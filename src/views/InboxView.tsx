@@ -129,7 +129,7 @@ export function InboxView() {
 
   const filteredConversations = conversations.filter(conv =>
     (conv.contact_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (conv.phone_masked || '').includes(searchTerm) ||
+    (conv.phone || '').includes(searchTerm) ||
     (conv.last_message || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -227,7 +227,7 @@ export function InboxView() {
                         </div>
                         <div className="flex items-center gap-2 mt-1.5">
                           <Phone className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-xs text-muted-foreground">{conv.phone_masked}</span>
+                          <span className="text-xs text-muted-foreground">{conv.phone}</span>
                           <span className="text-xs text-muted-foreground">•</span>
                           <span className="text-xs text-muted-foreground">{conv.message_count} mensajes</span>
                         </div>
@@ -260,7 +260,7 @@ export function InboxView() {
                 <h3 className="font-semibold text-lg">{selectedConvData?.contact_name}</h3>
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <Phone className="h-3 w-3" />
-                  {selectedConvData?.phone_masked}
+                  {selectedConvData?.phone}
                 </p>
               </div>
               <Button
