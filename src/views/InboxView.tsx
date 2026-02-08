@@ -9,7 +9,10 @@ import {
   RefreshCw,
   Loader2,
   Phone,
-  Search
+  Search,
+  Inbox,
+  CheckCheck,
+  Check
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -133,19 +136,24 @@ export function InboxView() {
   const selectedConvData = conversations.find(c => c.phone === selectedConversation);
 
   return (
-    <div className="h-[calc(100vh-120px)] flex flex-col">
+    <div className="h-[calc(100vh-120px)] flex flex-col animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <MessageCircle className="h-6 w-6" />
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Inbox className="h-7 w-7 text-primary" />
             Bandeja de Entrada
           </h1>
-          <p className="text-muted-foreground">
-            {conversations.length} conversaciones
+          <p className="text-muted-foreground mt-1">
+            {conversations.length} conversaciones activas
           </p>
         </div>
-        <Button variant="outline" onClick={() => fetchConversations()} disabled={loading}>
+        <Button
+          variant="outline"
+          onClick={() => fetchConversations()}
+          disabled={loading}
+          className="shadow-sm hover:shadow-md transition-shadow"
+        >
           <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           Actualizar
         </Button>
@@ -154,76 +162,89 @@ export function InboxView() {
       {/* Main content */}
       <div className="flex-1 flex gap-4 min-h-0">
         {/* Conversations list */}
-        <Card className={`${selectedConversation ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-96`}>
-          <div className="p-3 border-b">
+        <Card className={`${selectedConversation ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-96 overflow-hidden`}>
+          <div className="p-3 border-b bg-muted/30">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar conversaciones..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
+                className="pl-9 bg-background"
               />
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto">
             {loading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              <div className="flex flex-col items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
+                <p className="text-sm text-muted-foreground">Cargando conversaciones...</p>
               </div>
             ) : filteredConversations.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>No hay conversaciones</p>
+              <div className="text-center py-12 text-muted-foreground">
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                  <MessageCircle className="h-8 w-8 opacity-50" />
+                </div>
+                <p className="font-medium">No hay conversaciones</p>
+                <p className="text-sm mt-1">Los chats aparecerán aquí</p>
               </div>
             ) : (
-              filteredConversations.map((conv) => (
-                <div
-                  key={conv.phone}
-                  onClick={() => setSelectedConversation(conv.phone)}
-                  className={`p-3 border-b cursor-pointer hover:bg-muted/50 transition-colors ${
-                    selectedConversation === conv.phone ? 'bg-muted' : ''
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <User className="h-5 w-5 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium truncate">{conv.contact_name}</span>
-                        <span className="text-xs text-muted-foreground flex-shrink-0">
-                          {formatTime(conv.last_message_time)}
-                        </span>
+              <div className="animate-stagger">
+                {filteredConversations.map((conv) => (
+                  <div
+                    key={conv.phone}
+                    onClick={() => setSelectedConversation(conv.phone)}
+                    className={`p-4 border-b cursor-pointer transition-all duration-200 hover:bg-primary/5 ${
+                      selectedConversation === conv.phone
+                        ? 'bg-primary/10 border-l-4 border-l-primary'
+                        : ''
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <User className="h-5 w-5 text-primary" />
                       </div>
-                      <div className="flex items-center gap-2">
-                        {conv.direction === 'incoming' && (
-                          <span className="text-xs text-emerald-600 font-medium">Nuevo</span>
-                        )}
-                        <p className="text-sm text-muted-foreground truncate">
-                          {conv.direction === 'outgoing' && '↩ '}
-                          {conv.last_message}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Phone className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground">{conv.phone_masked}</span>
-                        <span className="text-xs text-muted-foreground">• {conv.message_count} msgs</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-semibold truncate">{conv.contact_name}</span>
+                          <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
+                            {formatTime(conv.last_message_time)}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {conv.direction === 'incoming' && (
+                            <span className="px-1.5 py-0.5 text-xs bg-emerald-100 text-emerald-700 rounded font-medium">
+                              Nuevo
+                            </span>
+                          )}
+                          <p className="text-sm text-muted-foreground truncate">
+                            {conv.direction === 'outgoing' && (
+                              <CheckCheck className="inline h-3.5 w-3.5 mr-1 text-primary" />
+                            )}
+                            {conv.last_message}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <Phone className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-xs text-muted-foreground">{conv.phone_masked}</span>
+                          <span className="text-xs text-muted-foreground">•</span>
+                          <span className="text-xs text-muted-foreground">{conv.message_count} mensajes</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))
+                ))}
+              </div>
             )}
           </div>
         </Card>
 
         {/* Messages view */}
         {selectedConversation ? (
-          <Card className="flex-1 flex flex-col">
+          <Card className="flex-1 flex flex-col overflow-hidden">
             {/* Chat header */}
-            <div className="p-3 border-b flex items-center gap-3">
+            <div className="p-4 border-b bg-gradient-to-r from-primary/5 to-transparent flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="icon"
@@ -232,11 +253,11 @@ export function InboxView() {
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <User className="h-5 w-5 text-primary" />
+              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20">
+                <User className="h-5 w-5 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-medium">{selectedConvData?.contact_name}</h3>
+                <h3 className="font-semibold text-lg">{selectedConvData?.contact_name}</h3>
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   <Phone className="h-3 w-3" />
                   {selectedConvData?.phone_masked}
@@ -247,42 +268,47 @@ export function InboxView() {
                 size="icon"
                 onClick={() => fetchMessages(selectedConversation)}
                 disabled={loadingMessages}
+                className="hover:bg-primary/10"
               >
                 <RefreshCw className={`h-4 w-4 ${loadingMessages ? 'animate-spin' : ''}`} />
               </Button>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-muted/30">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gradient-to-b from-muted/20 to-muted/40">
               {loadingMessages && messages.length === 0 ? (
-                <div className="flex justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                <div className="flex flex-col items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
+                  <p className="text-sm text-muted-foreground">Cargando mensajes...</p>
                 </div>
               ) : messages.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="text-center py-12 text-muted-foreground">
                   <p>No hay mensajes</p>
                 </div>
               ) : (
                 messages.map((msg, idx) => (
                   <div
                     key={msg.id || idx}
-                    className={`flex ${msg.direction === 'outgoing' ? 'justify-end' : 'justify-start'}`}
+                    className={`flex ${msg.direction === 'outgoing' ? 'justify-end' : 'justify-start'} animate-fade-in`}
                   >
                     <div
-                      className={`max-w-[80%] rounded-lg p-3 ${
+                      className={`max-w-[80%] rounded-2xl p-3 shadow-sm ${
                         msg.direction === 'outgoing'
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-background border'
+                          ? 'bg-primary text-primary-foreground rounded-br-md'
+                          : 'bg-background border rounded-bl-md'
                       }`}
                     >
-                      <p className="text-sm whitespace-pre-wrap break-words">{msg.message}</p>
-                      <div className={`flex items-center justify-end gap-1 mt-1 ${
+                      <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{msg.message}</p>
+                      <div className={`flex items-center justify-end gap-1.5 mt-1.5 ${
                         msg.direction === 'outgoing' ? 'text-primary-foreground/70' : 'text-muted-foreground'
                       }`}>
                         {msg.message_type !== 'text' && (
                           <span className="text-xs">({msg.message_type})</span>
                         )}
                         <span className="text-xs">{formatMessageTime(msg.timestamp)}</span>
+                        {msg.direction === 'outgoing' && (
+                          <Check className="h-3.5 w-3.5" />
+                        )}
                       </div>
                     </div>
                   </div>
@@ -292,18 +318,20 @@ export function InboxView() {
             </div>
 
             {/* Input placeholder */}
-            <div className="p-3 border-t bg-muted/20">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground justify-center">
+            <div className="p-4 border-t bg-muted/20">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground justify-center py-2 px-4 bg-muted/50 rounded-full">
                 <MessageCircle className="h-4 w-4" />
                 <span>Los mensajes se envían automáticamente desde el bot</span>
               </div>
             </div>
           </Card>
         ) : (
-          <Card className="hidden md:flex flex-1 items-center justify-center">
+          <Card className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-br from-muted/30 to-muted/10">
             <div className="text-center text-muted-foreground">
-              <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <h3 className="font-medium mb-1">Selecciona una conversación</h3>
+              <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                <MessageCircle className="h-10 w-10 opacity-50" />
+              </div>
+              <h3 className="font-semibold text-lg mb-1 text-foreground">Selecciona una conversación</h3>
               <p className="text-sm">Elige un chat de la lista para ver los mensajes</p>
             </div>
           </Card>

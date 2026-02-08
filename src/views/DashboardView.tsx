@@ -14,7 +14,8 @@ import {
   Activity,
   Server,
   DollarSign,
-  ShoppingCart
+  ShoppingCart,
+  Sparkles
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -91,16 +92,24 @@ export function DashboardView({ onViewChange }: DashboardViewProps) {
     Math.round(((metrics.messages_received - totalErrors) / metrics.messages_received) * 100) : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            Dashboard
+            <Sparkles className="h-6 w-6 text-primary" />
+          </h1>
+          <p className="text-muted-foreground mt-1">
             Métricas en tiempo real de tu negocio
           </p>
         </div>
-        <Button variant="outline" onClick={fetchData} disabled={loading}>
+        <Button
+          variant="outline"
+          onClick={fetchData}
+          disabled={loading}
+          className="shadow-sm hover:shadow-md transition-shadow"
+        >
           <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           Actualizar
         </Button>
@@ -108,26 +117,41 @@ export function DashboardView({ onViewChange }: DashboardViewProps) {
 
       {/* System Status */}
       {health && (
-        <Card className={health.redis === 'connected' ? 'border-emerald-200 bg-emerald-50/30' : 'border-red-200 bg-red-50/30'}>
-          <CardContent className="p-4">
+        <Card className={`overflow-hidden ${
+          health.redis === 'connected'
+            ? 'border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50'
+            : 'border-red-200 bg-gradient-to-r from-red-50 to-orange-50'
+        }`}>
+          <CardContent className="p-5">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                  health.redis === 'connected' ? 'bg-emerald-100' : 'bg-red-100'
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${
+                  health.redis === 'connected'
+                    ? 'bg-emerald-500 shadow-emerald-500/30'
+                    : 'bg-red-500 shadow-red-500/30'
                 }`}>
-                  <Server className={`h-5 w-5 ${health.redis === 'connected' ? 'text-emerald-600' : 'text-red-600'}`} />
+                  <Server className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-medium flex items-center gap-2">
+                  <h3 className="font-semibold text-lg flex items-center gap-2">
                     Bot de WhatsApp
-                    <span className={`w-2 h-2 rounded-full ${health.redis === 'connected' ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                    <span className={`w-2.5 h-2.5 rounded-full ${
+                      health.redis === 'connected'
+                        ? 'bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50'
+                        : 'bg-red-500'
+                    }`} />
                   </h3>
                   <p className="text-sm text-muted-foreground">
                     v{health.version} • Redis: {health.redis === 'connected' ? 'Conectado' : 'Desconectado'}
                   </p>
                 </div>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => onViewChange('system')}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onViewChange('system')}
+                className="hover:bg-white/50"
+              >
                 Ver detalles <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
@@ -137,7 +161,7 @@ export function DashboardView({ onViewChange }: DashboardViewProps) {
 
       {/* Sales & Orders Overview */}
       {summary && (
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-4 animate-stagger">
           <KPICard
             title="Ventas Hoy"
             value={formatCurrency(summary.sales.today)}
@@ -206,58 +230,62 @@ export function DashboardView({ onViewChange }: DashboardViewProps) {
           </div>
 
           {/* Success Rate */}
-          <Card>
-            <CardHeader>
+          <Card className="overflow-hidden">
+            <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
-                <Activity className="h-5 w-5" />
+                <Activity className="h-5 w-5 text-primary" />
                 Tasa de Éxito del Bot
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-8">
-                <div className="relative w-32 h-32">
+                <div className="relative w-36 h-36">
                   <svg className="w-full h-full transform -rotate-90">
                     <circle
-                      cx="64"
-                      cy="64"
-                      r="56"
+                      cx="72"
+                      cy="72"
+                      r="60"
                       stroke="currentColor"
-                      strokeWidth="12"
+                      strokeWidth="14"
                       fill="transparent"
                       className="text-muted"
                     />
                     <circle
-                      cx="64"
-                      cy="64"
-                      r="56"
+                      cx="72"
+                      cy="72"
+                      r="60"
                       stroke="currentColor"
-                      strokeWidth="12"
+                      strokeWidth="14"
                       fill="transparent"
-                      strokeDasharray={351.86}
-                      strokeDashoffset={351.86 * (1 - successRate / 100)}
-                      className={successRate >= 95 ? 'text-emerald-500' : successRate >= 80 ? 'text-amber-500' : 'text-red-500'}
+                      strokeDasharray={377}
+                      strokeDashoffset={377 * (1 - successRate / 100)}
+                      strokeLinecap="round"
+                      className={`transition-all duration-1000 ${
+                        successRate >= 95 ? 'text-emerald-500' : successRate >= 80 ? 'text-amber-500' : 'text-red-500'
+                      }`}
                     />
                   </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-2xl font-bold">{successRate}%</span>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-3xl font-bold">{successRate}%</span>
+                    <span className="text-xs text-muted-foreground">éxito</span>
                   </div>
                 </div>
-                <div className="flex-1 space-y-3">
-                  <div className="flex justify-between items-center">
+                <div className="flex-1 space-y-4">
+                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                     <span className="text-muted-foreground">Mensajes procesados</span>
-                    <span className="font-medium">{metrics.messages_received}</span>
+                    <span className="font-semibold text-lg">{metrics.messages_received}</span>
                   </div>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
                     <span className="text-muted-foreground">Errores totales</span>
-                    <span className={`font-medium ${totalErrors > 0 ? 'text-red-600' : ''}`}>
+                    <span className={`font-semibold text-lg ${totalErrors > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
                       {totalErrors}
                     </span>
                   </div>
                   {totalErrors > 0 && metrics.errors && (
-                    <div className="text-sm text-muted-foreground space-y-1">
-                      {metrics.errors.ai > 0 && <div>• Errores IA: {metrics.errors.ai}</div>}
-                      {metrics.errors.send > 0 && <div>• Errores de envío: {metrics.errors.send}</div>}
-                      {metrics.errors.webhook > 0 && <div>• Errores webhook: {metrics.errors.webhook}</div>}
+                    <div className="text-sm text-muted-foreground pl-3 space-y-1">
+                      {metrics.errors.ai > 0 && <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-400" /> Errores IA: {metrics.errors.ai}</div>}
+                      {metrics.errors.send > 0 && <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-400" /> Errores de envío: {metrics.errors.send}</div>}
+                      {metrics.errors.webhook > 0 && <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-400" /> Errores webhook: {metrics.errors.webhook}</div>}
                     </div>
                   )}
                 </div>
@@ -269,60 +297,74 @@ export function DashboardView({ onViewChange }: DashboardViewProps) {
 
       {/* Quick Actions */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => onViewChange('orders')}>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
-                <Package className="h-6 w-6 text-blue-600" />
+        <Card
+          className="cursor-pointer card-hover group overflow-hidden"
+          onClick={() => onViewChange('orders')}
+        >
+          <CardContent className="p-6 relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex items-center gap-4 relative">
+              <div className="w-14 h-14 rounded-xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
+                <Package className="h-7 w-7 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold">Buscar Pedido</h3>
+                <h3 className="font-semibold text-lg">Buscar Pedido</h3>
                 <p className="text-sm text-muted-foreground">Consulta por número de orden</p>
               </div>
-              <ArrowRight className="h-5 w-5 text-muted-foreground" />
+              <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => onViewChange('tracking')}>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center">
-                <Truck className="h-6 w-6 text-amber-600" />
+        <Card
+          className="cursor-pointer card-hover group overflow-hidden"
+          onClick={() => onViewChange('tracking')}
+        >
+          <CardContent className="p-6 relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex items-center gap-4 relative">
+              <div className="w-14 h-14 rounded-xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-transform">
+                <Truck className="h-7 w-7 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold">Tracking</h3>
+                <h3 className="font-semibold text-lg">Tracking</h3>
                 <p className="text-sm text-muted-foreground">Rastrea envíos de Andreani</p>
               </div>
-              <ArrowRight className="h-5 w-5 text-muted-foreground" />
+              <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => onViewChange('carts')}>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-red-100 flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-red-600" />
+        <Card
+          className="cursor-pointer card-hover group overflow-hidden"
+          onClick={() => onViewChange('carts')}
+        >
+          <CardContent className="p-6 relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="flex items-center gap-4 relative">
+              <div className="w-14 h-14 rounded-xl bg-red-500 flex items-center justify-center shadow-lg shadow-red-500/30 group-hover:scale-110 transition-transform">
+                <TrendingUp className="h-7 w-7 text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold">Carritos</h3>
+                <h3 className="font-semibold text-lg">Carritos</h3>
                 <p className="text-sm text-muted-foreground">Recupera ventas perdidas</p>
               </div>
-              <ArrowRight className="h-5 w-5 text-muted-foreground" />
+              <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Info */}
-      <Card className="bg-muted/50">
-        <CardContent className="p-4">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
-            <div className="text-sm text-muted-foreground">
+      <Card className="bg-gradient-to-r from-muted/50 to-muted/30 border-dashed">
+        <CardContent className="p-5">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+              <AlertCircle className="h-5 w-5 text-primary" />
+            </div>
+            <div className="text-sm">
               <p className="font-medium text-foreground mb-1">¿Cómo funciona?</p>
-              <p>Este dashboard se conecta directamente a tu bot de WhatsApp y muestra datos reales en tiempo real. Las métricas se actualizan automáticamente cada 30 segundos.</p>
+              <p className="text-muted-foreground">Este dashboard se conecta directamente a tu bot de WhatsApp y muestra datos reales en tiempo real. Las métricas se actualizan automáticamente cada 30 segundos.</p>
             </div>
           </div>
         </CardContent>
