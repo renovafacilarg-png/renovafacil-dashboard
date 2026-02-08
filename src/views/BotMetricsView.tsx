@@ -90,7 +90,7 @@ export function BotMetricsView() {
   }, []);
 
   const totalErrors = metrics?.errors ?
-    metrics.errors.ai + metrics.errors.send + metrics.errors.webhook : 0;
+    Number(metrics.errors.ai || 0) + Number(metrics.errors.send || 0) + Number(metrics.errors.webhook || 0) : 0;
 
   // Calcular tasa de éxito basada en mensajes enviados vs errores de envío
   const successRate = metrics?.messages_sent ?
