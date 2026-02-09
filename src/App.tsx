@@ -67,7 +67,7 @@ function App() {
     checkAuth();
   }, [API_URL]);
 
-  const handleLogin = (token: string) => {
+  const handleLogin = (_token: string) => {
     setIsAuthenticated(true);
   };
 
