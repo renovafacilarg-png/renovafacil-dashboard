@@ -19,7 +19,10 @@ import {
   Trash2,
   Edit,
   Check,
-  X
+  X,
+  CheckSquare,
+  Square,
+  Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -78,6 +81,8 @@ export function SelfImprovementView() {
   const [editingSuggestion, setEditingSuggestion] = useState<string | null>(null);
   const [editedContent, setEditedContent] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'pending' | 'active'>('pending');
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkApproving, setBulkApproving] = useState(false);
 
   const loadData = async () => {
     console.log('📊 Cargando datos de auto-mejora...');
@@ -186,6 +191,59 @@ export function SelfImprovementView() {
 
   const getEditableContent = (suggestion: Suggestion): string => {
     return suggestion.suggested_response || suggestion.content || suggestion.rule || '';
+  };
+
+  const toggleSelection = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const selectAll = () => {
+    if (selectedIds.size === suggestions.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(suggestions.map(s => s.id)));
+    }
+  };
+
+  const handleBulkApprove = async () => {
+    if (selectedIds.size === 0) return;
+
+    setBulkApproving(true);
+    let approved = 0;
+    let failed = 0;
+
+    for (const id of selectedIds) {
+      try {
+        const result = await approveSuggestion(id);
+        if (result.success) {
+          approved++;
+        } else {
+          failed++;
+        }
+      } catch {
+        failed++;
+      }
+    }
+
+    setBulkApproving(false);
+    setSelectedIds(new Set());
+
+    if (approved > 0) {
+      toast.success(`${approved} sugerencias aprobadas`);
+    }
+    if (failed > 0) {
+      toast.error(`${failed} fallaron`);
+    }
+
+    loadData();
   };
 
   return (
@@ -316,18 +374,66 @@ export function SelfImprovementView() {
               </CardContent>
             </Card>
           ) : (
-            suggestions.map((suggestion) => {
+            <>
+              {/* Barra de acciones en lote */}
+              <div className="flex items-center justify-between p-3 bg-violet-50 dark:bg-violet-900/20 rounded-lg border border-violet-200 dark:border-violet-800">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={selectAll}
+                    className="flex items-center gap-2 text-sm font-medium hover:text-violet-700 transition-colors"
+                  >
+                    {selectedIds.size === suggestions.length ? (
+                      <CheckSquare className="h-5 w-5 text-violet-600" />
+                    ) : (
+                      <Square className="h-5 w-5" />
+                    )}
+                    {selectedIds.size === suggestions.length ? 'Deseleccionar todas' : 'Seleccionar todas'}
+                  </button>
+                  {selectedIds.size > 0 && (
+                    <span className="text-sm text-muted-foreground">
+                      ({selectedIds.size} seleccionadas)
+                    </span>
+                  )}
+                </div>
+                <Button
+                  onClick={handleBulkApprove}
+                  disabled={selectedIds.size === 0 || bulkApproving}
+                  className="bg-green-600 hover:bg-green-700"
+                  size="sm"
+                >
+                  {bulkApproving ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                  )}
+                  {bulkApproving ? 'Aprobando...' : `Aprobar ${selectedIds.size > 0 ? `(${selectedIds.size})` : 'seleccionadas'}`}
+                </Button>
+              </div>
+
+              {suggestions.map((suggestion) => {
               const typeConfig = suggestionTypeConfig[suggestion.type as keyof typeof suggestionTypeConfig] || suggestionTypeConfig.cached_response;
               const prioConfig = priorityConfig[suggestion.priority as keyof typeof priorityConfig] || priorityConfig.medium;
               const Icon = typeConfig.icon;
               const isExpanded = expandedSuggestion === suggestion.id;
               const isEditing = editingSuggestion === suggestion.id;
+              const isSelected = selectedIds.has(suggestion.id);
 
               return (
-                <Card key={suggestion.id} className="overflow-hidden">
+                <Card key={suggestion.id} className={`overflow-hidden transition-colors ${isSelected ? 'ring-2 ring-violet-500 bg-violet-50/50 dark:bg-violet-900/10' : ''}`}>
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3">
+                        {/* Checkbox de selección */}
+                        <button
+                          onClick={() => toggleSelection(suggestion.id)}
+                          className="mt-1 flex-shrink-0 hover:scale-110 transition-transform"
+                        >
+                          {isSelected ? (
+                            <CheckSquare className="h-5 w-5 text-violet-600" />
+                          ) : (
+                            <Square className="h-5 w-5 text-muted-foreground hover:text-violet-500" />
+                          )}
+                        </button>
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${typeConfig.color.replace('text-', 'bg-').replace('-800', '-200')}`}>
                           <Icon className={`h-5 w-5 ${typeConfig.color.split(' ')[1]}`} />
                         </div>
@@ -345,13 +451,36 @@ export function SelfImprovementView() {
                           </CardDescription>
                         </div>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setExpandedSuggestion(isExpanded ? null : suggestion.id)}
-                      >
-                        {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                      </Button>
+                      {/* Botones de acción rápida */}
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleReject(suggestion.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0"
+                          title="Rechazar"
+                        >
+                          <XCircle className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleApprove(suggestion.id)}
+                          className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8 w-8 p-0"
+                          title="Aprobar"
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setExpandedSuggestion(isExpanded ? null : suggestion.id)}
+                          className="h-8 w-8 p-0"
+                          title="Ver detalles"
+                        >
+                          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        </Button>
+                      </div>
                     </div>
                   </CardHeader>
 
@@ -472,7 +601,8 @@ export function SelfImprovementView() {
                   </CardContent>
                 </Card>
               );
-            })
+            })}
+            </>
           )}
         </div>
       )}
