@@ -57,8 +57,10 @@ function App() {
           setIsAuthenticated(false);
         }
       } catch {
-        // Si hay error de red, asumir que está autenticado si tiene token
-        setIsAuthenticated(true);
+        // Si hay error de red, mostrar login para que reintente
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('auth_expires');
+        setIsAuthenticated(false);
       }
     };
 
