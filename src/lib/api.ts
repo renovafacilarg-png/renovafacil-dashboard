@@ -331,3 +331,142 @@ export async function fetchConversations(limit?: number): Promise<ConversationsR
   const response = await fetch(url, { headers: getHeaders() });
   return handleResponse<ConversationsResponse>(response);
 }
+
+// =============================================================================
+// SELF IMPROVEMENT / AUTO-MEJORAS
+// =============================================================================
+
+export interface ImprovementStats {
+  pending_suggestions: number;
+  active_mutations: number;
+  approved_total: number;
+  rejected_total: number;
+  approval_rate: number;
+  config?: {
+    dynamic_responses: number;
+    prompt_additions: number;
+    objection_handlers: number;
+    failed_rules: number;
+    total_active: number;
+  };
+}
+
+export interface Suggestion {
+  id: string;
+  type: 'cached_response' | 'objection_handler' | 'prompt_addition' | 'failed_response';
+  priority: 'high' | 'medium' | 'low';
+  status: 'pending' | 'approved' | 'rejected';
+  patterns?: string[];
+  triggers?: string[];
+  suggested_response?: string;
+  content?: string;
+  rule?: string;
+  reason?: string;
+  examples?: Array<{ user: string; bot: string }>;
+  date?: string;
+  created_at?: string;
+  approved_at?: string;
+  rejected_at?: string;
+  edited_content?: string;
+}
+
+export interface SuggestionsResponse {
+  suggestions: Suggestion[];
+  count: number;
+  total: number;
+}
+
+export interface Mutation {
+  id: string;
+  type: 'cached_response' | 'objection_handler' | 'prompt_addition' | 'failed_response';
+  patterns?: string[];
+  triggers?: string[];
+  response?: string;
+  content?: string;
+  rule?: string;
+  created_at?: string;
+  uses: number;
+}
+
+export interface MutationsResponse {
+  mutations: Mutation[];
+  count: number;
+}
+
+export interface AnalysisResult {
+  success: boolean;
+  message?: string;
+  date?: string;
+  conversations_analyzed?: number;
+  suggestions?: Suggestion[];
+  summary?: {
+    total_conversations: number;
+    patterns_found: number;
+    issues_detected: number;
+  };
+}
+
+export async function fetchImprovementStats(): Promise<ImprovementStats> {
+  const response = await fetch(`${API_URL}/api/improvements/stats`, {
+    headers: getHeaders(),
+  });
+  return handleResponse<ImprovementStats>(response);
+}
+
+export async function fetchSuggestions(status?: string): Promise<SuggestionsResponse> {
+  const url = status
+    ? `${API_URL}/api/improvements/suggestions?status=${status}`
+    : `${API_URL}/api/improvements/suggestions`;
+  const response = await fetch(url, { headers: getHeaders() });
+  return handleResponse<SuggestionsResponse>(response);
+}
+
+export async function fetchMutations(): Promise<MutationsResponse> {
+  const response = await fetch(`${API_URL}/api/improvements/mutations`, {
+    headers: getHeaders(),
+  });
+  return handleResponse<MutationsResponse>(response);
+}
+
+export async function approveSuggestion(
+  suggestionId: string,
+  editedContent?: string
+): Promise<{ success: boolean; message: string }> {
+  const response = await fetch(`${API_URL}/api/improvements/suggestions/${suggestionId}/approve`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ edited_content: editedContent }),
+  });
+  return handleResponse<{ success: boolean; message: string }>(response);
+}
+
+export async function rejectSuggestion(
+  suggestionId: string,
+  reason?: string
+): Promise<{ success: boolean; message: string }> {
+  const response = await fetch(`${API_URL}/api/improvements/suggestions/${suggestionId}/reject`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ reason }),
+  });
+  return handleResponse<{ success: boolean; message: string }>(response);
+}
+
+export async function triggerAnalysis(date?: string): Promise<AnalysisResult> {
+  const response = await fetch(`${API_URL}/api/improvements/analyze`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ date }),
+  });
+  return handleResponse<AnalysisResult>(response);
+}
+
+export async function deactivateMutation(
+  mutationId: string
+): Promise<{ success: boolean; message: string }> {
+  const response = await fetch(`${API_URL}/api/improvements/mutations/${mutationId}`, {
+    method: 'DELETE',
+    headers: getHeaders(),
+  });
+  return handleResponse<{ success: boolean; message: string }>(response);
+}

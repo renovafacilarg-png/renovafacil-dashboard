@@ -7,6 +7,7 @@ import { AbandonedCartsView } from '@/views/AbandonedCartsView';
 import { BotMetricsView } from '@/views/BotMetricsView';
 import { SystemStatusView } from '@/views/SystemStatusView';
 import { InboxView } from '@/views/InboxView';
+import { SelfImprovementView } from '@/views/SelfImprovementView';
 import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
 
@@ -27,6 +28,8 @@ function App() {
         return <BotMetricsView />;
       case 'inbox':
         return <InboxView />;
+      case 'improvements':
+        return <SelfImprovementView />;
       case 'system':
         return <SystemStatusView />;
       default:
