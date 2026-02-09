@@ -12,10 +12,10 @@ const getHeaders = (): HeadersInit => {
     'Content-Type': 'application/json',
   };
 
-  // Si hay API key configurada, agregarla
-  const apiKey = import.meta.env.VITE_API_KEY;
-  if (apiKey) {
-    headers['X-API-Key'] = apiKey;
+  // Agregar token de autenticación si existe
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
   }
 
   return headers;

@@ -13,7 +13,8 @@ import {
   Menu,
   Inbox,
   Zap,
-  Sparkles
+  Sparkles,
+  LogOut
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -22,6 +23,7 @@ export type ViewType = 'dashboard' | 'orders' | 'tracking' | 'carts' | 'bot' | '
 interface SidebarProps {
   currentView: ViewType;
   onViewChange: (view: ViewType) => void;
+  onLogout?: () => void;
   className?: string;
 }
 
@@ -43,7 +45,7 @@ const navItems: NavItem[] = [
   { id: 'system', label: 'Sistema', icon: Server },
 ];
 
-export function Sidebar({ currentView, onViewChange, className }: SidebarProps) {
+export function Sidebar({ currentView, onViewChange, onLogout, className }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -132,6 +134,23 @@ export function Sidebar({ currentView, onViewChange, className }: SidebarProps) 
               <p className="text-xs text-sidebar-foreground/50 mt-2">DeepSeek AI</p>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Logout Button */}
+      {onLogout && (
+        <div className="p-3 border-t border-sidebar-border">
+          <Button
+            variant="ghost"
+            className={cn(
+              'w-full justify-start gap-3 h-10 text-sidebar-foreground/70 hover:text-red-500 hover:bg-red-50',
+              collapsed && 'justify-center px-2'
+            )}
+            onClick={onLogout}
+          >
+            <LogOut className="h-5 w-5 shrink-0" />
+            {!collapsed && <span>Cerrar Sesión</span>}
+          </Button>
         </div>
       )}
     </>
