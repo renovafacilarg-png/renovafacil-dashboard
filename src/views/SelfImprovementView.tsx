@@ -80,6 +80,7 @@ export function SelfImprovementView() {
   const [activeTab, setActiveTab] = useState<'pending' | 'active'>('pending');
 
   const loadData = async () => {
+    console.log('📊 Cargando datos de auto-mejora...');
     try {
       setLoading(true);
       const [statsData, suggestionsData, mutationsData] = await Promise.all([
@@ -87,12 +88,15 @@ export function SelfImprovementView() {
         fetchSuggestions(),
         fetchMutations()
       ]);
+      console.log('📈 Stats:', statsData);
+      console.log('💡 Sugerencias:', suggestionsData);
+      console.log('🔧 Mutaciones:', mutationsData);
       setStats(statsData);
-      setSuggestions(suggestionsData.suggestions);
-      setMutations(mutationsData.mutations);
+      setSuggestions(suggestionsData.suggestions || []);
+      setMutations(mutationsData.mutations || []);
     } catch (error) {
-      console.error('Error:', error);
-      toast.error('Error al cargar datos de auto-mejora');
+      console.error('💥 Error cargando datos:', error);
+      toast.error(`Error: ${error instanceof Error ? error.message : 'Error al cargar datos'}`);
     } finally {
       setLoading(false);
     }
@@ -103,21 +107,26 @@ export function SelfImprovementView() {
   }, []);
 
   const handleAnalyze = async () => {
+    console.log('🔍 Iniciando análisis...');
     try {
       setAnalyzing(true);
       toast.info('Iniciando análisis de conversaciones...');
+      console.log('📡 Llamando API...');
       const result = await triggerAnalysis();
+      console.log('📥 Resultado:', result);
       if (result.success) {
         toast.success(`Análisis completado: ${result.suggestions?.length || 0} sugerencias generadas`);
         loadData();
       } else {
+        console.error('❌ Error en resultado:', result);
         toast.error(result.message || 'Error en el análisis');
       }
     } catch (error) {
-      console.error('Error:', error);
-      toast.error('Error al ejecutar el análisis');
+      console.error('💥 Error en análisis:', error);
+      toast.error(`Error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     } finally {
       setAnalyzing(false);
+      console.log('✅ Análisis finalizado');
     }
   };
 
