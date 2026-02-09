@@ -70,7 +70,7 @@ export function InboxView() {
   const fetchConversations = async (showLoading = true) => {
     try {
       if (showLoading && conversations.length === 0) setLoading(true);
-      const response = await fetch(`${API_URL}/api/conversations?limit=100`, {
+      const response = await fetch(`${API_URL}/api/conversations?limit=500`, {
         headers: getAuthHeaders()
       });
       if (response.ok) {
@@ -90,7 +90,7 @@ export function InboxView() {
   const fetchMessages = async (phone: string) => {
     try {
       setLoadingMessages(true);
-      const response = await fetch(`${API_URL}/api/conversations/${phone}?limit=100`, {
+      const response = await fetch(`${API_URL}/api/conversations/${phone}?limit=500`, {
         headers: getAuthHeaders()
       });
       if (response.ok) {
