@@ -66,10 +66,17 @@ interface RecoveryResponse {
   response_message: string;
 }
 
+interface RecoveryStats {
+  today: { sent: number; sent_ok: number; responses: number; response_rate: number };
+  week: { sent: number; sent_ok: number; responses: number; response_rate: number };
+  totals: { sent: number; sent_ok: number; responses: number };
+}
+
 export function AbandonedCartsView() {
   const [carts, setCarts] = useState<AbandonedCart[]>([]);
   const [recoveryLogs, setRecoveryLogs] = useState<RecoveryLog[]>([]);
   const [recoveryResponses, setRecoveryResponses] = useState<RecoveryResponse[]>([]);
+  const [stats, setStats] = useState<RecoveryStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [showLogs, setShowLogs] = useState(false);
   const [showResponses, setShowResponses] = useState(false);
@@ -136,10 +143,25 @@ export function AbandonedCartsView() {
     }
   };
 
+  const fetchStats = async () => {
+    try {
+      const response = await fetch(`${API_URL}/api/cart-recovery-stats`, {
+        headers: getAuthHeaders()
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setStats(data);
+      }
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
+
   useEffect(() => {
     fetchCarts();
     fetchRecoveryLogs();
     fetchRecoveryResponses();
+    fetchStats();
   }, []);
 
   const handleRecover = async (cart: AbandonedCart) => {
@@ -245,15 +267,15 @@ export function AbandonedCartsView() {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Carritos (24h)</p>
-                <p className="text-2xl font-bold">{carts.length}</p>
+                <p className="text-xs text-muted-foreground">Carritos hoy</p>
+                <p className="text-2xl font-bold">{carts.filter(c => c.hours_abandoned <= 24).length}</p>
               </div>
-              <ShoppingCart className="h-8 w-8 text-muted-foreground" />
+              <ShoppingCart className="h-7 w-7 text-muted-foreground" />
             </div>
           </CardContent>
         </Card>
@@ -261,10 +283,10 @@ export function AbandonedCartsView() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Valor Total</p>
+                <p className="text-xs text-muted-foreground">Valor total</p>
                 <p className="text-2xl font-bold text-blue-600">{formatCurrency(totalValue)}</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-blue-500" />
+              <TrendingUp className="h-7 w-7 text-blue-500" />
             </div>
           </CardContent>
         </Card>
@@ -272,12 +294,44 @@ export function AbandonedCartsView() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Promedio</p>
-                <p className="text-2xl font-bold text-emerald-600">
-                  {carts.length > 0 ? formatCurrency(totalValue / carts.length) : '$0'}
-                </p>
+                <p className="text-xs text-muted-foreground">Enviados hoy</p>
+                <p className="text-2xl font-bold text-amber-600">{stats?.today.sent_ok ?? '-'}</p>
               </div>
-              <CheckCircle className="h-8 w-8 text-emerald-500" />
+              <Send className="h-7 w-7 text-amber-500" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Respuestas hoy</p>
+                <p className="text-2xl font-bold text-emerald-600">{stats?.today.responses ?? '-'}</p>
+              </div>
+              <MessageCircle className="h-7 w-7 text-emerald-500" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Tasa respuesta</p>
+                <p className="text-2xl font-bold text-purple-600">{stats?.today.response_rate ?? 0}%</p>
+              </div>
+              <CheckCircle className="h-7 w-7 text-purple-500" />
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-muted-foreground">Enviados (7d)</p>
+                <p className="text-2xl font-bold text-slate-600">{stats?.week.sent_ok ?? '-'}</p>
+                <p className="text-xs text-muted-foreground">{stats?.week.responses ?? 0} resp.</p>
+              </div>
+              <Clock className="h-7 w-7 text-slate-400" />
             </div>
           </CardContent>
         </Card>
