@@ -13,9 +13,20 @@ import {
   RefreshCw,
   Activity,
   Cpu,
-  HardDrive
+  HardDrive,
+  Clock,
+  Timer
 } from 'lucide-react';
 import { toast } from 'sonner';
+
+interface SchedulerStatus {
+  running: boolean;
+  last_check?: string;
+  delay_minutes?: number;
+  template?: string;
+  stats?: { sent: number; skipped: number; errors: number };
+  [key: string]: unknown;
+}
 
 interface SystemHealth {
   status: string;
@@ -24,6 +35,7 @@ interface SystemHealth {
   features: string[];
   redis: string;
   timestamp: string;
+  schedulers?: Record<string, SchedulerStatus>;
 }
 
 export function SystemStatusView() {
@@ -253,6 +265,48 @@ export function SystemStatusView() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Schedulers */}
+          {health.schedulers && Object.keys(health.schedulers).length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Timer className="h-5 w-5" />
+                  Procesos Automáticos
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                  {Object.entries(health.schedulers).map(([name, scheduler]) => {
+                    const label = name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    const isRunning = scheduler.running;
+                    return (
+                      <div key={name} className={`flex items-start gap-3 p-3 rounded-lg border ${isRunning ? 'border-emerald-200 bg-emerald-50/50' : 'border-red-200 bg-red-50/50'}`}>
+                        <div className={`mt-0.5 w-3 h-3 rounded-full flex-shrink-0 ${isRunning ? 'bg-emerald-500 animate-pulse' : 'bg-red-400'}`} />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm">{label}</p>
+                          <p className={`text-xs ${isRunning ? 'text-emerald-700' : 'text-red-700'}`}>
+                            {isRunning ? 'Activo' : 'Detenido'}
+                          </p>
+                          {scheduler.last_check && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              <Clock className="inline h-3 w-3 mr-1" />
+                              {new Date(scheduler.last_check).toLocaleTimeString('es-AR')}
+                            </p>
+                          )}
+                          {scheduler.stats && (
+                            <p className="text-xs text-muted-foreground">
+                              {scheduler.stats.sent} enviados
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* All Features */}
           <Card>
