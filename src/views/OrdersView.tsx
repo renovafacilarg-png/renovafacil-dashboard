@@ -31,6 +31,13 @@ export function OrdersView() {
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+  const getAuthHeaders = (): HeadersInit => {
+    const headers: HeadersInit = { 'Content-Type': 'application/json' };
+    const token = localStorage.getItem('auth_token');
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return headers;
+  };
+
   const searchOrder = async () => {
     if (!orderNumber.trim()) {
       toast.error('Ingresa un número de pedido');
@@ -39,7 +46,7 @@ export function OrdersView() {
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/order/${orderNumber.trim()}`);
+      const response = await fetch(`${API_URL}/order/${orderNumber.trim()}`, { headers: getAuthHeaders() });
       if (response.ok) {
         const data = await response.json();
         setOrder(data);

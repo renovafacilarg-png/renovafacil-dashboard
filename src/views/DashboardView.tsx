@@ -40,6 +40,13 @@ export function DashboardView({ onViewChange }: DashboardViewProps) {
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+  const getAuthHeaders = (): HeadersInit => {
+    const headers: HeadersInit = { 'Content-Type': 'application/json' };
+    const token = localStorage.getItem('auth_token');
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return headers;
+  };
+
   const fetchData = async () => {
     try {
       setLoading(true);
@@ -53,7 +60,7 @@ export function DashboardView({ onViewChange }: DashboardViewProps) {
       }
 
       // Fetch health
-      const healthRes = await fetch(`${API_URL}/health`);
+      const healthRes = await fetch(`${API_URL}/health`, { headers: getAuthHeaders() });
       if (healthRes.ok) {
         const healthData = await healthRes.json();
         setHealth(healthData);

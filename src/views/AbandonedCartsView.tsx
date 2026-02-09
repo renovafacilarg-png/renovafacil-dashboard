@@ -79,10 +79,21 @@ export function AbandonedCartsView() {
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+  const getAuthHeaders = (): HeadersInit => {
+    const headers: HeadersInit = { 'Content-Type': 'application/json' };
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  };
+
   const fetchCarts = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/api/abandoned-carts?hours=48&limit=50`);
+      const response = await fetch(`${API_URL}/api/abandoned-carts?hours=48&limit=50`, {
+        headers: getAuthHeaders()
+      });
       if (response.ok) {
         const data = await response.json();
         setCarts(data.carts || data.abandoned_carts || []);
@@ -99,7 +110,9 @@ export function AbandonedCartsView() {
 
   const fetchRecoveryLogs = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/recovery-logs?limit=50`);
+      const response = await fetch(`${API_URL}/api/recovery-logs?limit=50`, {
+        headers: getAuthHeaders()
+      });
       if (response.ok) {
         const data = await response.json();
         setRecoveryLogs(data.logs || []);
@@ -111,7 +124,9 @@ export function AbandonedCartsView() {
 
   const fetchRecoveryResponses = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/recovery-responses?limit=50`);
+      const response = await fetch(`${API_URL}/api/recovery-responses?limit=50`, {
+        headers: getAuthHeaders()
+      });
       if (response.ok) {
         const data = await response.json();
         setRecoveryResponses(data.responses || []);
@@ -132,7 +147,7 @@ export function AbandonedCartsView() {
     try {
       const response = await fetch(`${API_URL}/api/abandoned-carts/${cart.id}/recover`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ force: false })
       });
 
@@ -165,7 +180,7 @@ export function AbandonedCartsView() {
     try {
       const response = await fetch(`${API_URL}/recover-carts`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ hours: 6, dry_run: dryRun, limit: 20 })
       });
 

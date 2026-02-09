@@ -44,10 +44,17 @@ export function SystemStatusView() {
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+  const getAuthHeaders = (): HeadersInit => {
+    const headers: HeadersInit = { 'Content-Type': 'application/json' };
+    const token = localStorage.getItem('auth_token');
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return headers;
+  };
+
   const fetchHealth = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/health`);
+      const response = await fetch(`${API_URL}/health`, { headers: getAuthHeaders() });
       if (response.ok) {
         const data = await response.json();
         setHealth(data);
