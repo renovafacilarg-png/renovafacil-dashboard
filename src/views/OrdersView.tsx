@@ -3,19 +3,25 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-import { 
-  Search, 
+import {
+  Search,
   Package,
   Copy,
   MessageSquare,
   AlertCircle,
-  Loader2
+  Loader2,
+  Truck,
+  ExternalLink
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Order {
   order_number: string;
   message: string;
+  tracking_url?: string;
+  tracking_number?: string;
+  status?: string;
+  payment_status?: string;
 }
 
 export function OrdersView() {
@@ -112,19 +118,48 @@ export function OrdersView() {
               {order.message}
             </div>
 
+            {/* Tracking Button */}
+            {order.tracking_url && (
+              <div className="mt-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Truck className="h-5 w-5 text-primary" />
+                    <div>
+                      <p className="font-medium">Seguimiento del envío</p>
+                      {order.tracking_number && (
+                        <p className="text-sm text-muted-foreground">
+                          Tracking: {order.tracking_number}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <Button asChild>
+                    <a
+                      href={order.tracking_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      Ver en Andreani
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <div className="flex gap-2 mt-6">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => copyToClipboard(order.message)}
               >
                 <Copy className="mr-2 h-4 w-4" />
                 Copiar info
               </Button>
-              <Button 
+              <Button
                 variant="outline"
                 asChild
               >
-                <a 
+                <a
                   href={`https://wa.me/?text=${encodeURIComponent(`Hola! Te paso la info de tu pedido #${order.order_number}:\n\n${order.message}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
