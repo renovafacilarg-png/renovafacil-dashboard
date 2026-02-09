@@ -57,10 +57,21 @@ export function InboxView() {
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
+  const getAuthHeaders = (): HeadersInit => {
+    const headers: HeadersInit = { 'Content-Type': 'application/json' };
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  };
+
   const fetchConversations = async (showLoading = true) => {
     try {
       if (showLoading && conversations.length === 0) setLoading(true);
-      const response = await fetch(`${API_URL}/api/conversations?limit=100`);
+      const response = await fetch(`${API_URL}/api/conversations?limit=100`, {
+        headers: getAuthHeaders()
+      });
       if (response.ok) {
         const data = await response.json();
         const newConvs = data.conversations || [];
@@ -78,7 +89,9 @@ export function InboxView() {
   const fetchMessages = async (phone: string) => {
     try {
       setLoadingMessages(true);
-      const response = await fetch(`${API_URL}/api/conversations/${phone}?limit=100`);
+      const response = await fetch(`${API_URL}/api/conversations/${phone}?limit=100`, {
+        headers: getAuthHeaders()
+      });
       if (response.ok) {
         const data = await response.json();
         setMessages(data.messages || []);
