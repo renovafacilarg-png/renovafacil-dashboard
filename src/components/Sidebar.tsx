@@ -14,11 +14,12 @@ import {
   Inbox,
   Zap,
   Sparkles,
-  LogOut
+  LogOut,
+  Facebook,
 } from 'lucide-react';
 import { useState } from 'react';
 
-export type ViewType = 'dashboard' | 'orders' | 'tracking' | 'carts' | 'bot' | 'inbox' | 'improvements' | 'system';
+export type ViewType = 'dashboard' | 'orders' | 'tracking' | 'carts' | 'bot' | 'inbox' | 'improvements' | 'system' | 'facebook';
 
 interface SidebarProps {
   currentView: ViewType;
@@ -41,6 +42,7 @@ const navItems: NavItem[] = [
   { id: 'tracking', label: 'Tracking', icon: Truck },
   { id: 'carts', label: 'Carritos', icon: ShoppingCart },
   { id: 'bot', label: 'Bot WhatsApp', icon: MessageSquare },
+  { id: 'facebook', label: 'Facebook', icon: Facebook },
   { id: 'improvements', label: 'Auto-Mejoras', icon: Sparkles },
   { id: 'system', label: 'Sistema', icon: Server },
 ];

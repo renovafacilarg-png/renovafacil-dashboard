@@ -9,6 +9,7 @@ import { BotMetricsView } from '@/views/BotMetricsView';
 import { SystemStatusView } from '@/views/SystemStatusView';
 import { InboxView } from '@/views/InboxView';
 import { SelfImprovementView } from '@/views/SelfImprovementView';
+import { FacebookCommentsView } from '@/views/FacebookCommentsView';
 import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
 
@@ -104,6 +105,8 @@ function App() {
         return <InboxView />;
       case 'improvements':
         return <SelfImprovementView />;
+      case 'facebook':
+        return <FacebookCommentsView />;
       case 'system':
         return <SystemStatusView />;
       default:
