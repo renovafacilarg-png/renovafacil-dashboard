@@ -53,6 +53,7 @@ export function InboxView() {
   const [loading, setLoading] = useState(getCachedConversations().length === 0);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showTestChats, setShowTestChats] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -140,7 +141,30 @@ export function InboxView() {
     }
   };
 
-  const filteredConversations = conversations.filter(conv =>
+  // Separar conversaciones reales de pruebas
+  const isTestConversation = (conv: Conversation) => {
+    const phone = (conv.phone || '').toLowerCase();
+    return phone.startsWith('test') ||
+           phone.includes('test_') ||
+           phone.startsWith('final') ||
+           phone.startsWith('conflict') ||
+           phone.startsWith('retest') ||
+           phone.startsWith('context') ||
+           phone.startsWith('order') ||
+           phone.startsWith('simple') ||
+           phone.startsWith('buy');
+  };
+
+  const realConversations = conversations.filter(conv => !isTestConversation(conv));
+  const testConversations = conversations.filter(conv => isTestConversation(conv));
+
+  const filteredConversations = realConversations.filter(conv =>
+    (conv.contact_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (conv.phone || '').includes(searchTerm) ||
+    (conv.last_message || '').toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredTestConversations = testConversations.filter(conv =>
     (conv.contact_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (conv.phone || '').includes(searchTerm) ||
     (conv.last_message || '').toLowerCase().includes(searchTerm.toLowerCase())
@@ -155,21 +179,35 @@ export function InboxView() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Inbox className="h-7 w-7 text-primary" />
-            Bandeja de Entrada
+            {showTestChats ? 'Chats de Prueba' : 'Bandeja de Entrada'}
           </h1>
           <p className="text-muted-foreground mt-1">
-            {conversations.length} conversaciones activas
+            {showTestChats
+              ? `${testConversations.length} conversaciones de prueba`
+              : `${realConversations.length} conversaciones reales`}
+            {!showTestChats && testConversations.length > 0 && (
+              <span className="ml-2 text-xs">({testConversations.length} de prueba ocultas)</span>
+            )}
           </p>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => fetchConversations()}
-          disabled={loading}
-          className="shadow-sm hover:shadow-md transition-shadow"
-        >
-          <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          Actualizar
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant={showTestChats ? "default" : "outline"}
+            onClick={() => setShowTestChats(!showTestChats)}
+            size="sm"
+          >
+            {showTestChats ? 'Ver Reales' : 'Ver Pruebas'}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => fetchConversations()}
+            disabled={loading}
+            className="shadow-sm hover:shadow-md transition-shadow"
+          >
+            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            Actualizar
+          </Button>
+        </div>
       </div>
 
       {/* Main content */}
@@ -194,17 +232,17 @@ export function InboxView() {
                 <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
                 <p className="text-sm text-muted-foreground">Cargando conversaciones...</p>
               </div>
-            ) : filteredConversations.length === 0 ? (
+            ) : (showTestChats ? filteredTestConversations : filteredConversations).length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
                   <MessageCircle className="h-8 w-8 opacity-50" />
                 </div>
                 <p className="font-medium">No hay conversaciones</p>
-                <p className="text-sm mt-1">Los chats aparecerán aquí</p>
+                <p className="text-sm mt-1">{showTestChats ? 'No hay chats de prueba' : 'Los chats aparecerán aquí'}</p>
               </div>
             ) : (
               <div className="animate-stagger">
-                {filteredConversations.map((conv) => (
+                {(showTestChats ? filteredTestConversations : filteredConversations).map((conv) => (
                   <div
                     key={conv.phone}
                     onClick={() => setSelectedConversation(conv.phone)}
