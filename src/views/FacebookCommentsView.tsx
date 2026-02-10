@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,6 +9,7 @@ import {
   Loader2,
   ExternalLink,
   Clock,
+  ChevronDown,
 } from 'lucide-react';
 
 interface FBCommentEntry {
@@ -35,10 +36,16 @@ interface FBStats {
   };
 }
 
+const PAGE_SIZE = 50;
+
 export function FacebookCommentsView() {
   const [entries, setEntries] = useState<FBCommentEntry[]>([]);
   const [stats, setStats] = useState<FBStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const loadedCountRef = useRef(PAGE_SIZE);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -52,18 +59,43 @@ export function FacebookCommentsView() {
   const fetchData = async (showLoading = true) => {
     try {
       if (showLoading) setLoading(true);
-      const response = await fetch(`${API_URL}/api/fb-comments?limit=50`, {
-        headers: getAuthHeaders(),
-      });
+      const response = await fetch(
+        `${API_URL}/api/fb-comments?limit=${loadedCountRef.current}&offset=0`,
+        { headers: getAuthHeaders() }
+      );
       if (response.ok) {
         const data = await response.json();
         setEntries(data.entries || []);
         setStats(data.stats || null);
+        setHasMore(data.has_more ?? false);
+        setTotalCount(data.total_count ?? 0);
       }
     } catch (error) {
       console.error('Error fetching FB comments:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadMore = async () => {
+    setLoadingMore(true);
+    try {
+      const response = await fetch(
+        `${API_URL}/api/fb-comments?limit=${PAGE_SIZE}&offset=${loadedCountRef.current}`,
+        { headers: getAuthHeaders() }
+      );
+      if (response.ok) {
+        const data = await response.json();
+        const newEntries = data.entries || [];
+        setEntries(prev => [...prev, ...newEntries]);
+        loadedCountRef.current += newEntries.length;
+        setHasMore(data.has_more ?? false);
+        setTotalCount(data.total_count ?? 0);
+      }
+    } catch (error) {
+      console.error('Error fetching FB comments:', error);
+    } finally {
+      setLoadingMore(false);
     }
   };
 
@@ -149,7 +181,7 @@ export function FacebookCommentsView() {
         </Card>
         <Card className="md:col-span-1 lg:col-span-2">
           <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Total (últimos 200)</p>
+            <p className="text-xs text-muted-foreground">Total almacenados</p>
             <p className="text-2xl font-bold">{stats?.total ?? '-'}</p>
             <p className="text-xs text-muted-foreground mt-1">
               {stats?.responded ?? 0} resp / {stats?.deleted ?? 0} borr / {stats?.ignored ?? 0} ign
@@ -173,6 +205,9 @@ export function FacebookCommentsView() {
         </Card>
       ) : (
         <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            Mostrando {entries.length} de {totalCount}
+          </p>
           {entries.map((entry, idx) => (
             <Card key={entry.comment_id || idx}>
               <CardContent className="p-4">
@@ -219,6 +254,24 @@ export function FacebookCommentsView() {
               </CardContent>
             </Card>
           ))}
+
+          {/* Load more */}
+          {hasMore && (
+            <div className="flex justify-center pt-2">
+              <Button
+                variant="outline"
+                onClick={loadMore}
+                disabled={loadingMore}
+              >
+                {loadingMore ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <ChevronDown className="mr-2 h-4 w-4" />
+                )}
+                Cargar más
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
