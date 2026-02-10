@@ -38,7 +38,6 @@ interface FBStats {
 export function FacebookCommentsView() {
   const [entries, setEntries] = useState<FBCommentEntry[]>([]);
   const [stats, setStats] = useState<FBStats | null>(null);
-  const [pageId, setPageId] = useState('811362445384942');
   const [loading, setLoading] = useState(true);
 
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -60,7 +59,6 @@ export function FacebookCommentsView() {
         const data = await response.json();
         setEntries(data.entries || []);
         setStats(data.stats || null);
-        if (data.page_id) setPageId(data.page_id);
       }
     } catch (error) {
       console.error('Error fetching FB comments:', error);
