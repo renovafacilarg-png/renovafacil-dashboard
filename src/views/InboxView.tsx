@@ -18,7 +18,7 @@ import {
   Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
 } from '@/components/ui/tooltip';
 import {
-  MessageCircle, User, ArrowLeft, RefreshCw, Loader2, Phone, Search,
+  MessageCircle, ArrowLeft, RefreshCw, Loader2, Phone, Search,
   Inbox, CheckCheck, Check, Send, Tag, ShoppingBag, CheckCircle, Info,
   Package, DollarSign,
 } from 'lucide-react';
@@ -71,6 +71,31 @@ interface OrderSummary {
 }
 
 type FilterType = 'all' | 'unread' | 'incoming' | 'outgoing';
+
+// ---------------------------------------------------------------------------
+// Avatar helpers
+// ---------------------------------------------------------------------------
+
+const AVATAR_COLORS = [
+  'bg-red-500', 'bg-blue-600', 'bg-emerald-500', 'bg-amber-500', 'bg-purple-500',
+  'bg-pink-500', 'bg-cyan-600', 'bg-orange-500', 'bg-teal-500', 'bg-indigo-500',
+];
+
+function getInitials(name: string): string {
+  if (!name || name.startsWith('Cliente ')) {
+    const digits = name?.replace(/\D/g, '') || '';
+    return digits.slice(-2) || '??';
+  }
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+}
+
+function getAvatarColor(phone: string): string {
+  let hash = 0;
+  for (let i = 0; i < phone.length; i++) hash = phone.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -558,8 +583,8 @@ export function InboxView() {
                       } ${unread ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''}`}
                     >
                       <div className="flex items-start gap-3">
-                        <div className="relative w-11 h-11 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center flex-shrink-0 shadow-sm">
-                          <User className="h-5 w-5 text-primary" />
+                        <div className={`relative w-11 h-11 rounded-full ${getAvatarColor(conv.phone)} flex items-center justify-center flex-shrink-0 shadow-sm`}>
+                          <span className="text-white text-sm font-bold">{getInitials(getDisplayName(conv))}</span>
                           {unread && (
                             <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-blue-500 rounded-full border-2 border-background" />
                           )}
@@ -615,8 +640,8 @@ export function InboxView() {
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
-              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg shadow-primary/20">
-                <User className="h-5 w-5 text-white" />
+              <div className={`w-11 h-11 rounded-full ${selectedConversation ? getAvatarColor(selectedConversation) : 'bg-primary'} flex items-center justify-center shadow-lg shadow-primary/20`}>
+                <span className="text-white text-sm font-bold">{selectedConvData ? getInitials(getDisplayName(selectedConvData)) : ''}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-lg truncate">
@@ -800,7 +825,9 @@ export function InboxView() {
         <SheetContent>
           <SheetHeader>
             <SheetTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
+              <div className={`w-7 h-7 rounded-full ${selectedConversation ? getAvatarColor(selectedConversation) : 'bg-primary'} flex items-center justify-center`}>
+                <span className="text-white text-xs font-bold">{getInitials(selectedContactInfo?.name || selectedConvData?.contact_name || 'Cliente')}</span>
+              </div>
               {selectedContactInfo?.name || selectedConvData?.contact_name || 'Cliente'}
             </SheetTitle>
             <SheetDescription>
