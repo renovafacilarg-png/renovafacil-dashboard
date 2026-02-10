@@ -92,11 +92,14 @@ export function DashboardView({ onViewChange }: DashboardViewProps) {
   }, []);
 
   const metrics = summary?.bot_metrics;
-  const totalErrors = metrics?.errors ?
-    metrics.errors.ai + metrics.errors.send + metrics.errors.webhook : 0;
+  // Errores de procesamiento: solo IA y envío (afectan al usuario)
+  const processingErrors = metrics?.errors ?
+    Number(metrics.errors.ai || 0) + Number(metrics.errors.send || 0) : 0;
+  // Errores de webhook son infraestructura (status updates, etc.), se muestran aparte
+  const webhookErrors = metrics?.errors ? Number(metrics.errors.webhook || 0) : 0;
 
   const successRate = metrics?.messages_received ?
-    Math.round(((metrics.messages_received - totalErrors) / metrics.messages_received) * 100) : 0;
+    Math.min(100, Math.round(((metrics.messages_received - processingErrors) / metrics.messages_received) * 100)) : 100;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -277,22 +280,24 @@ export function DashboardView({ onViewChange }: DashboardViewProps) {
                     <span className="text-xs text-muted-foreground">éxito</span>
                   </div>
                 </div>
-                <div className="flex-1 space-y-4">
+                <div className="flex-1 space-y-3">
                   <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                    <span className="text-muted-foreground">Mensajes procesados</span>
+                    <span className="text-muted-foreground">Mensajes recibidos</span>
                     <span className="font-semibold text-lg">{metrics.messages_received}</span>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                    <span className="text-muted-foreground">Errores totales</span>
-                    <span className={`font-semibold text-lg ${totalErrors > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
-                      {totalErrors}
-                    </span>
+                    <span className="text-muted-foreground">Respuestas IA</span>
+                    <span className="font-semibold text-lg">{metrics.ai_responses}</span>
                   </div>
-                  {totalErrors > 0 && metrics.errors && (
-                    <div className="text-sm text-muted-foreground pl-3 space-y-1">
-                      {metrics.errors.ai > 0 && <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-400" /> Errores IA: {metrics.errors.ai}</div>}
-                      {metrics.errors.send > 0 && <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-400" /> Errores de envío: {metrics.errors.send}</div>}
-                      {metrics.errors.webhook > 0 && <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-400" /> Errores webhook: {metrics.errors.webhook}</div>}
+                  {processingErrors > 0 && (
+                    <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                      <span className="text-red-600">Errores de respuesta</span>
+                      <span className="font-semibold text-lg text-red-600">{processingErrors}</span>
+                    </div>
+                  )}
+                  {webhookErrors > 0 && (
+                    <div className="text-xs text-muted-foreground pl-3">
+                      {webhookErrors} eventos de webhook con error (no afectan respuestas)
                     </div>
                   )}
                 </div>
