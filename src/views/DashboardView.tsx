@@ -49,7 +49,7 @@ export function DashboardView({ onViewChange }: DashboardViewProps) {
       ]);
 
       if (summaryResult.status === 'fulfilled') setSummary(summaryResult.value);
-      if (healthResult.status === 'fulfilled') setHealth(healthResult.value as SystemHealth);
+      if (healthResult.status === 'fulfilled') setHealth(healthResult.value as unknown as SystemHealth);
       setLastUpdated(new Date());
     } catch (error) {
       console.error('Error fetching data:', error);
