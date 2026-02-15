@@ -4,10 +4,10 @@
  * Consume los endpoints del bot de WhatsApp RenovaFacil
  */
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 // Headers comunes para todas las requests
-const getHeaders = (): HeadersInit => {
+export const getHeaders = (): HeadersInit => {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };
@@ -469,4 +469,13 @@ export async function deactivateMutation(
     headers: getHeaders(),
   });
   return handleResponse<{ success: boolean; message: string }>(response);
+}
+
+// =============================================================================
+// HEALTH
+// =============================================================================
+
+export async function fetchHealthStatus(): Promise<Record<string, unknown>> {
+  const response = await fetch(`${API_URL}/health`, { headers: getHeaders() });
+  return handleResponse<Record<string, unknown>>(response);
 }

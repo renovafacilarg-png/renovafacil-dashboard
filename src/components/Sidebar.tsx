@@ -71,6 +71,7 @@ export function Sidebar({ currentView, onViewChange, onLogout, className }: Side
           size="icon"
           className="hidden lg:flex text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
           onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
@@ -149,6 +150,7 @@ export function Sidebar({ currentView, onViewChange, onLogout, className }: Side
               collapsed && 'justify-center px-2'
             )}
             onClick={onLogout}
+            aria-label="Cerrar sesion"
           >
             <LogOut className="h-5 w-5 shrink-0" />
             {!collapsed && <span>Cerrar Sesión</span>}
@@ -174,6 +176,7 @@ export function Sidebar({ currentView, onViewChange, onLogout, className }: Side
         size="icon"
         className="fixed top-4 left-4 z-50 lg:hidden bg-background/80 backdrop-blur-sm"
         onClick={() => setMobileOpen(!mobileOpen)}
+        aria-label={mobileOpen ? 'Cerrar menu' : 'Abrir menu'}
       >
         <Menu className="h-5 w-5" />
       </Button>

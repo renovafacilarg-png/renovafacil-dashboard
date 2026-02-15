@@ -11,6 +11,7 @@ import {
   Clock,
   ChevronDown,
 } from 'lucide-react';
+import { API_URL, getHeaders } from '@/lib/api';
 
 interface FBCommentEntry {
   comment_id: string;
@@ -47,21 +48,12 @@ export function FacebookCommentsView() {
   const [totalCount, setTotalCount] = useState(0);
   const loadedCountRef = useRef(PAGE_SIZE);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-  const getAuthHeaders = (): HeadersInit => {
-    const headers: HeadersInit = { 'Content-Type': 'application/json' };
-    const token = localStorage.getItem('auth_token');
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return headers;
-  };
-
   const fetchData = async (showLoading = true) => {
     try {
       if (showLoading) setLoading(true);
       const response = await fetch(
         `${API_URL}/api/fb-comments?limit=${loadedCountRef.current}&offset=0`,
-        { headers: getAuthHeaders() }
+        { headers: getHeaders() }
       );
       if (response.ok) {
         const data = await response.json();
@@ -82,7 +74,7 @@ export function FacebookCommentsView() {
     try {
       const response = await fetch(
         `${API_URL}/api/fb-comments?limit=${PAGE_SIZE}&offset=${loadedCountRef.current}`,
-        { headers: getAuthHeaders() }
+        { headers: getHeaders() }
       );
       if (response.ok) {
         const data = await response.json();

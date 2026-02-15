@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { fetchDashboardSummary, type DashboardSummary } from '@/lib/api';
+import { fetchDashboardSummary, fetchHealthStatus, type DashboardSummary } from '@/lib/api';
 
 interface DashboardViewProps {
   onViewChange: (view: 'orders' | 'tracking' | 'carts' | 'bot' | 'system') => void;
@@ -37,34 +37,20 @@ export function DashboardView({ onViewChange }: DashboardViewProps) {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [health, setHealth] = useState<SystemHealth | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-  const getAuthHeaders = (): HeadersInit => {
-    const headers: HeadersInit = { 'Content-Type': 'application/json' };
-    const token = localStorage.getItem('auth_token');
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return headers;
-  };
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchData = async () => {
     try {
       setLoading(true);
 
-      // Fetch dashboard summary (includes all metrics)
-      try {
-        const summaryData = await fetchDashboardSummary();
-        setSummary(summaryData);
-      } catch (e) {
-        console.error('Error fetching summary:', e);
-      }
+      const [summaryResult, healthResult] = await Promise.allSettled([
+        fetchDashboardSummary(),
+        fetchHealthStatus(),
+      ]);
 
-      // Fetch health
-      const healthRes = await fetch(`${API_URL}/health`, { headers: getAuthHeaders() });
-      if (healthRes.ok) {
-        const healthData = await healthRes.json();
-        setHealth(healthData);
-      }
+      if (summaryResult.status === 'fulfilled') setSummary(summaryResult.value);
+      if (healthResult.status === 'fulfilled') setHealth(healthResult.value as SystemHealth);
+      setLastUpdated(new Date());
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Error al conectar con el servidor', {
@@ -112,6 +98,11 @@ export function DashboardView({ onViewChange }: DashboardViewProps) {
           </h1>
           <p className="text-muted-foreground mt-1">
             Métricas en tiempo real de tu negocio
+            {lastUpdated && (
+              <span className="ml-2 text-xs">
+                · Actualizado {lastUpdated.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            )}
           </p>
         </div>
         <Button
