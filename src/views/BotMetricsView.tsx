@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { API_URL, getHeaders } from '@/lib/api';
 import {
   XAxis,
   YAxis,
@@ -50,51 +51,61 @@ interface BotMetrics {
   };
 }
 
-// Mock historical data (esto vendría de una API en el futuro)
-const mockHistory = [
-  { date: '2025-01-25', messages: 32, ai_responses: 18, orders: 4, tracking: 8 },
-  { date: '2025-01-26', messages: 41, ai_responses: 22, orders: 6, tracking: 10 },
-  { date: '2025-01-27', messages: 38, ai_responses: 20, orders: 5, tracking: 9 },
-  { date: '2025-01-28', messages: 52, ai_responses: 28, orders: 8, tracking: 14 },
-  { date: '2025-01-29', messages: 45, ai_responses: 24, orders: 7, tracking: 11 },
-  { date: '2025-01-30', messages: 39, ai_responses: 21, orders: 5, tracking: 10 },
-  { date: '2025-01-31', messages: 45, ai_responses: 23, orders: 8, tracking: 12 },
-];
+interface HistoryItem {
+  date: string;
+  messages_received: number;
+  messages_sent: number;
+  ai_responses: number;
+  order_queries: number;
+  tracking_queries: number;
+  new_users: number;
+}
 
 export function BotMetricsView() {
   const [metrics, setMetrics] = useState<BotMetrics | null>(null);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [period, setPeriod] = useState('today');
-
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-  const getAuthHeaders = (): HeadersInit => {
-    const headers: HeadersInit = { 'Content-Type': 'application/json' };
-    const token = localStorage.getItem('auth_token');
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return headers;
-  };
 
   const fetchMetrics = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/metrics`, { headers: getAuthHeaders() });
+      const response = await fetch(`${API_URL}/metrics`, { headers: getHeaders() });
       if (response.ok) {
         const data = await response.json();
         setMetrics(data);
+        setLastUpdated(new Date());
       } else {
-        toast.error('Error al cargar métricas');
+        toast.error('Error al cargar metricas');
       }
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Error de conexión');
+      toast.error('Error de conexion');
     } finally {
       setLoading(false);
     }
   };
 
+  const fetchHistory = async () => {
+    try {
+      setLoadingHistory(true);
+      const response = await fetch(`${API_URL}/api/metrics/history?days=7`, { headers: getHeaders() });
+      if (response.ok) {
+        const data = await response.json();
+        setHistory(data.history || []);
+      }
+    } catch (error) {
+      console.error('Error fetching history:', error);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
   useEffect(() => {
     fetchMetrics();
+    fetchHistory();
     const interval = setInterval(fetchMetrics, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -102,9 +113,10 @@ export function BotMetricsView() {
   const totalErrors = metrics?.errors ?
     Number(metrics.errors.ai || 0) + Number(metrics.errors.send || 0) + Number(metrics.errors.webhook || 0) : 0;
 
-  // Calcular tasa de éxito basada en mensajes enviados vs errores de envío
   const successRate = metrics?.messages_sent ?
     Math.max(0, Math.round(((metrics.messages_sent - (metrics.errors?.send || 0)) / metrics.messages_sent) * 100)) : 100;
+
+  const hasHistoryData = history.some(h => h.messages_received > 0 || h.ai_responses > 0);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -116,12 +128,17 @@ export function BotMetricsView() {
             <Zap className="h-6 w-6 text-primary" />
           </h1>
           <p className="text-muted-foreground mt-1">
-            Métricas y actividad del asistente virtual
+            Metricas y actividad del asistente virtual
+            {lastUpdated && (
+              <span className="ml-2 text-xs">
+                · Actualizado {lastUpdated.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            )}
           </p>
         </div>
         <div className="flex gap-2">
           <Select value={period} onValueChange={setPeriod}>
-            <SelectTrigger className="w-[140px]">
+            <SelectTrigger className="w-[140px]" aria-label="Periodo de metricas">
               <Clock className="mr-2 h-4 w-4" />
               <SelectValue />
             </SelectTrigger>
@@ -135,6 +152,7 @@ export function BotMetricsView() {
             onClick={fetchMetrics}
             disabled={loading}
             className="shadow-sm hover:shadow-md transition-shadow"
+            aria-label="Actualizar metricas"
           >
             <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             Actualizar
@@ -156,7 +174,7 @@ export function BotMetricsView() {
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50" />
                 </h3>
                 <p className="text-muted-foreground">
-                  Respondiendo con DeepSeek AI • {successRate}% tasa de éxito
+                  Respondiendo con DeepSeek AI · {successRate}% tasa de exito
                 </p>
               </div>
               <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white/60 rounded-lg">
@@ -192,7 +210,7 @@ export function BotMetricsView() {
                   <div>
                     <p className="text-sm text-muted-foreground">Respuestas IA</p>
                     <p className="text-3xl font-bold text-emerald-600 mt-1">{metrics.ai_responses}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Automáticas</p>
+                    <p className="text-xs text-muted-foreground mt-1">Automaticas</p>
                   </div>
                   <div className="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform">
                     <TrendingUp className="h-6 w-6 text-white" />
@@ -263,7 +281,7 @@ export function BotMetricsView() {
                     <span className="font-semibold">{metrics.errors.ai}</span>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                    <span className="text-muted-foreground">Errores de envío</span>
+                    <span className="text-muted-foreground">Errores de envio</span>
                     <span className="font-semibold">{metrics.errors.send}</span>
                   </div>
                   <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
@@ -289,13 +307,13 @@ export function BotMetricsView() {
                   <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
                     <Activity className="h-4 w-4 text-primary" />
                   </div>
-                  Tasa de Éxito
+                  Tasa de Exito
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-center py-4">
                   <div className="relative">
-                    <svg className="w-40 h-40 transform -rotate-90">
+                    <svg className="w-40 h-40 transform -rotate-90" aria-label={`Tasa de exito: ${successRate}%`}>
                       <circle
                         cx="80"
                         cy="80"
@@ -322,7 +340,7 @@ export function BotMetricsView() {
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                       <span className="text-4xl font-bold">{successRate}%</span>
-                      <span className="text-sm text-muted-foreground">éxito</span>
+                      <span className="text-sm text-muted-foreground">exito</span>
                     </div>
                   </div>
                 </div>
@@ -335,43 +353,55 @@ export function BotMetricsView() {
         </>
       )}
 
-      {/* Historical Chart (Mock) */}
+      {/* Historical Chart — Real Data */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Historial (últimos 7 días)</CardTitle>
+          <CardTitle className="text-lg">Historial (ultimos 7 dias)</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[280px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={mockHistory} barGap={8}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
-                <XAxis
-                  dataKey="date"
-                  tickFormatter={(date) => format(parseISO(date), 'dd/MM')}
-                  className="text-xs"
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  className="text-xs"
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <Tooltip
-                  labelFormatter={(label) => format(parseISO(label), 'dd/MM/yyyy')}
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-                  }}
-                />
-                <Legend />
-                <Bar dataKey="messages" fill="#3b82f6" name="Mensajes" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="ai_responses" fill="#10b981" name="Respuestas IA" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+          {loadingHistory ? (
+            <div className="h-[280px] flex items-center justify-center">
+              <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : !hasHistoryData ? (
+            <div className="h-[280px] flex flex-col items-center justify-center text-muted-foreground">
+              <Activity className="h-10 w-10 mb-3 opacity-50" />
+              <p className="font-medium">Sin datos historicos</p>
+              <p className="text-sm mt-1">Las metricas apareceran a medida que el bot reciba mensajes</p>
+            </div>
+          ) : (
+            <div className="h-[280px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={history} barGap={8}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
+                  <XAxis
+                    dataKey="date"
+                    tickFormatter={(date) => format(parseISO(date), 'dd/MM')}
+                    className="text-xs"
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    className="text-xs"
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    labelFormatter={(label) => format(parseISO(label), 'dd/MM/yyyy')}
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
+                    }}
+                  />
+                  <Legend />
+                  <Bar dataKey="messages_received" fill="#3b82f6" name="Mensajes" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="ai_responses" fill="#10b981" name="Respuestas IA" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -379,7 +409,7 @@ export function BotMetricsView() {
       {!metrics && loading && (
         <div className="flex flex-col items-center justify-center py-16">
           <RefreshCw className="h-10 w-10 animate-spin text-primary mb-4" />
-          <p className="text-muted-foreground">Cargando métricas...</p>
+          <p className="text-muted-foreground">Cargando metricas...</p>
         </div>
       )}
     </div>

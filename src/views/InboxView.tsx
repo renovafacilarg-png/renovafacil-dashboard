@@ -25,6 +25,8 @@ import {
 import { formatDistanceToNow, isToday, isYesterday, isSameDay, format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { API_URL, getHeaders } from '@/lib/api';
+import { getInitials, getAvatarColor } from '@/lib/avatar';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -73,31 +75,6 @@ interface OrderSummary {
 type FilterType = 'all' | 'unread' | 'incoming' | 'outgoing';
 
 // ---------------------------------------------------------------------------
-// Avatar helpers
-// ---------------------------------------------------------------------------
-
-const AVATAR_COLORS = [
-  'bg-red-500', 'bg-blue-600', 'bg-emerald-500', 'bg-amber-500', 'bg-purple-500',
-  'bg-pink-500', 'bg-cyan-600', 'bg-orange-500', 'bg-teal-500', 'bg-indigo-500',
-];
-
-function getInitials(name: string): string {
-  if (!name || name.startsWith('Cliente ')) {
-    const digits = name?.replace(/\D/g, '') || '';
-    return digits.slice(-2) || '??';
-  }
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  return name.slice(0, 2).toUpperCase();
-}
-
-function getAvatarColor(phone: string): string {
-  let hash = 0;
-  for (let i = 0; i < phone.length; i++) hash = phone.charCodeAt(i) + ((hash << 5) - hash);
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
-
-// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
@@ -143,6 +120,7 @@ export function InboxView() {
   // Send message state
   const [messageText, setMessageText] = useState('');
   const [sending, setSending] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   // Contact info cache
   const [contactInfoCache, setContactInfoCache] = useState<Record<string, ContactInfo>>({});
@@ -158,17 +136,6 @@ export function InboxView() {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-  const getAuthHeaders = (): HeadersInit => {
-    const headers: HeadersInit = { 'Content-Type': 'application/json' };
-    const token = localStorage.getItem('auth_token');
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    return headers;
-  };
-
   // ---- Is user scrolled near bottom? ----
   const isNearBottom = useCallback(() => {
     const el = messagesContainerRef.current;
@@ -182,12 +149,13 @@ export function InboxView() {
     try {
       if (showLoading && conversations.length === 0) setLoading(true);
       const response = await fetch(`${API_URL}/api/conversations?limit=500`, {
-        headers: getAuthHeaders()
+        headers: getHeaders()
       });
       if (response.ok) {
         const data = await response.json();
         const newConvs = data.conversations || [];
         setConversations(newConvs);
+        setLastUpdated(new Date());
         localStorage.setItem('inbox_conversations', JSON.stringify(newConvs));
       }
     } catch (error) {
@@ -201,7 +169,7 @@ export function InboxView() {
     try {
       if (!isAutoRefresh) setLoadingMessages(true);
       const response = await fetch(`${API_URL}/api/conversations/${phone}?limit=500`, {
-        headers: getAuthHeaders()
+        headers: getHeaders()
       });
       if (response.ok) {
         const data = await response.json();
@@ -218,14 +186,14 @@ export function InboxView() {
     } finally {
       if (!isAutoRefresh) setLoadingMessages(false);
     }
-  }, [API_URL, isNearBottom]);
+  }, [isNearBottom]);
 
   const fetchContactInfo = useCallback(async (phone: string) => {
     if (contactInfoCache[phone] || loadingContactInfo[phone]) return;
     setLoadingContactInfo(prev => ({ ...prev, [phone]: true }));
     try {
       const response = await fetch(`${API_URL}/api/contact-info/${phone}`, {
-        headers: getAuthHeaders()
+        headers: getHeaders()
       });
       if (response.ok) {
         const data: ContactInfo = await response.json();
@@ -236,7 +204,7 @@ export function InboxView() {
     } finally {
       setLoadingContactInfo(prev => ({ ...prev, [phone]: false }));
     }
-  }, [API_URL, contactInfoCache, loadingContactInfo]);
+  }, [contactInfoCache, loadingContactInfo]);
 
   // ---- Send message ----
 
@@ -247,7 +215,7 @@ export function InboxView() {
     try {
       const response = await fetch(`${API_URL}/api/send-manual-message`, {
         method: 'POST',
-        headers: getAuthHeaders(),
+        headers: getHeaders(),
         body: JSON.stringify({ phone: selectedConversation, message: text }),
       });
       if (response.ok) {
@@ -271,12 +239,19 @@ export function InboxView() {
 
   const handleSendDiscount = async () => {
     if (!selectedConversation) return;
-    const msg = `🎁 ¡Tenemos un descuento especial para vos! Usá el código *DESCUENTO${discountPercent}* y obtené un *${discountPercent}% OFF* en tu próxima compra. ¡Aprovechá! 🛒`;
+    // Codigos reales del backend (product_catalog.py CUPONES)
+    const DISCOUNT_CODES: Record<string, string> = {
+      '5': 'CLIENTEFIEL',
+      '10': 'CLIENTEESPECIAL',
+      '15': 'CLIENTEUNICO',
+    };
+    const code = DISCOUNT_CODES[discountPercent] || `DESCUENTO${discountPercent}`;
+    const msg = `🎁 ¡Tenemos un descuento especial para vos! Usá el código *${code}* y obtené un *${discountPercent}% OFF* en tu próxima compra. ¡Aprovechá! 🛒`;
     setSending(true);
     try {
       const response = await fetch(`${API_URL}/api/send-manual-message`, {
         method: 'POST',
-        headers: getAuthHeaders(),
+        headers: getHeaders(),
         body: JSON.stringify({ phone: selectedConversation, message: msg }),
       });
       if (response.ok) {
@@ -481,6 +456,11 @@ export function InboxView() {
             {!showTestChats && testConversations.length > 0 && (
               <span className="ml-2 text-xs">({testConversations.length} de prueba ocultas)</span>
             )}
+            {lastUpdated && (
+              <span className="ml-2 text-xs">
+                · Actualizado {lastUpdated.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            )}
           </p>
         </div>
         <div className="flex gap-2">
@@ -637,6 +617,7 @@ export function InboxView() {
                 size="icon"
                 className="md:hidden"
                 onClick={() => setSelectedConversation(null)}
+                aria-label="Volver a conversaciones"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
@@ -801,6 +782,7 @@ export function InboxView() {
                   onClick={handleSendMessage}
                   disabled={!messageText.trim() || sending}
                   className="flex-shrink-0 h-10 w-10"
+                  aria-label="Enviar mensaje"
                 >
                   {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </Button>

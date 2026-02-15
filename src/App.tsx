@@ -1,23 +1,33 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Sidebar, type ViewType } from '@/components/Sidebar';
 import { LoginPage } from '@/components/LoginPage';
-import { DashboardView } from '@/views/DashboardView';
-import { OrdersView } from '@/views/OrdersView';
-import { TrackingView } from '@/views/TrackingView';
-import { AbandonedCartsView } from '@/views/AbandonedCartsView';
-import { BotMetricsView } from '@/views/BotMetricsView';
-import { SystemStatusView } from '@/views/SystemStatusView';
-import { InboxView } from '@/views/InboxView';
-import { SelfImprovementView } from '@/views/SelfImprovementView';
-import { FacebookCommentsView } from '@/views/FacebookCommentsView';
 import { Toaster } from '@/components/ui/sonner';
 import { cn } from '@/lib/utils';
+import { API_URL } from '@/lib/api';
+import { Loader2 } from 'lucide-react';
+
+// Lazy load all views — Vite splits them into separate chunks
+const DashboardView = lazy(() => import('@/views/DashboardView').then(m => ({ default: m.DashboardView })));
+const OrdersView = lazy(() => import('@/views/OrdersView').then(m => ({ default: m.OrdersView })));
+const TrackingView = lazy(() => import('@/views/TrackingView').then(m => ({ default: m.TrackingView })));
+const AbandonedCartsView = lazy(() => import('@/views/AbandonedCartsView').then(m => ({ default: m.AbandonedCartsView })));
+const BotMetricsView = lazy(() => import('@/views/BotMetricsView').then(m => ({ default: m.BotMetricsView })));
+const SystemStatusView = lazy(() => import('@/views/SystemStatusView').then(m => ({ default: m.SystemStatusView })));
+const InboxView = lazy(() => import('@/views/InboxView').then(m => ({ default: m.InboxView })));
+const SelfImprovementView = lazy(() => import('@/views/SelfImprovementView').then(m => ({ default: m.SelfImprovementView })));
+const FacebookCommentsView = lazy(() => import('@/views/FacebookCommentsView').then(m => ({ default: m.FacebookCommentsView })));
+
+function ViewLoader() {
+  return (
+    <div className="flex items-center justify-center py-24">
+      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+    </div>
+  );
+}
 
 function App() {
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   // Verificar token al cargar
   useEffect(() => {
@@ -66,7 +76,7 @@ function App() {
     };
 
     checkAuth();
-  }, [API_URL]);
+  }, []);
 
   const handleLogin = (_token: string) => {
     setIsAuthenticated(true);
@@ -149,7 +159,9 @@ function App() {
           <div className="h-14 lg:hidden" />
 
           <div className="max-w-7xl mx-auto">
-            {renderView()}
+            <Suspense fallback={<ViewLoader />}>
+              {renderView()}
+            </Suspense>
           </div>
         </main>
       </div>

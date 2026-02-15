@@ -19,6 +19,8 @@ import {
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { API_URL, getHeaders } from '@/lib/api';
+import { getInitials, getAvatarColor } from '@/lib/avatar';
 import {
   Dialog,
   DialogContent,
@@ -78,31 +80,6 @@ interface RecoveryStats {
 }
 
 // ---------------------------------------------------------------------------
-// Avatar helpers
-// ---------------------------------------------------------------------------
-
-const AVATAR_COLORS = [
-  'bg-red-500', 'bg-blue-600', 'bg-emerald-500', 'bg-amber-500', 'bg-purple-500',
-  'bg-pink-500', 'bg-cyan-600', 'bg-orange-500', 'bg-teal-500', 'bg-indigo-500',
-];
-
-function getInitials(name: string): string {
-  if (!name || name.startsWith('Cliente ')) {
-    const digits = name?.replace(/\D/g, '') || '';
-    return digits.slice(-2) || '??';
-  }
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  return name.slice(0, 2).toUpperCase();
-}
-
-function getAvatarColor(identifier: string): string {
-  let hash = 0;
-  for (let i = 0; i < identifier.length; i++) hash = identifier.charCodeAt(i) + ((hash << 5) - hash);
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
-
-// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
@@ -117,22 +94,13 @@ export function AbandonedCartsView() {
   const [dryRun, setDryRun] = useState(true);
   const [activeTab, setActiveTab] = useState('pendientes');
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-  const getAuthHeaders = (): HeadersInit => {
-    const headers: HeadersInit = { 'Content-Type': 'application/json' };
-    const token = localStorage.getItem('auth_token');
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return headers;
-  };
-
   // ---- Fetchers ----
 
   const fetchCarts = async () => {
     try {
       setLoading(true);
       const response = await fetch(`${API_URL}/api/abandoned-carts?hours=48&limit=50`, {
-        headers: getAuthHeaders(),
+        headers: getHeaders(),
       });
       if (response.ok) {
         const data = await response.json();
@@ -151,7 +119,7 @@ export function AbandonedCartsView() {
   const fetchRecoveryLogs = async () => {
     try {
       const response = await fetch(`${API_URL}/api/recovery-logs?limit=50`, {
-        headers: getAuthHeaders(),
+        headers: getHeaders(),
       });
       if (response.ok) {
         const data = await response.json();
@@ -165,7 +133,7 @@ export function AbandonedCartsView() {
   const fetchRecoveryResponses = async () => {
     try {
       const response = await fetch(`${API_URL}/api/recovery-responses?limit=50`, {
-        headers: getAuthHeaders(),
+        headers: getHeaders(),
       });
       if (response.ok) {
         const data = await response.json();
@@ -179,7 +147,7 @@ export function AbandonedCartsView() {
   const fetchStats = async () => {
     try {
       const response = await fetch(`${API_URL}/api/cart-recovery-stats`, {
-        headers: getAuthHeaders(),
+        headers: getHeaders(),
       });
       if (response.ok) {
         const data = await response.json();
@@ -204,7 +172,7 @@ export function AbandonedCartsView() {
     try {
       const response = await fetch(`${API_URL}/api/abandoned-carts/${cart.id}/recover`, {
         method: 'POST',
-        headers: getAuthHeaders(),
+        headers: getHeaders(),
         body: JSON.stringify({ force: false }),
       });
       if (response.ok) {
@@ -234,7 +202,7 @@ export function AbandonedCartsView() {
     try {
       const response = await fetch(`${API_URL}/recover-carts`, {
         method: 'POST',
-        headers: getAuthHeaders(),
+        headers: getHeaders(),
         body: JSON.stringify({ hours: 6, dry_run: dryRun, limit: 20 }),
       });
       if (response.ok) {

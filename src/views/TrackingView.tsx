@@ -18,6 +18,7 @@ import {
   Package
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { API_URL, getHeaders } from '@/lib/api';
 
 interface TrackingEvent {
   date: string;
@@ -42,15 +43,6 @@ export function TrackingView() {
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-  const getAuthHeaders = (): HeadersInit => {
-    const headers: HeadersInit = { 'Content-Type': 'application/json' };
-    const token = localStorage.getItem('auth_token');
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return headers;
-  };
-
   const searchTracking = async () => {
     if (!trackingNumber.trim()) {
       toast.error('Ingresa un número de tracking');
@@ -59,7 +51,7 @@ export function TrackingView() {
 
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/track/${trackingNumber.trim()}`, { headers: getAuthHeaders() });
+      const response = await fetch(`${API_URL}/track/${trackingNumber.trim()}`, { headers: getHeaders() });
       const data = await response.json();
       setTracking(data);
       

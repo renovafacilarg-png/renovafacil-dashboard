@@ -18,6 +18,7 @@ import {
   Timer
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { API_URL, getHeaders } from '@/lib/api';
 
 interface SchedulerStatus {
   running: boolean;
@@ -41,23 +42,16 @@ interface SystemHealth {
 export function SystemStatusView() {
   const [health, setHealth] = useState<SystemHealth | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-
-  const getAuthHeaders = (): HeadersInit => {
-    const headers: HeadersInit = { 'Content-Type': 'application/json' };
-    const token = localStorage.getItem('auth_token');
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return headers;
-  };
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchHealth = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/health`, { headers: getAuthHeaders() });
+      const response = await fetch(`${API_URL}/health`, { headers: getHeaders() });
       if (response.ok) {
         const data = await response.json();
         setHealth(data);
+        setLastUpdated(new Date());
       } else {
         toast.error('Error al obtener estado del sistema');
       }
@@ -95,6 +89,11 @@ export function SystemStatusView() {
           <h1 className="text-2xl font-bold">Estado del Sistema</h1>
           <p className="text-muted-foreground">
             Monitoreo de servicios y componentes
+            {lastUpdated && (
+              <span className="ml-2 text-xs">
+                · Actualizado {lastUpdated.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            )}
           </p>
         </div>
         <Button variant="outline" onClick={fetchHealth} disabled={loading}>

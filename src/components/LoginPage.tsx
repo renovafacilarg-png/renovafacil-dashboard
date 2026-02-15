@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Lock, LogIn, AlertCircle } from 'lucide-react';
+import { API_URL } from '@/lib/api';
 
 interface LoginPageProps {
   onLogin: (token: string) => void;
@@ -12,8 +13,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,8 +62,10 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="relative">
+              <label htmlFor="password" className="sr-only">Contraseña</label>
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
+                id="password"
                 type="password"
                 placeholder="Contraseña"
                 value={password}
