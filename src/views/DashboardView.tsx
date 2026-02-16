@@ -72,8 +72,8 @@ export function DashboardView({ onViewChange }: DashboardViewProps) {
 
   useEffect(() => {
     fetchData();
-    // Refresh every 30 seconds
-    const interval = setInterval(fetchData, 30000);
+    // Refresh every 15 minutes
+    const interval = setInterval(fetchData, 900000);
     return () => clearInterval(interval);
   }, []);
 

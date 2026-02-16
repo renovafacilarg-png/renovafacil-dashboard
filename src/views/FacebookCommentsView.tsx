@@ -93,7 +93,7 @@ export function FacebookCommentsView() {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(() => fetchData(false), 60000);
+    const interval = setInterval(() => fetchData(false), 600000);
     return () => clearInterval(interval);
   }, []);
 

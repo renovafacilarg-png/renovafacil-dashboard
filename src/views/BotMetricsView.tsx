@@ -106,7 +106,7 @@ export function BotMetricsView() {
   useEffect(() => {
     fetchMetrics();
     fetchHistory();
-    const interval = setInterval(fetchMetrics, 30000);
+    const interval = setInterval(fetchMetrics, 120000);
     return () => clearInterval(interval);
   }, []);
 
