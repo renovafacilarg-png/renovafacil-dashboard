@@ -17,7 +17,10 @@ import {
   LogOut,
   Facebook,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { API_URL } from '@/lib/api';
+
+const FRONTEND_VERSION = '2.0.0';
 
 export type ViewType = 'dashboard' | 'orders' | 'tracking' | 'carts' | 'bot' | 'inbox' | 'improvements' | 'system' | 'facebook';
 
@@ -50,6 +53,14 @@ const navItems: NavItem[] = [
 export function Sidebar({ currentView, onViewChange, onLogout, className }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [backendVersion, setBackendVersion] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch(`${API_URL}/health`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.version) setBackendVersion(data.version); })
+      .catch(() => {});
+  }, []);
 
   const sidebarContent = (
     <>
@@ -137,6 +148,17 @@ export function Sidebar({ currentView, onViewChange, onLogout, className }: Side
               <p className="text-xs text-sidebar-foreground/50 mt-2">DeepSeek AI</p>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Version indicator */}
+      {!collapsed && (
+        <div className="px-4 pb-2 flex items-center justify-center gap-2 text-[10px] text-sidebar-foreground/40">
+          <span>dash v{FRONTEND_VERSION}</span>
+          <span>·</span>
+          <span className={backendVersion ? 'text-emerald-500/70' : 'text-red-400/70'}>
+            bot {backendVersion ? `v${backendVersion}` : 'offline'}
+          </span>
         </div>
       )}
 
