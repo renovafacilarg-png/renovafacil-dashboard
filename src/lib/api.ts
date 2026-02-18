@@ -368,6 +368,8 @@ export interface Suggestion {
   approved_at?: string;
   rejected_at?: string;
   edited_content?: string;
+  target_component?: string;
+  requires_code_change?: boolean;
 }
 
 export interface SuggestionsResponse {
