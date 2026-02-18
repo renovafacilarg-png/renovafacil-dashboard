@@ -109,6 +109,26 @@ export function FacebookCommentsView() {
     }
   };
 
+  const pollIgReprocessStatus = async () => {
+    try {
+      const resp = await fetch(`${API_URL}/ig-reprocess-status?key=renovafacil2024`, { headers: getHeaders() });
+      if (resp.ok) {
+        const data = await resp.json();
+        setIgReprocessResult(data);
+        if (data.status === 'running') {
+          setTimeout(pollIgReprocessStatus, 5000);
+        } else {
+          setIgReprocessing(false);
+          fetchData(false);
+        }
+      } else {
+        setIgReprocessing(false);
+      }
+    } catch {
+      setIgReprocessing(false);
+    }
+  };
+
   const triggerIgReprocess = async () => {
     setIgReprocessing(true);
     setIgReprocessResult(null);
@@ -119,14 +139,19 @@ export function FacebookCommentsView() {
       });
       if (resp.ok) {
         const data = await resp.json();
-        setIgReprocessResult(data);
-        fetchData(false);
+        if (data.status === 'started' || data.status === 'already_running') {
+          setIgReprocessResult({ status: 'running' });
+          setTimeout(pollIgReprocessStatus, 5000);
+        } else {
+          setIgReprocessResult(data);
+          setIgReprocessing(false);
+        }
       } else {
         setIgReprocessResult({ error: `HTTP ${resp.status}` });
+        setIgReprocessing(false);
       }
     } catch (e: any) {
       setIgReprocessResult({ error: e.message || 'Error de conexión' });
-    } finally {
       setIgReprocessing(false);
     }
   };
@@ -276,15 +301,22 @@ export function FacebookCommentsView() {
             )}
 
             {/* Reprocess result */}
-            {igReprocessing && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700">
-                Respondiendo comentarios sin contestar... Esto puede tardar varios minutos (2 min entre respuestas).
-              </div>
-            )}
-            {igReprocessResult && !igReprocessing && (
-              <div className={`rounded-lg p-3 text-sm ${igReprocessResult.error ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-emerald-50 border border-emerald-200 text-emerald-700'}`}>
+            {igReprocessResult && (
+              <div className={`rounded-lg p-3 text-sm ${
+                igReprocessResult.error ? 'bg-red-50 border border-red-200 text-red-700' :
+                igReprocessResult.status === 'running' ? 'bg-blue-50 border border-blue-200 text-blue-700' :
+                'bg-emerald-50 border border-emerald-200 text-emerald-700'
+              }`}>
                 {igReprocessResult.error ? (
                   <p>Error: {igReprocessResult.error}</p>
+                ) : igReprocessResult.status === 'running' ? (
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>
+                      Respondiendo comentarios... {igReprocessResult.replied ?? 0} respondidos
+                      {igReprocessResult.total_comments ? ` de ${igReprocessResult.total_comments} escaneados` : ''}
+                    </span>
+                  </div>
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <div>
