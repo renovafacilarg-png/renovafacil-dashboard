@@ -26,6 +26,7 @@ interface FBCommentEntry {
   author_name: string;
   dry_run?: boolean;
   source?: string;
+  permalink?: string;
 }
 
 interface FBStats {
@@ -396,10 +397,10 @@ export function FacebookCommentsView() {
                   </div>
 
                   {/* External link */}
-                  {entry.post_id && (
+                  {(entry.permalink || (entry.source !== 'instagram' && entry.post_id)) && (
                     <a
                       href={entry.source === 'instagram'
-                        ? `https://www.instagram.com/${igStatus?.ig_username || 'renova.facil.arg'}/`
+                        ? entry.permalink || `https://www.instagram.com/${igStatus?.ig_username || 'renova.facil.arg'}/`
                         : `https://www.facebook.com/${entry.post_id}`}
                       target="_blank"
                       rel="noopener noreferrer"
