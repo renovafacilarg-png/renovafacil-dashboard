@@ -47,6 +47,8 @@ export function FacebookCommentsView() {
   const [entries, setEntries] = useState<FBCommentEntry[]>([]);
   const [stats, setStats] = useState<FBStats | null>(null);
   const [igStatus, setIgStatus] = useState<any>(null);
+  const [igReprocessing, setIgReprocessing] = useState(false);
+  const [igReprocessResult, setIgReprocessResult] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -104,6 +106,28 @@ export function FacebookCommentsView() {
       console.error('Error fetching FB comments:', error);
     } finally {
       setLoadingMore(false);
+    }
+  };
+
+  const triggerIgReprocess = async () => {
+    setIgReprocessing(true);
+    setIgReprocessResult(null);
+    try {
+      const resp = await fetch(`${API_URL}/ig-reprocess?key=renovafacil2024`, {
+        method: 'POST',
+        headers: getHeaders(),
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        setIgReprocessResult(data);
+        fetchData(false);
+      } else {
+        setIgReprocessResult({ error: `HTTP ${resp.status}` });
+      }
+    } catch (e: any) {
+      setIgReprocessResult({ error: e.message || 'Error de conexión' });
+    } finally {
+      setIgReprocessing(false);
     }
   };
 
@@ -201,18 +225,35 @@ export function FacebookCommentsView() {
       {/* Instagram Status */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Instagram className="h-5 w-5 text-pink-500" />
-            Instagram
-            {igStatus?.ig_linked ? (
-              <Badge className="bg-green-100 text-green-800">Conectado</Badge>
-            ) : (
-              <Badge className="bg-red-100 text-red-800">Desconectado</Badge>
+          <CardTitle className="text-base flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Instagram className="h-5 w-5 text-pink-500" />
+              Instagram
+              {igStatus?.ig_linked ? (
+                <Badge className="bg-green-100 text-green-800">Conectado</Badge>
+              ) : (
+                <Badge className="bg-red-100 text-red-800">Desconectado</Badge>
+              )}
+            </div>
+            {igStatus?.ig_linked && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={triggerIgReprocess}
+                disabled={igReprocessing}
+              >
+                {igReprocessing ? (
+                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                ) : (
+                  <RefreshCw className="mr-2 h-3 w-3" />
+                )}
+                {igReprocessing ? 'Procesando...' : 'Reprocesar IG'}
+              </Button>
             )}
           </CardTitle>
         </CardHeader>
         {igStatus && (
-          <CardContent className="pt-0">
+          <CardContent className="pt-0 space-y-3">
             {igStatus.ig_linked ? (
               <div className="grid grid-cols-3 gap-4 text-sm">
                 <div>
@@ -232,6 +273,39 @@ export function FacebookCommentsView() {
               <p className="text-sm text-muted-foreground">
                 {igStatus.error || 'Instagram no vinculado. Configurar en Meta Business Suite.'}
               </p>
+            )}
+
+            {/* Reprocess result */}
+            {igReprocessing && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700">
+                Respondiendo comentarios sin contestar... Esto puede tardar varios minutos (2 min entre respuestas).
+              </div>
+            )}
+            {igReprocessResult && !igReprocessing && (
+              <div className={`rounded-lg p-3 text-sm ${igReprocessResult.error ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-emerald-50 border border-emerald-200 text-emerald-700'}`}>
+                {igReprocessResult.error ? (
+                  <p>Error: {igReprocessResult.error}</p>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <div>
+                      <p className="font-medium">{igReprocessResult.replied ?? 0}</p>
+                      <p className="text-xs opacity-75">Respondidos</p>
+                    </div>
+                    <div>
+                      <p className="font-medium">{igReprocessResult.skipped_already_replied ?? 0}</p>
+                      <p className="text-xs opacity-75">Ya tenían respuesta</p>
+                    </div>
+                    <div>
+                      <p className="font-medium">{igReprocessResult.skipped_ignored ?? 0}</p>
+                      <p className="text-xs opacity-75">Ignorados</p>
+                    </div>
+                    <div>
+                      <p className="font-medium">{igReprocessResult.total_comments ?? 0}</p>
+                      <p className="text-xs opacity-75">Total escaneados</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </CardContent>
         )}
