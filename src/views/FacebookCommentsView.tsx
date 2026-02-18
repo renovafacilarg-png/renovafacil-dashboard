@@ -73,9 +73,9 @@ export function FacebookCommentsView() {
       console.error('Error fetching FB comments:', error);
     }
 
-    // Fetch IG status
+    // Fetch IG status via authenticated API
     try {
-      const igResp = await fetch(`${API_URL}/ig-debug?key=renovafacil2024`, { headers: getHeaders() });
+      const igResp = await fetch(`${API_URL}/api/fb-comments/ig-status`, { headers: getHeaders() });
       if (igResp.ok) {
         const igData = await igResp.json();
         setIgStatus(igData);
@@ -111,7 +111,7 @@ export function FacebookCommentsView() {
 
   const pollIgReprocessStatus = async () => {
     try {
-      const resp = await fetch(`${API_URL}/ig-reprocess-status?key=renovafacil2024`, { headers: getHeaders() });
+      const resp = await fetch(`${API_URL}/api/fb-comments/ig-reprocess-status`, { headers: getHeaders() });
       if (resp.ok) {
         const data = await resp.json();
         setIgReprocessResult(data);
@@ -133,7 +133,7 @@ export function FacebookCommentsView() {
     setIgReprocessing(true);
     setIgReprocessResult(null);
     try {
-      const resp = await fetch(`${API_URL}/ig-reprocess?key=renovafacil2024`, {
+      const resp = await fetch(`${API_URL}/api/fb-comments/ig-reprocess`, {
         method: 'POST',
         headers: getHeaders(),
       });
