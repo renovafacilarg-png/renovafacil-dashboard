@@ -71,6 +71,15 @@ const priorityConfig = {
   low: { label: 'Baja', color: 'bg-gray-100 text-gray-800' }
 };
 
+const targetComponentConfig: Record<string, { label: string; color: string }> = {
+  system_prompt: { label: 'Prompt', color: 'bg-violet-100 text-violet-800' },
+  dynamic_config: { label: 'Config', color: 'bg-blue-100 text-blue-800' },
+  code_abandoned_carts: { label: 'Carritos', color: 'bg-orange-100 text-orange-800' },
+  code_app: { label: 'Código', color: 'bg-slate-100 text-slate-800' },
+  code_proactive_notifications: { label: 'Notif.', color: 'bg-teal-100 text-teal-800' },
+  code_other: { label: 'Código', color: 'bg-slate-100 text-slate-800' },
+};
+
 export function SelfImprovementView() {
   const [stats, setStats] = useState<ImprovementStats | null>(null);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -216,11 +225,22 @@ export function SelfImprovementView() {
   const handleBulkApprove = async () => {
     if (selectedIds.size === 0) return;
 
+    // Filter out suggestions that require code changes
+    const approvableIds = [...selectedIds].filter(id => {
+      const s = suggestions.find(s => s.id === id);
+      return s && !s.requires_code_change;
+    });
+
+    if (approvableIds.length === 0) {
+      toast.error('Las sugerencias seleccionadas requieren cambios de código');
+      return;
+    }
+
     setBulkApproving(true);
     let approved = 0;
     let failed = 0;
 
-    for (const id of selectedIds) {
+    for (const id of approvableIds) {
       try {
         const result = await approveSuggestion(id);
         if (result.success) {
@@ -438,13 +458,26 @@ export function SelfImprovementView() {
                           <Icon className={`h-5 w-5 ${typeConfig.color.split(' ')[1]}`} />
                         </div>
                         <div>
-                          <CardTitle className="text-lg flex items-center gap-2">
+                          <CardTitle className="text-lg flex items-center gap-2 flex-wrap">
                             <Badge variant="secondary" className={typeConfig.color}>
                               {typeConfig.label}
                             </Badge>
                             <Badge variant="outline" className={prioConfig.color}>
                               {prioConfig.label}
                             </Badge>
+                            {suggestion.target_component && (() => {
+                              const tc = targetComponentConfig[suggestion.target_component] || { label: suggestion.target_component, color: 'bg-gray-100 text-gray-800' };
+                              return (
+                                <Badge variant="outline" className={tc.color}>
+                                  {tc.label}
+                                </Badge>
+                              );
+                            })()}
+                            {suggestion.requires_code_change && (
+                              <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
+                                Requiere código
+                              </Badge>
+                            )}
                           </CardTitle>
                           <CardDescription className="mt-1">
                             {suggestion.reason || typeConfig.description}
@@ -466,8 +499,9 @@ export function SelfImprovementView() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleApprove(suggestion.id)}
-                          className="text-green-600 hover:text-green-700 hover:bg-green-50 h-8 w-8 p-0"
-                          title="Aprobar"
+                          className={`h-8 w-8 p-0 ${suggestion.requires_code_change ? 'text-gray-400 cursor-not-allowed' : 'text-green-600 hover:text-green-700 hover:bg-green-50'}`}
+                          title={suggestion.requires_code_change ? 'Requiere cambio de código' : 'Aprobar'}
+                          disabled={suggestion.requires_code_change}
                         >
                           <CheckCircle className="h-4 w-4" />
                         </Button>
@@ -587,11 +621,12 @@ export function SelfImprovementView() {
                               </Button>
                               <Button
                                 size="sm"
-                                className="bg-green-600 hover:bg-green-700"
+                                className={suggestion.requires_code_change ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}
                                 onClick={() => handleApprove(suggestion.id)}
+                                disabled={suggestion.requires_code_change}
                               >
                                 <CheckCircle className="mr-1 h-4 w-4" />
-                                Aprobar
+                                {suggestion.requires_code_change ? 'Requiere dev' : 'Aprobar'}
                               </Button>
                             </>
                           )}

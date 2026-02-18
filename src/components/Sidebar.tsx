@@ -20,7 +20,7 @@ import {
 import { useState, useEffect } from 'react';
 import { API_URL } from '@/lib/api';
 
-const FRONTEND_VERSION = '2.0.0';
+const FRONTEND_VERSION = '2.1.0';
 
 export type ViewType = 'dashboard' | 'orders' | 'tracking' | 'carts' | 'bot' | 'inbox' | 'improvements' | 'system' | 'facebook';
 
@@ -45,7 +45,7 @@ const navItems: NavItem[] = [
   { id: 'tracking', label: 'Tracking', icon: Truck },
   { id: 'carts', label: 'Carritos', icon: ShoppingCart },
   { id: 'bot', label: 'Bot WhatsApp', icon: MessageSquare },
-  { id: 'facebook', label: 'Facebook', icon: Facebook },
+  { id: 'facebook', label: 'FB / Instagram', icon: Facebook },
   { id: 'improvements', label: 'Auto-Mejoras', icon: Sparkles },
   { id: 'system', label: 'Sistema', icon: Server },
 ];

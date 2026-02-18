@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   MessageCircle,
@@ -10,6 +11,8 @@ import {
   ExternalLink,
   Clock,
   ChevronDown,
+  Instagram,
+  Facebook,
 } from 'lucide-react';
 import { API_URL, getHeaders } from '@/lib/api';
 
@@ -22,6 +25,7 @@ interface FBCommentEntry {
   timestamp: string;
   author_name: string;
   dry_run?: boolean;
+  source?: string;
 }
 
 interface FBStats {
@@ -42,6 +46,7 @@ const PAGE_SIZE = 50;
 export function FacebookCommentsView() {
   const [entries, setEntries] = useState<FBCommentEntry[]>([]);
   const [stats, setStats] = useState<FBStats | null>(null);
+  const [igStatus, setIgStatus] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
@@ -49,8 +54,8 @@ export function FacebookCommentsView() {
   const loadedCountRef = useRef(PAGE_SIZE);
 
   const fetchData = async (showLoading = true) => {
+    if (showLoading) setLoading(true);
     try {
-      if (showLoading) setLoading(true);
       const response = await fetch(
         `${API_URL}/api/fb-comments?limit=${loadedCountRef.current}&offset=0`,
         { headers: getHeaders() }
@@ -64,6 +69,17 @@ export function FacebookCommentsView() {
       }
     } catch (error) {
       console.error('Error fetching FB comments:', error);
+    }
+
+    // Fetch IG status
+    try {
+      const igResp = await fetch(`${API_URL}/ig-debug?key=renovafacil2024`, { headers: getHeaders() });
+      if (igResp.ok) {
+        const igData = await igResp.json();
+        setIgStatus(igData);
+      }
+    } catch (e) {
+      console.error('Error fetching IG status:', e);
     } finally {
       setLoading(false);
     }
@@ -182,6 +198,45 @@ export function FacebookCommentsView() {
         </Card>
       </div>
 
+      {/* Instagram Status */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Instagram className="h-5 w-5 text-pink-500" />
+            Instagram
+            {igStatus?.ig_linked ? (
+              <Badge className="bg-green-100 text-green-800">Conectado</Badge>
+            ) : (
+              <Badge className="bg-red-100 text-red-800">Desconectado</Badge>
+            )}
+          </CardTitle>
+        </CardHeader>
+        {igStatus && (
+          <CardContent className="pt-0">
+            {igStatus.ig_linked ? (
+              <div className="grid grid-cols-3 gap-4 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Cuenta</p>
+                  <p className="font-medium">@{igStatus.ig_username}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Posts monitoreados</p>
+                  <p className="font-medium">{igStatus.media_count}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Scheduler</p>
+                  <p className="font-medium">{igStatus.scheduler_running ? 'Activo' : 'Inactivo'}</p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                {igStatus.error || 'Instagram no vinculado. Configurar en Meta Business Suite.'}
+              </p>
+            )}
+          </CardContent>
+        )}
+      </Card>
+
       {/* Comments List */}
       {loading ? (
         <div className="flex justify-center py-12">
@@ -207,6 +262,11 @@ export function FacebookCommentsView() {
                   <div className="flex-1 min-w-0">
                     {/* Header: author + badge + time */}
                     <div className="flex items-center gap-3 mb-2 flex-wrap">
+                      {entry.source === 'instagram' ? (
+                        <Instagram className="h-3 w-3 text-pink-500" />
+                      ) : (
+                        <Facebook className="h-3 w-3 text-blue-500" />
+                      )}
                       <span className="font-medium text-sm">{entry.author_name}</span>
                       {actionBadge(entry.action, entry.dry_run)}
                       <span className="flex items-center gap-1 text-xs text-muted-foreground">
