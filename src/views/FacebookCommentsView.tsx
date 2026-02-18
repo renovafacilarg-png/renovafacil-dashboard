@@ -395,10 +395,12 @@ export function FacebookCommentsView() {
                     )}
                   </div>
 
-                  {/* Facebook link */}
+                  {/* External link */}
                   {entry.post_id && (
                     <a
-                      href={`https://www.facebook.com/${entry.post_id}`}
+                      href={entry.source === 'instagram'
+                        ? `https://www.instagram.com/${igStatus?.ig_username || 'renova.facil.arg'}/`
+                        : `https://www.facebook.com/${entry.post_id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="shrink-0"
