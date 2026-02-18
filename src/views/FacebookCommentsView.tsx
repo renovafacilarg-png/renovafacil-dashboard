@@ -397,7 +397,7 @@ export function FacebookCommentsView() {
                   </div>
 
                   {/* External link */}
-                  {(entry.permalink || (entry.source !== 'instagram' && entry.post_id)) && (
+                  {entry.post_id && (
                     <a
                       href={entry.source === 'instagram'
                         ? entry.permalink || `https://www.instagram.com/${igStatus?.ig_username || 'renova.facil.arg'}/`
