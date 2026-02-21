@@ -1,6 +1,7 @@
 import { KPICard } from '@/components/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   MessageSquare,
   TrendingUp,
@@ -15,14 +16,15 @@ import {
   Server,
   DollarSign,
   ShoppingCart,
-  Sparkles
+  Sparkles,
+  Brain
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { fetchDashboardSummary, fetchHealthStatus, type DashboardSummary } from '@/lib/api';
+import { fetchDashboardSummary, fetchHealthStatus, fetchImprovementStats, type DashboardSummary, type ImprovementStats } from '@/lib/api';
 
 interface DashboardViewProps {
-  onViewChange: (view: 'orders' | 'tracking' | 'carts' | 'bot' | 'system') => void;
+  onViewChange: (view: 'orders' | 'tracking' | 'carts' | 'bot' | 'system' | 'improvements') => void;
 }
 
 interface SystemHealth {
@@ -36,6 +38,7 @@ interface SystemHealth {
 export function DashboardView({ onViewChange }: DashboardViewProps) {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [health, setHealth] = useState<SystemHealth | null>(null);
+  const [improvementStats, setImprovementStats] = useState<ImprovementStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
@@ -43,16 +46,18 @@ export function DashboardView({ onViewChange }: DashboardViewProps) {
     try {
       setLoading(true);
 
-      const [summaryResult, healthResult] = await Promise.allSettled([
+      const [summaryResult, healthResult, improvementResult] = await Promise.allSettled([
         fetchDashboardSummary(),
         fetchHealthStatus(),
+        fetchImprovementStats(),
       ]);
 
       if (summaryResult.status === 'fulfilled') setSummary(summaryResult.value);
       if (healthResult.status === 'fulfilled') setHealth(healthResult.value as unknown as SystemHealth);
+      if (improvementResult.status === 'fulfilled') setImprovementStats(improvementResult.value);
       setLastUpdated(new Date());
     } catch (error) {
-      console.error('Error fetching data:', error);
+      void error;
       toast.error('Error al conectar con el servidor', {
         description: 'Verifica que el bot esté corriendo'
       });
@@ -358,6 +363,45 @@ export function DashboardView({ onViewChange }: DashboardViewProps) {
         </Card>
       </div>
 
+      {/* Auto-Mejora Widget */}
+      {improvementStats && (
+        <Card
+          className="cursor-pointer card-hover group overflow-hidden border-violet-200 bg-gradient-to-r from-violet-50/50 to-purple-50/30"
+          onClick={() => onViewChange('improvements')}
+        >
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Brain className="h-5 w-5 text-violet-500" />
+                Auto-Mejora del Bot
+              </span>
+              <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-violet-500 group-hover:translate-x-1 transition-all" />
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-amber-600">{improvementStats.pending_suggestions}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Pendientes</p>
+                {improvementStats.pending_suggestions > 0 && (
+                  <Badge className="mt-1 text-[10px] bg-amber-100 text-amber-700 border-amber-200">
+                    Revisar
+                  </Badge>
+                )}
+              </div>
+              <div className="text-center border-x border-violet-100">
+                <p className="text-2xl font-bold text-green-600">{improvementStats.active_mutations}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Activas</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-violet-600">{improvementStats.approval_rate}%</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Aprobación</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Info */}
       <Card className="bg-gradient-to-r from-muted/50 to-muted/30 border-dashed">
         <CardContent className="p-5">
@@ -367,7 +411,7 @@ export function DashboardView({ onViewChange }: DashboardViewProps) {
             </div>
             <div className="text-sm">
               <p className="font-medium text-foreground mb-1">¿Cómo funciona?</p>
-              <p className="text-muted-foreground">Este dashboard se conecta directamente a tu bot de WhatsApp y muestra datos reales en tiempo real. Las métricas se actualizan automáticamente cada 30 segundos.</p>
+              <p className="text-muted-foreground">Este dashboard se conecta directamente a tu bot de WhatsApp y muestra datos reales en tiempo real. Las métricas se actualizan automáticamente cada 15 minutos.</p>
             </div>
           </div>
         </CardContent>

@@ -355,7 +355,7 @@ export interface Suggestion {
   id: string;
   type: 'cached_response' | 'objection_handler' | 'prompt_addition' | 'failed_response';
   priority: 'high' | 'medium' | 'low';
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'rolledback';
   patterns?: string[];
   triggers?: string[];
   suggested_response?: string;
@@ -370,6 +370,15 @@ export interface Suggestion {
   edited_content?: string;
   target_component?: string;
   requires_code_change?: boolean;
+  // Campos enriquecidos por el backend
+  hierarchy_level?: 1 | 2 | 3;
+  rollback_strategy?: string;
+  has_conflict?: boolean;
+  conflict_reason?: string;
+  data_support?: {
+    conversations_analyzed?: number;
+    occurrences?: number;
+  };
 }
 
 export interface SuggestionsResponse {
@@ -468,6 +477,93 @@ export async function deactivateMutation(
 ): Promise<{ success: boolean; message: string }> {
   const response = await fetch(`${API_URL}/api/improvements/mutations/${mutationId}`, {
     method: 'DELETE',
+    headers: getHeaders(),
+  });
+  return handleResponse<{ success: boolean; message: string }>(response);
+}
+
+export async function rollbackMutation(
+  suggestionId: string
+): Promise<{ success: boolean; message: string }> {
+  const response = await fetch(`${API_URL}/api/improvements/rollback/${suggestionId}`, {
+    method: 'POST',
+    headers: getHeaders(),
+  });
+  return handleResponse<{ success: boolean; message: string }>(response);
+}
+
+// =============================================================================
+// CONVERSATION SCORES
+// =============================================================================
+
+export interface ConvScoreDay {
+  date: string;
+  avg_score: number;
+  total: number;
+  tier_distribution: {
+    excellent: number;
+    good: number;
+    regular: number;
+    poor: number;
+  };
+}
+
+export interface ConvScoreSummary {
+  days: ConvScoreDay[];
+  overall_avg: number;
+  trend: 'improving' | 'declining' | 'stable' | 'insufficient_data';
+  total_scored: number;
+}
+
+export async function fetchConvScores(days?: number): Promise<ConvScoreSummary> {
+  const url = days
+    ? `${API_URL}/api/improvements/conv-scores?days=${days}`
+    : `${API_URL}/api/improvements/conv-scores`;
+  const response = await fetch(url, { headers: getHeaders() });
+  return handleResponse<ConvScoreSummary>(response);
+}
+
+export async function triggerConvScoring(): Promise<{ success: boolean; scored: number }> {
+  const response = await fetch(`${API_URL}/api/improvements/conv-scores/run`, {
+    method: 'POST',
+    headers: getHeaders(),
+  });
+  return handleResponse<{ success: boolean; scored: number }>(response);
+}
+
+// =============================================================================
+// MUTATION HEALTH
+// =============================================================================
+
+export interface MutationHealthEntry {
+  suggestion_id: string;
+  type: string;
+  approved_at: string;
+  days_active: number;
+  avg_score_before?: number;
+  avg_score_after?: number;
+  delta?: number;
+  status: 'healthy' | 'warning' | 'critical' | 'insufficient_data';
+  auto_rollback_at?: string;
+}
+
+export interface MutationHealthResponse {
+  mutations: MutationHealthEntry[];
+  overall_status: 'healthy' | 'warning' | 'critical' | 'insufficient_data';
+  monitor_active: boolean;
+  last_evaluated?: string;
+}
+
+export async function fetchMutationHealth(): Promise<MutationHealthResponse> {
+  const response = await fetch(`${API_URL}/api/improvements/mutation-health`, {
+    headers: getHeaders(),
+  });
+  return handleResponse<MutationHealthResponse>(response);
+}
+
+export async function triggerMutationEvaluation(): Promise<{ success: boolean; message: string }> {
+  const response = await fetch(`${API_URL}/api/improvements/mutation-health/evaluate`, {
+    method: 'POST',
     headers: getHeaders(),
   });
   return handleResponse<{ success: boolean; message: string }>(response);

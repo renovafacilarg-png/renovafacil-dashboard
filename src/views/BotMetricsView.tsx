@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { API_URL, getHeaders } from '@/lib/api';
+import { API_URL, getHeaders, fetchConvScores, type ConvScoreSummary } from '@/lib/api';
 import {
   XAxis,
   YAxis,
@@ -32,7 +32,10 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-  Legend
+  Legend,
+  LineChart,
+  Line,
+  ReferenceLine
 } from 'recharts';
 import { format, parseISO } from 'date-fns';
 
@@ -68,6 +71,7 @@ export function BotMetricsView() {
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [period, setPeriod] = useState('today');
+  const [convScores, setConvScores] = useState<ConvScoreSummary | null>(null);
 
   const fetchMetrics = async () => {
     try {
@@ -106,6 +110,7 @@ export function BotMetricsView() {
   useEffect(() => {
     fetchMetrics();
     fetchHistory();
+    fetchConvScores(7).then(setConvScores).catch(() => {});
     const interval = setInterval(fetchMetrics, 120000);
     return () => clearInterval(interval);
   }, []);
@@ -174,7 +179,7 @@ export function BotMetricsView() {
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50" />
                 </h3>
                 <p className="text-muted-foreground">
-                  Respondiendo con DeepSeek AI · {successRate}% tasa de exito
+                  Respondiendo con GPT-4o · {successRate}% tasa de exito
                 </p>
               </div>
               <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white/60 rounded-lg">
@@ -404,6 +409,95 @@ export function BotMetricsView() {
           )}
         </CardContent>
       </Card>
+
+      {/* Conversation Quality Chart */}
+      {convScores && convScores.days.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-violet-500" />
+                Calidad de Conversaciones (7 dias)
+              </span>
+              <span className={`text-sm font-normal px-2 py-0.5 rounded-full ${
+                convScores.trend === 'improving' ? 'bg-green-100 text-green-700' :
+                convScores.trend === 'declining' ? 'bg-red-100 text-red-700' :
+                convScores.trend === 'stable' ? 'bg-blue-100 text-blue-700' :
+                'bg-gray-100 text-gray-600'
+              }`}>
+                {convScores.trend === 'improving' ? 'Mejorando' :
+                 convScores.trend === 'declining' ? 'Declinando' :
+                 convScores.trend === 'stable' ? 'Estable' : 'Datos insuficientes'}
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-4 gap-4 mb-4">
+              <div className="text-center p-3 bg-muted/50 rounded-lg">
+                <p className="text-2xl font-bold">{Math.round(convScores.overall_avg)}</p>
+                <p className="text-xs text-muted-foreground">Score promedio</p>
+              </div>
+              <div className="text-center p-3 bg-emerald-50 rounded-lg">
+                <p className="text-2xl font-bold text-emerald-600">
+                  {convScores.days.reduce((acc, d) => acc + (d.tier_distribution?.excellent || 0), 0)}
+                </p>
+                <p className="text-xs text-emerald-600">Excelentes</p>
+              </div>
+              <div className="text-center p-3 bg-amber-50 rounded-lg">
+                <p className="text-2xl font-bold text-amber-600">
+                  {convScores.days.reduce((acc, d) => acc + (d.tier_distribution?.regular || 0), 0)}
+                </p>
+                <p className="text-xs text-amber-600">Regulares</p>
+              </div>
+              <div className="text-center p-3 bg-red-50 rounded-lg">
+                <p className="text-2xl font-bold text-red-600">
+                  {convScores.days.reduce((acc, d) => acc + (d.tier_distribution?.poor || 0), 0)}
+                </p>
+                <p className="text-xs text-red-600">Malas</p>
+              </div>
+            </div>
+            <div className="h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={convScores.days}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
+                  <XAxis
+                    dataKey="date"
+                    tickFormatter={(date) => {
+                      try { return format(parseISO(date), 'dd/MM'); } catch { return date; }
+                    }}
+                    className="text-xs"
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis domain={[0, 100]} className="text-xs" axisLine={false} tickLine={false} />
+                  <Tooltip
+                    labelFormatter={(label) => {
+                      try { return format(parseISO(label as string), 'dd/MM/yyyy'); } catch { return label; }
+                    }}
+                    formatter={(value: number) => [`${Math.round(value)}`, 'Score promedio']}
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                    }}
+                  />
+                  <ReferenceLine y={70} stroke="#10b981" strokeDasharray="4 4" label={{ value: 'Meta', position: 'right', fontSize: 10 }} />
+                  <ReferenceLine y={35} stroke="#ef4444" strokeDasharray="4 4" label={{ value: 'Alerta', position: 'right', fontSize: 10 }} />
+                  <Line
+                    type="monotone"
+                    dataKey="avg_score"
+                    stroke="#8b5cf6"
+                    strokeWidth={2}
+                    dot={{ r: 4, fill: '#8b5cf6' }}
+                    activeDot={{ r: 6 }}
+                    name="Score"
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Loading State */}
       {!metrics && loading && (

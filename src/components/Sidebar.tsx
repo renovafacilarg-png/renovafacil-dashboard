@@ -18,7 +18,7 @@ import {
   Facebook,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { API_URL } from '@/lib/api';
+import { API_URL, fetchImprovementStats } from '@/lib/api';
 
 const FRONTEND_VERSION = '2.1.0';
 
@@ -54,12 +54,27 @@ export function Sidebar({ currentView, onViewChange, onLogout, className }: Side
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [backendVersion, setBackendVersion] = useState<string | null>(null);
+  const [pendingSuggestions, setPendingSuggestions] = useState<number>(0);
 
   useEffect(() => {
     fetch(`${API_URL}/health`)
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (data?.version) setBackendVersion(data.version); })
       .catch(() => {});
+
+    // Cargar badge de sugerencias pendientes
+    fetchImprovementStats()
+      .then(stats => { if (stats?.pending_suggestions) setPendingSuggestions(stats.pending_suggestions); })
+      .catch(() => {});
+
+    // Refrescar badge cada 5 minutos
+    const interval = setInterval(() => {
+      fetchImprovementStats()
+        .then(stats => { if (stats?.pending_suggestions !== undefined) setPendingSuggestions(stats.pending_suggestions); })
+        .catch(() => {});
+    }, 300000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const sidebarContent = (
@@ -94,6 +109,7 @@ export function Sidebar({ currentView, onViewChange, onLogout, className }: Side
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
+            const badge = item.id === 'improvements' ? (pendingSuggestions > 0 ? pendingSuggestions : undefined) : item.badge;
 
             return (
               <Button
@@ -118,9 +134,9 @@ export function Sidebar({ currentView, onViewChange, onLogout, className }: Side
                 {!collapsed && (
                   <span className="flex-1 text-left">{item.label}</span>
                 )}
-                {!collapsed && item.badge && (
+                {!collapsed && badge && (
                   <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-sidebar-primary text-sidebar-primary-foreground">
-                    {item.badge}
+                    {badge}
                   </span>
                 )}
               </Button>
@@ -145,7 +161,7 @@ export function Sidebar({ currentView, onViewChange, onLogout, className }: Side
                 <div className="status-dot status-dot-online animate-pulse" />
                 <span className="text-sm text-sidebar-foreground/80">Activo y respondiendo</span>
               </div>
-              <p className="text-xs text-sidebar-foreground/50 mt-2">DeepSeek AI</p>
+              <p className="text-xs text-sidebar-foreground/50 mt-2">GPT-4o</p>
             </div>
           </div>
         </div>

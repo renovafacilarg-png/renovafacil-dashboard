@@ -4,6 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
   Sparkles,
   Brain,
   CheckCircle,
@@ -22,7 +30,9 @@ import {
   X,
   CheckSquare,
   Square,
-  Loader2
+  Loader2,
+  RotateCcw,
+  ShieldAlert
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -33,6 +43,7 @@ import {
   rejectSuggestion,
   triggerAnalysis,
   deactivateMutation,
+  rollbackMutation,
   type ImprovementStats,
   type Suggestion,
   type Mutation
@@ -71,6 +82,12 @@ const priorityConfig = {
   low: { label: 'Baja', color: 'bg-gray-100 text-gray-800' }
 };
 
+const hierarchyConfig = {
+  1: { label: 'Bajo riesgo', color: 'bg-emerald-100 text-emerald-800', title: 'Cambio de bajo riesgo: respuesta cacheada o adición al prompt' },
+  2: { label: 'Riesgo moderado', color: 'bg-amber-100 text-amber-800', title: 'Cambio de riesgo moderado: manejo de objeción o respuesta fallida' },
+  3: { label: 'Alto riesgo', color: 'bg-red-100 text-red-800', title: 'Cambio de alto riesgo: requiere modificación de código' },
+};
+
 const targetComponentConfig: Record<string, { label: string; color: string }> = {
   system_prompt: { label: 'Prompt', color: 'bg-violet-100 text-violet-800' },
   dynamic_config: { label: 'Config', color: 'bg-blue-100 text-blue-800' },
@@ -92,9 +109,12 @@ export function SelfImprovementView() {
   const [activeTab, setActiveTab] = useState<'pending' | 'active'>('pending');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkApproving, setBulkApproving] = useState(false);
+  // Dialog states
+  const [deactivateTarget, setDeactivateTarget] = useState<string | null>(null);
+  const [rollbackTarget, setRollbackTarget] = useState<string | null>(null);
+  const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
 
   const loadData = async () => {
-    console.log('📊 Cargando datos de auto-mejora...');
     try {
       setLoading(true);
       const [statsData, suggestionsData, mutationsData] = await Promise.all([
@@ -102,14 +122,10 @@ export function SelfImprovementView() {
         fetchSuggestions(),
         fetchMutations()
       ]);
-      console.log('📈 Stats:', statsData);
-      console.log('💡 Sugerencias:', suggestionsData);
-      console.log('🔧 Mutaciones:', mutationsData);
       setStats(statsData);
       setSuggestions(suggestionsData.suggestions || []);
       setMutations(mutationsData.mutations || []);
     } catch (error) {
-      console.error('💥 Error cargando datos:', error);
       toast.error(`Error: ${error instanceof Error ? error.message : 'Error al cargar datos'}`);
     } finally {
       setLoading(false);
@@ -121,26 +137,20 @@ export function SelfImprovementView() {
   }, []);
 
   const handleAnalyze = async () => {
-    console.log('🔍 Iniciando análisis...');
     try {
       setAnalyzing(true);
       toast.info('Iniciando análisis de conversaciones...');
-      console.log('📡 Llamando API...');
       const result = await triggerAnalysis();
-      console.log('📥 Resultado:', result);
       if (result.success) {
         toast.success(`Análisis completado: ${result.suggestions?.length || 0} sugerencias generadas`);
         loadData();
       } else {
-        console.error('❌ Error en resultado:', result);
         toast.error(result.message || 'Error en el análisis');
       }
     } catch (error) {
-      console.error('💥 Error en análisis:', error);
       toast.error(`Error: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     } finally {
       setAnalyzing(false);
-      console.log('✅ Análisis finalizado');
     }
   };
 
@@ -154,8 +164,7 @@ export function SelfImprovementView() {
       } else {
         toast.error(result.message || 'Error al aprobar');
       }
-    } catch (error) {
-      console.error('Error:', error);
+    } catch {
       toast.error('Error al aprobar la sugerencia');
     }
   };
@@ -169,26 +178,42 @@ export function SelfImprovementView() {
       } else {
         toast.error(result.message || 'Error al rechazar');
       }
-    } catch (error) {
-      console.error('Error:', error);
+    } catch {
       toast.error('Error al rechazar la sugerencia');
     }
   };
 
-  const handleDeactivate = async (mutationId: string) => {
-    if (!confirm('¿Estás seguro de desactivar esta mejora?')) return;
-
+  const handleDeactivate = async () => {
+    if (!deactivateTarget) return;
     try {
-      const result = await deactivateMutation(mutationId);
+      const result = await deactivateMutation(deactivateTarget);
       if (result.success) {
         toast.success('Mejora desactivada');
         loadData();
       } else {
         toast.error(result.message || 'Error al desactivar');
       }
-    } catch (error) {
-      console.error('Error:', error);
+    } catch {
       toast.error('Error al desactivar la mejora');
+    } finally {
+      setDeactivateTarget(null);
+    }
+  };
+
+  const handleRollback = async () => {
+    if (!rollbackTarget) return;
+    try {
+      const result = await rollbackMutation(rollbackTarget);
+      if (result.success) {
+        toast.success('Mejora revertida correctamente');
+        loadData();
+      } else {
+        toast.error(result.message || 'Error al revertir');
+      }
+    } catch {
+      toast.error('Error al revertir la mejora');
+    } finally {
+      setRollbackTarget(null);
     }
   };
 
@@ -222,11 +247,14 @@ export function SelfImprovementView() {
     }
   };
 
-  const handleBulkApprove = async () => {
+  const handleBulkApprove = () => {
     if (selectedIds.size === 0) return;
+    setBulkConfirmOpen(true);
+  };
 
+  const confirmBulkApprove = async () => {
+    setBulkConfirmOpen(false);
     const approvableIds = [...selectedIds];
-
     setBulkApproving(true);
     let approved = 0;
     let failed = 0;
@@ -234,11 +262,8 @@ export function SelfImprovementView() {
     for (const id of approvableIds) {
       try {
         const result = await approveSuggestion(id);
-        if (result.success) {
-          approved++;
-        } else {
-          failed++;
-        }
+        if (result.success) approved++;
+        else failed++;
       } catch {
         failed++;
       }
@@ -247,18 +272,77 @@ export function SelfImprovementView() {
     setBulkApproving(false);
     setSelectedIds(new Set());
 
-    if (approved > 0) {
-      toast.success(`${approved} sugerencias aprobadas`);
-    }
-    if (failed > 0) {
-      toast.error(`${failed} fallaron`);
-    }
+    if (approved > 0) toast.success(`${approved} sugerencias aprobadas`);
+    if (failed > 0) toast.error(`${failed} fallaron`);
 
     loadData();
   };
 
   return (
     <div className="space-y-6">
+      {/* Deactivate Confirmation Dialog */}
+      <Dialog open={!!deactivateTarget} onOpenChange={(open) => { if (!open) setDeactivateTarget(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trash2 className="h-5 w-5 text-red-500" />
+              Desactivar mejora
+            </DialogTitle>
+            <DialogDescription>
+              ¿Estás seguro de que querés desactivar esta mejora activa? El bot dejará de usarla inmediatamente.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeactivateTarget(null)}>Cancelar</Button>
+            <Button variant="destructive" onClick={handleDeactivate}>Desactivar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rollback Confirmation Dialog */}
+      <Dialog open={!!rollbackTarget} onOpenChange={(open) => { if (!open) setRollbackTarget(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RotateCcw className="h-5 w-5 text-amber-500" />
+              Revertir mejora
+            </DialogTitle>
+            <DialogDescription>
+              ¿Revertir esta mejora aprobada? El bot volverá a su comportamiento anterior. Esta acción registrará el rollback en el historial.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRollbackTarget(null)}>Cancelar</Button>
+            <Button className="bg-amber-600 hover:bg-amber-700" onClick={handleRollback}>
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Revertir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Approve Confirmation Dialog */}
+      <Dialog open={bulkConfirmOpen} onOpenChange={setBulkConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              Aprobar {selectedIds.size} sugerencias
+            </DialogTitle>
+            <DialogDescription>
+              Vas a aplicar {selectedIds.size} cambio{selectedIds.size !== 1 ? 's' : ''} al bot simultáneamente. Revisá que las sugerencias seleccionadas sean correctas antes de continuar.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBulkConfirmOpen(false)}>Cancelar</Button>
+            <Button className="bg-green-600 hover:bg-green-700" onClick={confirmBulkApprove}>
+              <CheckCircle className="mr-2 h-4 w-4" />
+              Aprobar todas
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -456,6 +540,14 @@ export function SelfImprovementView() {
                             <Badge variant="outline" className={prioConfig.color}>
                               {prioConfig.label}
                             </Badge>
+                            {suggestion.hierarchy_level && (() => {
+                              const hc = hierarchyConfig[suggestion.hierarchy_level];
+                              return (
+                                <Badge variant="outline" className={hc.color} title={hc.title}>
+                                  {hc.label}
+                                </Badge>
+                              );
+                            })()}
                             {suggestion.target_component && (() => {
                               const tc = targetComponentConfig[suggestion.target_component] || { label: suggestion.target_component, color: 'bg-gray-100 text-gray-800' };
                               return (
@@ -473,6 +565,12 @@ export function SelfImprovementView() {
                           <CardDescription className="mt-1">
                             {suggestion.reason || typeConfig.description}
                           </CardDescription>
+                          {suggestion.has_conflict && (
+                            <div className="flex items-center gap-2 mt-2 p-2 bg-orange-50 border border-orange-200 rounded-lg text-sm text-orange-700">
+                              <ShieldAlert className="h-4 w-4 shrink-0" />
+                              <span>Posible conflicto con mejoras activas: {suggestion.conflict_reason || 'revisar antes de aprobar'}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                       {/* Botones de acción rápida */}
@@ -682,8 +780,18 @@ export function SelfImprovementView() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDeactivate(mutation.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => setRollbackTarget(mutation.id)}
+                          className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 h-8 px-2"
+                          title="Revertir esta mejora"
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDeactivateTarget(mutation.id)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 px-2"
+                          title="Desactivar esta mejora"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
