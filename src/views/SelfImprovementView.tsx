@@ -225,16 +225,7 @@ export function SelfImprovementView() {
   const handleBulkApprove = async () => {
     if (selectedIds.size === 0) return;
 
-    // Filter out suggestions that require code changes
-    const approvableIds = [...selectedIds].filter(id => {
-      const s = suggestions.find(s => s.id === id);
-      return s && !s.requires_code_change;
-    });
-
-    if (approvableIds.length === 0) {
-      toast.error('Las sugerencias seleccionadas requieren cambios de código');
-      return;
-    }
+    const approvableIds = [...selectedIds];
 
     setBulkApproving(true);
     let approved = 0;
@@ -499,9 +490,8 @@ export function SelfImprovementView() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleApprove(suggestion.id)}
-                          className={`h-8 w-8 p-0 ${suggestion.requires_code_change ? 'text-gray-400 cursor-not-allowed' : 'text-green-600 hover:text-green-700 hover:bg-green-50'}`}
-                          title={suggestion.requires_code_change ? 'Requiere cambio de código' : 'Aprobar'}
-                          disabled={suggestion.requires_code_change}
+                          className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                          title={suggestion.requires_code_change ? 'Marcar como resuelto' : 'Aprobar'}
                         >
                           <CheckCircle className="h-4 w-4" />
                         </Button>
@@ -621,12 +611,11 @@ export function SelfImprovementView() {
                               </Button>
                               <Button
                                 size="sm"
-                                className={suggestion.requires_code_change ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}
+                                className="bg-green-600 hover:bg-green-700"
                                 onClick={() => handleApprove(suggestion.id)}
-                                disabled={suggestion.requires_code_change}
                               >
                                 <CheckCircle className="mr-1 h-4 w-4" />
-                                {suggestion.requires_code_change ? 'Requiere dev' : 'Aprobar'}
+                                {suggestion.requires_code_change ? 'Marcar como resuelto' : 'Aprobar'}
                               </Button>
                             </>
                           )}
