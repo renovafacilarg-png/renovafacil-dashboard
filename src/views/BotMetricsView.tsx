@@ -411,7 +411,7 @@ export function BotMetricsView() {
       </Card>
 
       {/* Conversation Quality Chart */}
-      {convScores && convScores.days.length > 0 && (
+      {convScores && Array.isArray(convScores.days) && convScores.days.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center justify-between">
