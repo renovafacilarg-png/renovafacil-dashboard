@@ -71,6 +71,11 @@ interface OrderSummary {
 }
 
 type FilterType = 'all' | 'unread' | 'incoming' | 'outgoing';
+type ChannelType = 'wa' | 'messenger' | 'instagram';
+
+interface InboxViewProps {
+  channel?: ChannelType;
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -96,7 +101,7 @@ function markAsRead(phone: string) {
 // Component
 // ---------------------------------------------------------------------------
 
-export function InboxView() {
+export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
   // Cached conversations from localStorage
   const getCachedConversations = (): Conversation[] => {
     try {
@@ -339,8 +344,18 @@ export function InboxView() {
            phone.startsWith('buy');
   };
 
-  const realConversations = conversations.filter(conv => !isTestConversation(conv));
-  const testConversations = conversations.filter(conv => isTestConversation(conv));
+  // Filter by channel: wa = regular phones, messenger = fb:*, instagram = ig:*
+  const channelConversations = useMemo(() => {
+    return conversations.filter(conv => {
+      const p = conv.phone || '';
+      if (channel === 'messenger') return p.startsWith('fb:');
+      if (channel === 'instagram') return p.startsWith('ig:');
+      return !p.startsWith('fb:') && !p.startsWith('ig:');
+    });
+  }, [conversations, channel]);
+
+  const realConversations = channelConversations.filter(conv => !isTestConversation(conv));
+  const testConversations = channelConversations.filter(conv => isTestConversation(conv));
 
   const baseConversations = showTestChats ? testConversations : realConversations;
 
@@ -444,13 +459,19 @@ export function InboxView() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">
-            {showTestChats ? 'Chats de Prueba' : 'Bandeja de Entrada'}
+            {showTestChats
+              ? 'Chats de Prueba'
+              : channel === 'messenger'
+              ? 'Inbox Messenger'
+              : channel === 'instagram'
+              ? 'Inbox Instagram'
+              : 'Inbox WhatsApp'}
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             {showTestChats
               ? `${testConversations.length} conversaciones de prueba`
               : `${realConversations.length} conversaciones`}
-            {!showTestChats && testConversations.length > 0 && (
+            {!showTestChats && channel === 'wa' && testConversations.length > 0 && (
               <span className="ml-1.5 text-xs text-gray-400">
                 ({testConversations.length} de prueba ocultas)
               </span>
@@ -463,14 +484,16 @@ export function InboxView() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowTestChats(!showTestChats)}
-            className="text-xs text-gray-500 hover:text-gray-900"
-          >
-            {showTestChats ? 'Ver Reales' : 'Ver Pruebas'}
-          </Button>
+          {channel === 'wa' && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowTestChats(!showTestChats)}
+              className="text-xs text-gray-500 hover:text-gray-900"
+            >
+              {showTestChats ? 'Ver Reales' : 'Ver Pruebas'}
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="sm"

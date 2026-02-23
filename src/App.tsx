@@ -111,8 +111,12 @@ function App() {
         return <AbandonedCartsView />;
       case 'bot':
         return <BotMetricsView />;
-      case 'inbox':
-        return <InboxView />;
+      case 'inbox-wa':
+        return <InboxView channel="wa" />;
+      case 'inbox-messenger':
+        return <InboxView channel="messenger" />;
+      case 'inbox-instagram':
+        return <InboxView channel="instagram" />;
       case 'improvements':
         return <SelfImprovementView />;
       case 'facebook':

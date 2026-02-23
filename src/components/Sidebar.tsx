@@ -11,17 +11,17 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  Inbox,
   Sparkles,
   LogOut,
   Facebook,
+  Instagram,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { API_URL, fetchImprovementStats } from '@/lib/api';
 
 const FRONTEND_VERSION = '2.1.0';
 
-export type ViewType = 'dashboard' | 'orders' | 'tracking' | 'carts' | 'bot' | 'inbox' | 'improvements' | 'system' | 'facebook';
+export type ViewType = 'dashboard' | 'orders' | 'tracking' | 'carts' | 'bot' | 'inbox-wa' | 'inbox-messenger' | 'inbox-instagram' | 'improvements' | 'system' | 'facebook';
 
 interface SidebarProps {
   currentView: ViewType;
@@ -39,7 +39,9 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'inbox', label: 'Bandeja de Entrada', icon: Inbox },
+  { id: 'inbox-wa', label: 'Inbox WhatsApp', icon: MessageSquare },
+  { id: 'inbox-messenger', label: 'Inbox Messenger', icon: Facebook },
+  { id: 'inbox-instagram', label: 'Inbox Instagram', icon: Instagram },
   { id: 'orders', label: 'Buscar Pedido', icon: Package },
   { id: 'tracking', label: 'Tracking', icon: Truck },
   { id: 'carts', label: 'Carritos', icon: ShoppingCart },
