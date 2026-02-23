@@ -9,7 +9,6 @@ import {
   Package,
   Truck,
   CreditCard,
-  Shield,
   MessageSquare,
   Save,
   CheckCircle,

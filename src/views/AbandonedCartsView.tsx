@@ -5,7 +5,6 @@ import {
   ShoppingCart,
   MessageCircle,
   Clock,
-  TrendingUp,
   CheckCircle,
   Send,
   ExternalLink,
