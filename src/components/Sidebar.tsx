@@ -12,7 +12,6 @@ import {
   ChevronRight,
   Menu,
   Inbox,
-  Zap,
   Sparkles,
   LogOut,
   Facebook,
@@ -62,12 +61,10 @@ export function Sidebar({ currentView, onViewChange, onLogout, className }: Side
       .then(data => { if (data?.version) setBackendVersion(data.version); })
       .catch(() => {});
 
-    // Cargar badge de sugerencias pendientes
     fetchImprovementStats()
       .then(stats => { if (stats?.pending_suggestions) setPendingSuggestions(stats.pending_suggestions); })
       .catch(() => {});
 
-    // Refrescar badge cada 5 minutos
     const interval = setInterval(() => {
       fetchImprovementStats()
         .then(stats => { if (stats?.pending_suggestions !== undefined) setPendingSuggestions(stats.pending_suggestions); })
@@ -81,118 +78,104 @@ export function Sidebar({ currentView, onViewChange, onLogout, className }: Side
     <>
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
-        <div className={cn("flex items-center gap-3", collapsed && "justify-center")}>
-          <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-lg shadow-primary/20">
-            <span className="text-white font-bold text-lg">RF</span>
+        <div className={cn('flex items-center gap-3', collapsed && 'justify-center')}>
+          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shrink-0">
+            <span className="text-white font-bold text-sm">RF</span>
           </div>
           {!collapsed && (
-            <div className="animate-fade-in">
-              <h1 className="font-bold text-sidebar-foreground">Renovafacil</h1>
-              <p className="text-xs text-sidebar-foreground/60">Admin Panel</p>
+            <div>
+              <p className="text-sm font-semibold text-sidebar-foreground leading-tight">Renovafacil</p>
+              <p className="text-[11px] text-sidebar-foreground/50 leading-tight">Admin Panel</p>
             </div>
           )}
         </div>
         <Button
           variant="ghost"
           size="icon"
-          className="hidden lg:flex text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
+          className="hidden lg:flex h-7 w-7 text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent"
           onClick={() => setCollapsed(!collapsed)}
           aria-label={collapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
         >
-          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
         </Button>
       </div>
 
       {/* Navigation */}
-      <ScrollArea className="flex-1 py-4">
-        <nav className="px-3 space-y-1">
+      <ScrollArea className="flex-1 py-3">
+        <nav className="px-2 space-y-0.5">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
             const badge = item.id === 'improvements' ? (pendingSuggestions > 0 ? pendingSuggestions : undefined) : item.badge;
 
             return (
-              <Button
+              <button
                 key={item.id}
-                variant="ghost"
-                className={cn(
-                  'w-full justify-start gap-3 h-11 font-medium transition-all duration-200',
-                  collapsed && 'justify-center px-2',
-                  isActive
-                    ? 'sidebar-item-active bg-sidebar-primary/15 text-sidebar-primary hover:bg-sidebar-primary/20'
-                    : 'text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent'
-                )}
                 onClick={() => {
                   onViewChange(item.id);
                   setMobileOpen(false);
                 }}
+                className={cn(
+                  'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-100',
+                  collapsed && 'justify-center px-2',
+                  isActive
+                    ? 'bg-sidebar-primary/15 text-sidebar-primary'
+                    : 'text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent'
+                )}
               >
-                <Icon className={cn(
-                  "h-5 w-5 shrink-0 transition-transform duration-200",
-                  isActive && "scale-110"
-                )} />
+                <Icon className="h-4 w-4 shrink-0" />
                 {!collapsed && (
-                  <span className="flex-1 text-left">{item.label}</span>
+                  <span className="flex-1 text-left truncate">{item.label}</span>
                 )}
                 {!collapsed && badge && (
-                  <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-sidebar-primary text-sidebar-primary-foreground">
+                  <span className="ml-auto px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-sidebar-primary/20 text-sidebar-primary">
                     {badge}
                   </span>
                 )}
-              </Button>
+              </button>
             );
           })}
         </nav>
       </ScrollArea>
 
-      {/* Status Card */}
+      {/* Bot status */}
       {!collapsed && (
-        <div className="p-4 border-t border-sidebar-border">
-          <div className="bg-sidebar-accent rounded-xl p-4 relative overflow-hidden">
-            {/* Decorative gradient */}
-            <div className="absolute top-0 right-0 w-20 h-20 bg-sidebar-primary/10 rounded-full blur-2xl" />
-
-            <div className="relative">
-              <div className="flex items-center gap-2 mb-2">
-                <Zap className="h-4 w-4 text-sidebar-primary" />
-                <p className="text-sm font-semibold text-sidebar-foreground">Estado del Bot</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="status-dot status-dot-online animate-pulse" />
-                <span className="text-sm text-sidebar-foreground/80">Activo y respondiendo</span>
-              </div>
-              <p className="text-xs text-sidebar-foreground/50 mt-2">GPT-4o</p>
+        <div className="px-3 pb-3">
+          <div className="flex items-center gap-2.5 px-3 py-3 bg-sidebar-accent rounded-lg">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-sidebar-foreground truncate">Bot activo · GPT-4o</p>
+              <p className="text-[10px] text-sidebar-foreground/40 mt-0.5">Respondiendo mensajes</p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Version indicator */}
+      {/* Version */}
       {!collapsed && (
-        <div className="px-4 pb-2 flex items-center justify-center gap-2 text-[10px] text-sidebar-foreground/40">
+        <div className="px-4 pb-2 flex items-center justify-center gap-1.5 text-[10px] text-sidebar-foreground/30">
           <span>dash v{FRONTEND_VERSION}</span>
           <span>·</span>
-          <span className={backendVersion ? 'text-emerald-500/70' : 'text-red-400/70'}>
+          <span className={backendVersion ? 'text-emerald-500/60' : 'text-red-400/60'}>
             bot {backendVersion ? `v${backendVersion}` : 'offline'}
           </span>
         </div>
       )}
 
-      {/* Logout Button */}
+      {/* Logout */}
       {onLogout && (
-        <div className="p-3 border-t border-sidebar-border">
-          <Button
-            variant="ghost"
+        <div className="p-2 border-t border-sidebar-border">
+          <button
+            onClick={onLogout}
             className={cn(
-              'w-full justify-start gap-3 h-10 text-sidebar-foreground/70 hover:text-red-500 hover:bg-red-50',
+              'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-sidebar-foreground/50 hover:text-red-400 hover:bg-sidebar-accent transition-colors duration-100',
               collapsed && 'justify-center px-2'
             )}
-            onClick={onLogout}
-            aria-label="Cerrar sesion"
+            aria-label="Cerrar sesión"
           >
-            <LogOut className="h-5 w-5 shrink-0" />
+            <LogOut className="h-4 w-4 shrink-0" />
             {!collapsed && <span>Cerrar Sesión</span>}
-          </Button>
+          </button>
         </div>
       )}
     </>
@@ -203,12 +186,12 @@ export function Sidebar({ currentView, onViewChange, onLogout, className }: Side
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden animate-fade-in"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
-      {/* Mobile toggle button */}
+      {/* Mobile toggle */}
       <Button
         variant="outline"
         size="icon"
@@ -222,8 +205,8 @@ export function Sidebar({ currentView, onViewChange, onLogout, className }: Side
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed lg:static inset-y-0 left-0 z-50 sidebar-gradient border-r border-sidebar-border transition-all duration-300',
-          collapsed ? 'w-[72px]' : 'w-64',
+          'fixed lg:static inset-y-0 left-0 z-50 sidebar-gradient border-r border-sidebar-border transition-all duration-200',
+          collapsed ? 'w-[60px]' : 'w-60',
           mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
           className
         )}
