@@ -1,6 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   MessageCircle,
@@ -15,6 +13,7 @@ import {
   Facebook,
 } from 'lucide-react';
 import { API_URL, getHeaders } from '@/lib/api';
+import { cn } from '@/lib/utils';
 
 interface FBCommentEntry {
   comment_id: string;
@@ -168,20 +167,20 @@ export function FacebookCommentsView() {
     switch (action) {
       case 'responder':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 text-emerald-700">
-            <MessageCircle className="h-3 w-3" /> Respondió{dry}
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+            <MessageCircle className="h-3 w-3" /> Respondio{dry}
           </span>
         );
       case 'borrar':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-700">
-            <Trash2 className="h-3 w-3" /> Borró{dry}
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
+            <Trash2 className="h-3 w-3" /> Borro{dry}
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600">
-            <MinusCircle className="h-3 w-3" /> Ignoró
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+            <MinusCircle className="h-3 w-3" /> Ignoro
           </span>
         );
     }
@@ -206,108 +205,113 @@ export function FacebookCommentsView() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Comentarios Facebook</h1>
-          <p className="text-muted-foreground">
-            Moderación automática de comentarios en la página
+          <h1 className="text-2xl font-bold text-gray-900">Comentarios Facebook</h1>
+          <p className="text-sm text-gray-500 mt-0.5">
+            Moderacion automatica de comentarios en la pagina
           </p>
         </div>
-        <Button variant="outline" onClick={() => fetchData()} disabled={loading}>
-          <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => fetchData()}
+          disabled={loading}
+          className="text-gray-500 hover:text-gray-900"
+        >
+          <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} />
           Actualizar
         </Button>
       </div>
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-8">
-        <Card className="md:col-span-1 lg:col-span-2">
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Hoy procesados</p>
-            <p className="text-2xl font-bold">{stats?.today.total ?? '-'}</p>
-          </CardContent>
-        </Card>
-        <Card className="md:col-span-1 lg:col-span-2">
-          <CardContent className="p-4">
-            <p className="text-xs text-emerald-600">Hoy respondidos</p>
-            <p className="text-2xl font-bold text-emerald-600">{stats?.today.responded ?? '-'}</p>
-          </CardContent>
-        </Card>
-        <Card className="md:col-span-1 lg:col-span-2">
-          <CardContent className="p-4">
-            <p className="text-xs text-red-500">Hoy borrados</p>
-            <p className="text-2xl font-bold text-red-500">{stats?.today.deleted ?? '-'}</p>
-          </CardContent>
-        </Card>
-        <Card className="md:col-span-1 lg:col-span-2">
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Total almacenados</p>
-            <p className="text-2xl font-bold">{stats?.total ?? '-'}</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {stats?.responded ?? 0} resp / {stats?.deleted ?? 0} borr / {stats?.ignored ?? 0} ign
-            </p>
-          </CardContent>
-        </Card>
+        <div className="md:col-span-1 lg:col-span-2 bg-white border border-gray-200 rounded-xl p-5">
+          <p className="text-xs text-gray-500 uppercase tracking-wide">Hoy procesados</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">{stats?.today.total ?? '-'}</p>
+        </div>
+        <div className="md:col-span-1 lg:col-span-2 bg-white border border-gray-200 rounded-xl p-5">
+          <p className="text-xs text-gray-500 uppercase tracking-wide">Hoy respondidos</p>
+          <p className="text-2xl font-bold text-emerald-600 mt-1">{stats?.today.responded ?? '-'}</p>
+        </div>
+        <div className="md:col-span-1 lg:col-span-2 bg-white border border-gray-200 rounded-xl p-5">
+          <p className="text-xs text-gray-500 uppercase tracking-wide">Hoy borrados</p>
+          <p className="text-2xl font-bold text-red-500 mt-1">{stats?.today.deleted ?? '-'}</p>
+        </div>
+        <div className="md:col-span-1 lg:col-span-2 bg-white border border-gray-200 rounded-xl p-5">
+          <p className="text-xs text-gray-500 uppercase tracking-wide">Total almacenados</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">{stats?.total ?? '-'}</p>
+          <p className="text-xs text-gray-500 mt-1">
+            {stats?.responded ?? 0} resp / {stats?.deleted ?? 0} borr / {stats?.ignored ?? 0} ign
+          </p>
+        </div>
       </div>
 
       {/* Instagram Status */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Instagram className="h-5 w-5 text-pink-500" />
-              Instagram
-              {igStatus?.ig_linked ? (
-                <Badge className="bg-green-100 text-green-800">Conectado</Badge>
-              ) : (
-                <Badge className="bg-red-100 text-red-800">Desconectado</Badge>
-              )}
-            </div>
-            {igStatus?.ig_linked && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={triggerIgReprocess}
-                disabled={igReprocessing}
-              >
-                {igReprocessing ? (
-                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                ) : (
-                  <RefreshCw className="mr-2 h-3 w-3" />
-                )}
-                {igReprocessing ? 'Procesando...' : 'Reprocesar IG'}
-              </Button>
+      <div className="bg-white border border-gray-200 rounded-xl p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Instagram className="h-4 w-4 text-pink-500" />
+            <p className="text-sm font-semibold text-gray-900">Instagram</p>
+            {igStatus?.ig_linked ? (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">
+                Conectado
+              </span>
+            ) : (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
+                Desconectado
+              </span>
             )}
-          </CardTitle>
-        </CardHeader>
+          </div>
+          {igStatus?.ig_linked && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={triggerIgReprocess}
+              disabled={igReprocessing}
+              className="text-gray-500 hover:text-gray-900"
+            >
+              {igReprocessing ? (
+                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+              ) : (
+                <RefreshCw className="mr-2 h-3 w-3" />
+              )}
+              {igReprocessing ? 'Procesando...' : 'Reprocesar IG'}
+            </Button>
+          )}
+        </div>
+
         {igStatus && (
-          <CardContent className="pt-0 space-y-3">
+          <div className="space-y-3">
             {igStatus.ig_linked ? (
-              <div className="grid grid-cols-3 gap-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground">Cuenta</p>
-                  <p className="font-medium">@{igStatus.ig_username}</p>
+              <div className="divide-y divide-gray-100">
+                <div className="flex items-center justify-between py-3">
+                  <span className="text-xs text-gray-500">Cuenta</span>
+                  <span className="text-sm text-gray-900 font-medium">@{igStatus.ig_username}</span>
                 </div>
-                <div>
-                  <p className="text-muted-foreground">Posts monitoreados</p>
-                  <p className="font-medium">{igStatus.media_count}</p>
+                <div className="flex items-center justify-between py-3">
+                  <span className="text-xs text-gray-500">Posts monitoreados</span>
+                  <span className="text-sm text-gray-900 font-medium">{igStatus.media_count}</span>
                 </div>
-                <div>
-                  <p className="text-muted-foreground">Scheduler</p>
-                  <p className="font-medium">{igStatus.scheduler_running ? 'Activo' : 'Inactivo'}</p>
+                <div className="flex items-center justify-between py-3">
+                  <span className="text-xs text-gray-500">Scheduler</span>
+                  <span className="text-sm text-gray-900 font-medium">{igStatus.scheduler_running ? 'Activo' : 'Inactivo'}</span>
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-500">
                 {igStatus.error || 'Instagram no vinculado. Configurar en Meta Business Suite.'}
               </p>
             )}
 
             {/* Reprocess result */}
             {igReprocessResult && (
-              <div className={`rounded-lg p-3 text-sm ${
-                igReprocessResult.error ? 'bg-red-50 border border-red-200 text-red-700' :
-                igReprocessResult.status === 'running' ? 'bg-blue-50 border border-blue-200 text-blue-700' :
-                'bg-emerald-50 border border-emerald-200 text-emerald-700'
-              }`}>
+              <div className={cn(
+                "rounded-lg p-3 text-sm border",
+                igReprocessResult.error
+                  ? 'bg-red-50 border-red-200 text-red-700'
+                  : igReprocessResult.status === 'running'
+                  ? 'bg-blue-50 border-blue-200 text-blue-700'
+                  : 'bg-emerald-50 border-emerald-200 text-emerald-700'
+              )}>
                 {igReprocessResult.error ? (
                   <p>Error: {igReprocessResult.error}</p>
                 ) : igReprocessResult.status === 'running' ? (
@@ -326,7 +330,7 @@ export function FacebookCommentsView() {
                     </div>
                     <div>
                       <p className="font-medium">{igReprocessResult.skipped_already_replied ?? 0}</p>
-                      <p className="text-xs opacity-75">Ya tenían respuesta</p>
+                      <p className="text-xs opacity-75">Ya tenian respuesta</p>
                     </div>
                     <div>
                       <p className="font-medium">{igReprocessResult.skipped_ignored ?? 0}</p>
@@ -340,57 +344,58 @@ export function FacebookCommentsView() {
                 )}
               </div>
             )}
-          </CardContent>
+          </div>
         )}
-      </Card>
+      </div>
 
       {/* Comments List */}
       {loading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="h-6 w-6 animate-spin text-gray-300" />
         </div>
       ) : entries.length === 0 ? (
-        <Card className="p-12 text-center">
-          <MessageCircle className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium mb-2">No hay comentarios procesados</h3>
-          <p className="text-muted-foreground">
+        <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
+          <MessageCircle className="h-10 w-10 mx-auto text-gray-300 mb-3" />
+          <h3 className="text-sm font-medium text-gray-900 mb-1">No hay comentarios procesados</h3>
+          <p className="text-sm text-gray-500">
             El bot procesa comentarios cada 3 minutos
           </p>
-        </Card>
+        </div>
       ) : (
-        <div className="space-y-3">
-          <p className="text-sm text-muted-foreground">
+        <div className="space-y-2">
+          <p className="text-xs text-gray-500">
             Mostrando {entries.length} de {totalCount}
           </p>
-          {entries.map((entry, idx) => (
-            <Card key={entry.comment_id || idx}>
-              <CardContent className="p-4">
+
+          <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100">
+            {entries.map((entry, idx) => (
+              <div key={entry.comment_id || idx} className="py-4 px-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     {/* Header: author + badge + time */}
-                    <div className="flex items-center gap-3 mb-2 flex-wrap">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
                       {entry.source === 'instagram' ? (
-                        <Instagram className="h-3 w-3 text-pink-500" />
+                        <Instagram className="h-3 w-3 text-pink-500 shrink-0" />
                       ) : (
-                        <Facebook className="h-3 w-3 text-blue-500" />
+                        <Facebook className="h-3 w-3 text-blue-500 shrink-0" />
                       )}
-                      <span className="font-medium text-sm">{entry.author_name}</span>
+                      <span className="text-sm font-medium text-gray-900">{entry.author_name}</span>
                       {actionBadge(entry.action, entry.dry_run)}
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1 text-xs text-gray-500">
                         <Clock className="h-3 w-3" />
                         {formatTime(entry.timestamp)}
                       </span>
                     </div>
 
                     {/* Comment text */}
-                    <div className="bg-muted rounded-lg p-3 mb-2">
-                      <p className="text-sm break-words">{entry.comment_text}</p>
+                    <div className="bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 mb-2">
+                      <p className="text-sm text-gray-700 break-words">{entry.comment_text}</p>
                     </div>
 
                     {/* Bot reply */}
                     {entry.reply_text && (
-                      <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-                        <p className="text-xs text-emerald-700 font-medium mb-1">Respuesta del bot:</p>
+                      <div className="bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2">
+                        <p className="text-xs text-emerald-600 font-medium mb-1">Respuesta del bot:</p>
                         <p className="text-sm text-emerald-800 break-words">{entry.reply_text}</p>
                       </div>
                     )}
@@ -406,37 +411,39 @@ export function FacebookCommentsView() {
                       rel="noopener noreferrer"
                       className="shrink-0"
                     >
-                      <Button variant="outline" size="icon" className="h-8 w-8">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400 hover:text-gray-900">
                         <ExternalLink className="h-4 w-4" />
                       </Button>
                     </a>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            ))}
+          </div>
 
           {/* Load more */}
           {hasMore && (
             <div className="flex justify-center pt-2">
               <Button
-                variant="outline"
+                variant="ghost"
+                size="sm"
                 onClick={loadMore}
                 disabled={loadingMore}
+                className="text-gray-500 hover:text-gray-900"
               >
                 {loadingMore ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <ChevronDown className="mr-2 h-4 w-4" />
                 )}
-                Cargar más
+                Cargar mas
               </Button>
             </div>
           )}
         </div>
       )}
 
-      <p className="text-center text-xs text-muted-foreground">
+      <p className="text-center text-xs text-gray-500">
         Auto-refresh cada 60 segundos
       </p>
     </div>

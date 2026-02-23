@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   MessageSquare,
@@ -12,7 +11,6 @@ import {
   Bot,
   Clock,
   Activity,
-  Zap,
   CheckCircle2
 } from 'lucide-react';
 import {
@@ -38,6 +36,7 @@ import {
   ReferenceLine
 } from 'recharts';
 import { format, parseISO } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface BotMetrics {
   date: string;
@@ -124,18 +123,18 @@ export function BotMetricsView() {
   const hasHistoryData = history.some(h => h.messages_received > 0 || h.ai_responses > 0);
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             Bot de WhatsApp
-            <Zap className="h-6 w-6 text-primary" />
+            <Bot className="h-5 w-5 text-gray-400" />
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-sm text-gray-500 mt-0.5">
             Metricas y actividad del asistente virtual
             {lastUpdated && (
-              <span className="ml-2 text-xs">
+              <span className="ml-2">
                 · Actualizado {lastUpdated.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
               </span>
             )}
@@ -153,13 +152,14 @@ export function BotMetricsView() {
             </SelectContent>
           </Select>
           <Button
-            variant="outline"
+            variant="ghost"
+            size="sm"
             onClick={fetchMetrics}
             disabled={loading}
-            className="shadow-sm hover:shadow-md transition-shadow"
+            className="text-gray-500 hover:text-gray-900"
             aria-label="Actualizar metricas"
           >
-            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} />
             Actualizar
           </Button>
         </div>
@@ -167,343 +167,305 @@ export function BotMetricsView() {
 
       {/* Status Card */}
       {metrics && (
-        <Card className="overflow-hidden bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 border-emerald-200">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                <Bot className="h-7 w-7 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg flex items-center gap-2">
-                  Bot Activo
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50" />
-                </h3>
-                <p className="text-muted-foreground">
-                  Respondiendo con GPT-4o · {successRate}% tasa de exito
-                </p>
-              </div>
-              <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white/60 rounded-lg">
-                <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                <span className="text-sm font-medium text-emerald-700">Operativo</span>
-              </div>
+        <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-lg bg-emerald-500 flex items-center justify-center">
+              <Bot className="h-5 w-5 text-white" />
             </div>
-          </CardContent>
-        </Card>
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                Bot Activo
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              </h3>
+              <p className="text-sm text-gray-500">
+                Respondiendo con GPT-4o · {successRate}% tasa de exito
+              </p>
+            </div>
+            <div className="hidden sm:flex items-center gap-1.5">
+              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+              <span className="text-sm font-medium text-emerald-700">Operativo</span>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Metrics */}
       {metrics && (
         <>
           <div className="grid gap-4 md:grid-cols-5">
-            <Card className="card-hover group">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Mensajes</p>
-                    <p className="text-3xl font-bold mt-1">{metrics.messages_received}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{metrics.messages_sent} enviados</p>
-                  </div>
-                  <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
-                    <MessageSquare className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="card-hover group">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Respuestas IA</p>
-                    <p className="text-3xl font-bold text-emerald-600 mt-1">{metrics.ai_responses}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Automaticas</p>
-                  </div>
-                  <div className="w-12 h-12 rounded-xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform">
-                    <TrendingUp className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="card-hover group">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Pedidos</p>
-                    <p className="text-3xl font-bold text-blue-600 mt-1">{metrics.order_queries}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Consultas</p>
-                  </div>
-                  <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
-                    <Package className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="card-hover group">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Tracking</p>
-                    <p className="text-3xl font-bold text-amber-600 mt-1">{metrics.tracking_queries}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Seguimientos</p>
-                  </div>
-                  <div className="w-12 h-12 rounded-xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-transform">
-                    <Truck className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="card-hover group">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Nuevos</p>
-                    <p className="text-3xl font-bold text-violet-600 mt-1">{metrics.new_users}</p>
-                    <p className="text-xs text-muted-foreground mt-1">Usuarios hoy</p>
-                  </div>
-                  <div className="w-12 h-12 rounded-xl bg-violet-500 flex items-center justify-center shadow-lg shadow-violet-500/30 group-hover:scale-110 transition-transform">
-                    <Users className="h-6 w-6 text-white" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Mensajes */}
+            <div className="bg-white border border-gray-200 rounded-xl p-5">
+              <p className="text-xs text-gray-500 uppercase tracking-wide">Mensajes</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{metrics.messages_received}</p>
+              <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                <MessageSquare className="h-3 w-3" />
+                {metrics.messages_sent} enviados
+              </p>
+            </div>
+
+            {/* Respuestas IA */}
+            <div className="bg-white border border-gray-200 rounded-xl p-5">
+              <p className="text-xs text-gray-500 uppercase tracking-wide">Respuestas IA</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{metrics.ai_responses}</p>
+              <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                <TrendingUp className="h-3 w-3" />
+                Automaticas
+              </p>
+            </div>
+
+            {/* Pedidos */}
+            <div className="bg-white border border-gray-200 rounded-xl p-5">
+              <p className="text-xs text-gray-500 uppercase tracking-wide">Pedidos</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{metrics.order_queries}</p>
+              <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                <Package className="h-3 w-3" />
+                Consultas
+              </p>
+            </div>
+
+            {/* Tracking */}
+            <div className="bg-white border border-gray-200 rounded-xl p-5">
+              <p className="text-xs text-gray-500 uppercase tracking-wide">Tracking</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{metrics.tracking_queries}</p>
+              <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                <Truck className="h-3 w-3" />
+                Seguimientos
+              </p>
+            </div>
+
+            {/* Nuevos usuarios */}
+            <div className="bg-white border border-gray-200 rounded-xl p-5">
+              <p className="text-xs text-gray-500 uppercase tracking-wide">Nuevos</p>
+              <p className="text-2xl font-bold text-gray-900 mt-1">{metrics.new_users}</p>
+              <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                <Users className="h-3 w-3" />
+                Usuarios hoy
+              </p>
+            </div>
           </div>
 
           {/* Errors & Success Rate */}
           <div className="grid gap-4 md:grid-cols-2">
             {/* Errors */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center">
-                    <AlertCircle className="h-4 w-4 text-red-600" />
-                  </div>
-                  Errores
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                    <span className="text-muted-foreground">Errores IA</span>
-                    <span className="font-semibold">{metrics.errors.ai}</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                    <span className="text-muted-foreground">Errores de envio</span>
-                    <span className="font-semibold">{metrics.errors.send}</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                    <span className="text-muted-foreground">Errores webhook</span>
-                    <span className="font-semibold">{metrics.errors.webhook}</span>
-                  </div>
-                  <div className="border-t pt-3">
-                    <div className="flex justify-between items-center p-3 bg-muted rounded-lg">
-                      <span className="font-medium">Total</span>
-                      <span className={`font-bold text-xl ${totalErrors > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
-                        {totalErrors}
-                      </span>
-                    </div>
-                  </div>
+            <div className="bg-white border border-gray-200 rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <AlertCircle className="h-4 w-4 text-red-500" />
+                <p className="text-sm font-semibold text-gray-900">Errores</p>
+              </div>
+              <div className="divide-y divide-gray-100">
+                <div className="flex items-center justify-between py-3">
+                  <span className="text-xs text-gray-500">Errores IA</span>
+                  <span className="text-sm text-gray-900 font-medium">{metrics.errors.ai}</span>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="flex items-center justify-between py-3">
+                  <span className="text-xs text-gray-500">Errores de envio</span>
+                  <span className="text-sm text-gray-900 font-medium">{metrics.errors.send}</span>
+                </div>
+                <div className="flex items-center justify-between py-3">
+                  <span className="text-xs text-gray-500">Errores webhook</span>
+                  <span className="text-sm text-gray-900 font-medium">{metrics.errors.webhook}</span>
+                </div>
+                <div className="flex items-center justify-between py-3">
+                  <span className="text-xs text-gray-500 font-medium">Total</span>
+                  <span className={cn(
+                    "text-sm font-bold",
+                    totalErrors > 0 ? 'text-red-600' : 'text-emerald-600'
+                  )}>
+                    {totalErrors}
+                  </span>
+                </div>
+              </div>
+            </div>
 
             {/* Success Rate */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Activity className="h-4 w-4 text-primary" />
-                  </div>
-                  Tasa de Exito
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-center py-4">
-                  <div className="relative">
-                    <svg className="w-40 h-40 transform -rotate-90" aria-label={`Tasa de exito: ${successRate}%`}>
-                      <circle
-                        cx="80"
-                        cy="80"
-                        r="70"
-                        stroke="currentColor"
-                        strokeWidth="14"
-                        fill="transparent"
-                        className="text-muted"
-                      />
-                      <circle
-                        cx="80"
-                        cy="80"
-                        r="70"
-                        stroke="currentColor"
-                        strokeWidth="14"
-                        fill="transparent"
-                        strokeDasharray={439.82}
-                        strokeDashoffset={439.82 * (1 - successRate / 100)}
-                        strokeLinecap="round"
-                        className={`transition-all duration-1000 ${
-                          successRate >= 95 ? 'text-emerald-500' : successRate >= 80 ? 'text-amber-500' : 'text-red-500'
-                        }`}
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-4xl font-bold">{successRate}%</span>
-                      <span className="text-sm text-muted-foreground">exito</span>
-                    </div>
+            <div className="bg-white border border-gray-200 rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <Activity className="h-4 w-4 text-gray-400" />
+                <p className="text-sm font-semibold text-gray-900">Tasa de Exito</p>
+              </div>
+              <div className="flex items-center justify-center py-4">
+                <div className="relative">
+                  <svg className="w-40 h-40 transform -rotate-90" aria-label={`Tasa de exito: ${successRate}%`}>
+                    <circle
+                      cx="80"
+                      cy="80"
+                      r="70"
+                      stroke="currentColor"
+                      strokeWidth="14"
+                      fill="transparent"
+                      className="text-gray-100"
+                    />
+                    <circle
+                      cx="80"
+                      cy="80"
+                      r="70"
+                      stroke="currentColor"
+                      strokeWidth="14"
+                      fill="transparent"
+                      strokeDasharray={439.82}
+                      strokeDashoffset={439.82 * (1 - successRate / 100)}
+                      strokeLinecap="round"
+                      className={cn(
+                        "transition-all duration-1000",
+                        successRate >= 95 ? 'text-emerald-500' : successRate >= 80 ? 'text-amber-500' : 'text-red-500'
+                      )}
+                    />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-4xl font-bold text-gray-900">{successRate}%</span>
+                    <span className="text-xs text-gray-500">exito</span>
                   </div>
                 </div>
-                <p className="text-center text-muted-foreground text-sm">
-                  {metrics.messages_sent - (metrics.errors?.send || 0)} de {metrics.messages_sent} mensajes enviados correctamente
-                </p>
-              </CardContent>
-            </Card>
+              </div>
+              <p className="text-center text-xs text-gray-500">
+                {metrics.messages_sent - (metrics.errors?.send || 0)} de {metrics.messages_sent} mensajes enviados correctamente
+              </p>
+            </div>
           </div>
         </>
       )}
 
-      {/* Historical Chart — Real Data */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Historial (ultimos 7 dias)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loadingHistory ? (
-            <div className="h-[280px] flex items-center justify-center">
-              <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : !hasHistoryData ? (
-            <div className="h-[280px] flex flex-col items-center justify-center text-muted-foreground">
-              <Activity className="h-10 w-10 mb-3 opacity-50" />
-              <p className="font-medium">Sin datos historicos</p>
-              <p className="text-sm mt-1">Las metricas apareceran a medida que el bot reciba mensajes</p>
-            </div>
-          ) : (
-            <div className="h-[280px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={history} barGap={8}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
-                  <XAxis
-                    dataKey="date"
-                    tickFormatter={(date) => format(parseISO(date), 'dd/MM')}
-                    className="text-xs"
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    className="text-xs"
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip
-                    labelFormatter={(label) => format(parseISO(label), 'dd/MM/yyyy')}
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'
-                    }}
-                  />
-                  <Legend />
-                  <Bar dataKey="messages_received" fill="#3b82f6" name="Mensajes" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="ai_responses" fill="#10b981" name="Respuestas IA" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      {/* Historical Chart */}
+      <div className="bg-white border border-gray-200 rounded-xl p-5">
+        <p className="text-sm font-semibold text-gray-900 mb-4">Historial (ultimos 7 dias)</p>
+        {loadingHistory ? (
+          <div className="h-64 flex items-center justify-center">
+            <RefreshCw className="h-5 w-5 animate-spin text-gray-300" />
+          </div>
+        ) : !hasHistoryData ? (
+          <div className="h-64 flex flex-col items-center justify-center">
+            <Activity className="h-8 w-8 text-gray-300 mb-3" />
+            <p className="text-sm text-gray-500 text-center font-medium">Sin datos historicos</p>
+            <p className="text-sm text-gray-500 text-center mt-1">Las metricas apareceran a medida que el bot reciba mensajes</p>
+          </div>
+        ) : (
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={history} barGap={8}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={(date) => format(parseISO(date), 'dd/MM')}
+                  className="text-xs"
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  className="text-xs"
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  labelFormatter={(label) => format(parseISO(label), 'dd/MM/yyyy')}
+                  contentStyle={{
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                    boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1)'
+                  }}
+                />
+                <Legend />
+                <Bar dataKey="messages_received" fill="#3b82f6" name="Mensajes" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="ai_responses" fill="#10b981" name="Respuestas IA" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
 
       {/* Conversation Quality Chart */}
       {convScores && Array.isArray(convScores.days) && convScores.days.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-violet-500" />
-                Calidad de Conversaciones (7 dias)
-              </span>
-              <span className={`text-sm font-normal px-2 py-0.5 rounded-full ${
-                convScores.trend === 'improving' ? 'bg-green-100 text-green-700' :
-                convScores.trend === 'declining' ? 'bg-red-100 text-red-700' :
-                convScores.trend === 'stable' ? 'bg-blue-100 text-blue-700' :
-                'bg-gray-100 text-gray-600'
-              }`}>
-                {convScores.trend === 'improving' ? 'Mejorando' :
-                 convScores.trend === 'declining' ? 'Declinando' :
-                 convScores.trend === 'stable' ? 'Estable' : 'Datos insuficientes'}
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-4 gap-4 mb-4">
-              <div className="text-center p-3 bg-muted/50 rounded-lg">
-                <p className="text-2xl font-bold">{Math.round(convScores.overall_avg)}</p>
-                <p className="text-xs text-muted-foreground">Score promedio</p>
-              </div>
-              <div className="text-center p-3 bg-emerald-50 rounded-lg">
-                <p className="text-2xl font-bold text-emerald-600">
-                  {convScores.days.reduce((acc, d) => acc + (d.tier_distribution?.excellent || 0), 0)}
-                </p>
-                <p className="text-xs text-emerald-600">Excelentes</p>
-              </div>
-              <div className="text-center p-3 bg-amber-50 rounded-lg">
-                <p className="text-2xl font-bold text-amber-600">
-                  {convScores.days.reduce((acc, d) => acc + (d.tier_distribution?.regular || 0), 0)}
-                </p>
-                <p className="text-xs text-amber-600">Regulares</p>
-              </div>
-              <div className="text-center p-3 bg-red-50 rounded-lg">
-                <p className="text-2xl font-bold text-red-600">
-                  {convScores.days.reduce((acc, d) => acc + (d.tier_distribution?.poor || 0), 0)}
-                </p>
-                <p className="text-xs text-red-600">Malas</p>
-              </div>
+        <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Activity className="h-4 w-4 text-gray-400" />
+              <p className="text-sm font-semibold text-gray-900">Calidad de Conversaciones (7 dias)</p>
             </div>
-            <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={convScores.days}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" vertical={false} />
-                  <XAxis
-                    dataKey="date"
-                    tickFormatter={(date) => {
-                      try { return format(parseISO(date), 'dd/MM'); } catch { return date; }
-                    }}
-                    className="text-xs"
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis domain={[0, 100]} className="text-xs" axisLine={false} tickLine={false} />
-                  <Tooltip
-                    labelFormatter={(label) => {
-                      try { return format(parseISO(label as string), 'dd/MM/yyyy'); } catch { return label; }
-                    }}
-                    formatter={(value: number) => [`${Math.round(value)}`, 'Score promedio']}
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--card))',
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                    }}
-                  />
-                  <ReferenceLine y={70} stroke="#10b981" strokeDasharray="4 4" label={{ value: 'Meta', position: 'right', fontSize: 10 }} />
-                  <ReferenceLine y={35} stroke="#ef4444" strokeDasharray="4 4" label={{ value: 'Alerta', position: 'right', fontSize: 10 }} />
-                  <Line
-                    type="monotone"
-                    dataKey="avg_score"
-                    stroke="#8b5cf6"
-                    strokeWidth={2}
-                    dot={{ r: 4, fill: '#8b5cf6' }}
-                    activeDot={{ r: 6 }}
-                    name="Score"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+            <span className={cn(
+              "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
+              convScores.trend === 'improving' ? 'bg-green-50 text-green-700' :
+              convScores.trend === 'declining' ? 'bg-red-50 text-red-700' :
+              convScores.trend === 'stable' ? 'bg-blue-50 text-blue-700' :
+              'bg-gray-100 text-gray-600'
+            )}>
+              {convScores.trend === 'improving' ? 'Mejorando' :
+               convScores.trend === 'declining' ? 'Declinando' :
+               convScores.trend === 'stable' ? 'Estable' : 'Datos insuficientes'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-4 gap-3 mb-4">
+            <div className="text-center p-3 bg-gray-50 rounded-lg border border-gray-100">
+              <p className="text-2xl font-bold text-gray-900">{Math.round(convScores.overall_avg)}</p>
+              <p className="text-xs text-gray-500 mt-0.5">Score promedio</p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="text-center p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+              <p className="text-2xl font-bold text-emerald-700">
+                {convScores.days.reduce((acc, d) => acc + (d.tier_distribution?.excellent || 0), 0)}
+              </p>
+              <p className="text-xs text-emerald-600 mt-0.5">Excelentes</p>
+            </div>
+            <div className="text-center p-3 bg-amber-50 rounded-lg border border-amber-100">
+              <p className="text-2xl font-bold text-amber-700">
+                {convScores.days.reduce((acc, d) => acc + (d.tier_distribution?.regular || 0), 0)}
+              </p>
+              <p className="text-xs text-amber-600 mt-0.5">Regulares</p>
+            </div>
+            <div className="text-center p-3 bg-red-50 rounded-lg border border-red-100">
+              <p className="text-2xl font-bold text-red-700">
+                {convScores.days.reduce((acc, d) => acc + (d.tier_distribution?.poor || 0), 0)}
+              </p>
+              <p className="text-xs text-red-600 mt-0.5">Malas</p>
+            </div>
+          </div>
+
+          <div className="h-[200px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={convScores.days}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={(date) => {
+                    try { return format(parseISO(date), 'dd/MM'); } catch { return date; }
+                  }}
+                  className="text-xs"
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis domain={[0, 100]} className="text-xs" axisLine={false} tickLine={false} />
+                <Tooltip
+                  labelFormatter={(label) => {
+                    try { return format(parseISO(label as string), 'dd/MM/yyyy'); } catch { return label; }
+                  }}
+                  formatter={(value: number) => [`${Math.round(value)}`, 'Score promedio']}
+                  contentStyle={{
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '8px',
+                  }}
+                />
+                <ReferenceLine y={70} stroke="#10b981" strokeDasharray="4 4" label={{ value: 'Meta', position: 'right', fontSize: 10 }} />
+                <ReferenceLine y={35} stroke="#ef4444" strokeDasharray="4 4" label={{ value: 'Alerta', position: 'right', fontSize: 10 }} />
+                <Line
+                  type="monotone"
+                  dataKey="avg_score"
+                  stroke="#8b5cf6"
+                  strokeWidth={2}
+                  dot={{ r: 4, fill: '#8b5cf6' }}
+                  activeDot={{ r: 6 }}
+                  name="Score"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       )}
 
       {/* Loading State */}
       {!metrics && loading && (
         <div className="flex flex-col items-center justify-center py-16">
-          <RefreshCw className="h-10 w-10 animate-spin text-primary mb-4" />
-          <p className="text-muted-foreground">Cargando metricas...</p>
+          <RefreshCw className="h-8 w-8 animate-spin text-gray-300 mb-3" />
+          <p className="text-sm text-gray-500">Cargando metricas...</p>
         </div>
       )}
     </div>
