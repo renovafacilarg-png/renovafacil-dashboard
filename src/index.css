@@ -4,26 +4,26 @@
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 222 47% 11%;
+    --background: 0 0% 99%;
+    --foreground: 222 47% 9%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 222 47% 9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 173 80% 40%;
+    --popover-foreground: 222 47% 9%;
+    --primary: 173 80% 36%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 222 47% 9%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 215 16% 52%;
     --accent: 173 80% 95%;
     --accent-foreground: 173 80% 30%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 173 80% 40%;
-    --radius: 0.75rem;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 173 80% 36%;
+    --radius: 0.5rem;
     --sidebar-background: 222 47% 11%;
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 173 80% 50%;
@@ -71,14 +71,17 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -86,12 +89,11 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.2);
-  border-radius: 10px;
+  @apply bg-gray-200 dark:bg-gray-700 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.4);
+  @apply bg-gray-300 dark:bg-gray-600;
 }
 
 /* Smooth transitions */
@@ -191,7 +193,7 @@
 @keyframes fade-in {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
@@ -269,7 +271,7 @@
 }
 
 .animate-fade-in {
-  animation: fade-in 0.5s ease-out forwards;
+  animation: fade-in 0.2s ease-out forwards;
 }
 
 .animate-fade-in-up {
@@ -474,5 +476,42 @@ th, td {
 @media (min-width: 769px) {
   .hide-desktop {
     display: none !important;
+  }
+}
+
+/* ========================================
+   CHAT UI UTILITIES
+   ======================================== */
+@layer utilities {
+  /* Message bubbles */
+  .bubble-incoming {
+    @apply bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl rounded-tl-sm;
+  }
+  .bubble-outgoing {
+    @apply bg-primary text-white rounded-2xl rounded-tr-sm;
+  }
+
+  /* Conversation list item */
+  .conv-item {
+    @apply flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors duration-100;
+  }
+  .conv-item:hover {
+    @apply bg-gray-50 dark:bg-gray-900;
+  }
+  .conv-item.active {
+    @apply bg-primary/5 border-l-2 border-primary;
+  }
+
+  /* Filter pill (tab-style) */
+  .filter-tab {
+    @apply text-xs px-3 py-1.5 rounded-md cursor-pointer transition-all duration-100 text-gray-500;
+  }
+  .filter-tab.active {
+    @apply bg-white shadow-sm text-gray-900 font-medium;
+  }
+
+  /* Skeleton loading */
+  .skeleton {
+    @apply animate-pulse bg-gray-100 dark:bg-gray-800 rounded;
   }
 }

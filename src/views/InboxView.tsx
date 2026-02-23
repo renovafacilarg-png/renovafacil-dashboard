@@ -1,10 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Separator } from '@/components/ui/separator';
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
 } from '@/components/ui/sheet';
@@ -19,7 +16,7 @@ import {
 } from '@/components/ui/tooltip';
 import {
   MessageCircle, ArrowLeft, RefreshCw, Loader2, Phone, Search,
-  Inbox, CheckCheck, Check, Send, Tag, ShoppingBag, CheckCircle, Info,
+  CheckCheck, Check, Send, Tag, ShoppingBag, CheckCircle, Info,
   Package, DollarSign,
 } from 'lucide-react';
 import { formatDistanceToNow, isToday, isYesterday, isSameDay, format, parseISO } from 'date-fns';
@@ -27,6 +24,7 @@ import { es } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { API_URL, getHeaders } from '@/lib/api';
 import { getInitials, getAvatarColor } from '@/lib/avatar';
+import { cn } from '@/lib/utils';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -441,208 +439,252 @@ export function InboxView() {
   // ---- Render ----
 
   return (
-    <div className="h-[calc(100vh-120px)] flex flex-col animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+    <div className="h-[calc(100vh-120px)] flex flex-col">
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Inbox className="h-7 w-7 text-primary" />
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">
             {showTestChats ? 'Chats de Prueba' : 'Bandeja de Entrada'}
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
             {showTestChats
               ? `${testConversations.length} conversaciones de prueba`
-              : `${realConversations.length} conversaciones reales`}
+              : `${realConversations.length} conversaciones`}
             {!showTestChats && testConversations.length > 0 && (
-              <span className="ml-2 text-xs">({testConversations.length} de prueba ocultas)</span>
+              <span className="ml-1.5 text-xs text-gray-400">
+                ({testConversations.length} de prueba ocultas)
+              </span>
             )}
             {lastUpdated && (
-              <span className="ml-2 text-xs">
+              <span className="ml-1.5 text-xs text-gray-400">
                 · Actualizado {lastUpdated.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
               </span>
             )}
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           <Button
-            variant={showTestChats ? "default" : "outline"}
-            onClick={() => setShowTestChats(!showTestChats)}
+            variant="ghost"
             size="sm"
+            onClick={() => setShowTestChats(!showTestChats)}
+            className="text-xs text-gray-500 hover:text-gray-900"
           >
             {showTestChats ? 'Ver Reales' : 'Ver Pruebas'}
           </Button>
           <Button
-            variant="outline"
+            variant="ghost"
+            size="sm"
             onClick={() => fetchConversations()}
             disabled={loading}
-            className="shadow-sm hover:shadow-md transition-shadow"
+            className="text-xs text-gray-500 hover:text-gray-900 gap-1.5"
           >
-            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={cn('h-3.5 w-3.5', loading && 'animate-spin')} />
             Actualizar
           </Button>
         </div>
       </div>
 
-      {/* Main content */}
-      <div className="flex-1 flex gap-4 min-h-0">
-        {/* Conversations list */}
-        <Card className={`${selectedConversation ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-96 overflow-hidden`}>
-          <div className="p-3 border-b bg-muted/30 space-y-2">
+      {/* ── Main two-pane layout ── */}
+      <div className="flex-1 flex gap-0 min-h-0 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-950">
+
+        {/* ── Left panel: conversation list ── */}
+        <div
+          className={cn(
+            'flex flex-col w-full md:w-80 lg:w-96 border-r border-gray-100 dark:border-gray-800 flex-shrink-0',
+            selectedConversation ? 'hidden md:flex' : 'flex'
+          )}
+        >
+          {/* Search + filters */}
+          <div className="p-3 space-y-2 border-b border-gray-100 dark:border-gray-800">
+            {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar conversaciones..."
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Buscar..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 bg-background"
+                className={cn(
+                  'w-full pl-8 pr-3 py-1.5 text-sm rounded-lg',
+                  'bg-gray-50 dark:bg-gray-900 border-0 outline-none',
+                  'focus:bg-white dark:focus:bg-gray-800 focus:ring-1 focus:ring-primary/30',
+                  'placeholder:text-gray-400 text-gray-900 dark:text-gray-100',
+                  'transition-all duration-150'
+                )}
               />
             </div>
-            {/* Quick filters */}
-            <div className="flex gap-1.5 flex-wrap">
-              <Button
-                variant={filter === 'all' ? 'default' : 'outline'}
-                size="sm"
-                className="h-7 text-xs"
-                onClick={() => setFilter('all')}
-              >
-                Todos
-              </Button>
-              <Button
-                variant={filter === 'unread' ? 'default' : 'outline'}
-                size="sm"
-                className="h-7 text-xs"
-                onClick={() => setFilter('unread')}
-              >
-                No leídos {unreadCount > 0 && <Badge variant="secondary" className="ml-1 h-4 px-1 text-[10px]">{unreadCount}</Badge>}
-              </Button>
-              <Button
-                variant={filter === 'incoming' ? 'default' : 'outline'}
-                size="sm"
-                className="h-7 text-xs"
-                onClick={() => setFilter('incoming')}
-              >
-                Consultas
-              </Button>
-              <Button
-                variant={filter === 'outgoing' ? 'default' : 'outline'}
-                size="sm"
-                className="h-7 text-xs"
-                onClick={() => setFilter('outgoing')}
-              >
-                Enviados
-              </Button>
+
+            {/* Filter tabs */}
+            <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-900 rounded-lg">
+              {(['all', 'unread', 'incoming', 'outgoing'] as FilterType[]).map((f) => {
+                const labels: Record<FilterType, string> = {
+                  all: 'Todos',
+                  unread: 'No leídos',
+                  incoming: 'Consultas',
+                  outgoing: 'Enviados',
+                };
+                return (
+                  <button
+                    key={f}
+                    onClick={() => setFilter(f)}
+                    className={cn(
+                      'flex-1 text-xs px-2 py-1.5 rounded-md cursor-pointer transition-all duration-150 font-medium whitespace-nowrap',
+                      filter === f
+                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                    )}
+                  >
+                    {labels[f]}
+                    {f === 'unread' && unreadCount > 0 && (
+                      <span className="ml-1 text-[10px] bg-primary text-white rounded-full px-1 py-0.5">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
+          {/* Conversation list body */}
           <div className="flex-1 overflow-y-auto">
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
-                <p className="text-sm text-muted-foreground">Cargando conversaciones...</p>
+              // Skeleton loading state
+              <div className="p-3 space-y-1">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 px-4 py-3 animate-pulse">
+                    <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex-shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-2/3" />
+                      <div className="h-2.5 bg-gray-100 dark:bg-gray-800 rounded w-full" />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : filteredConversations.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                  <MessageCircle className="h-8 w-8 opacity-50" />
-                </div>
-                <p className="font-medium">No hay conversaciones</p>
-                <p className="text-sm mt-1">{filter !== 'all' ? 'Cambiá el filtro para ver más' : showTestChats ? 'No hay chats de prueba' : 'Los chats aparecerán aquí'}</p>
+              // Empty state
+              <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
+                <MessageCircle className="h-10 w-10 text-gray-300 dark:text-gray-700 mb-3" />
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">No hay conversaciones</p>
+                <p className="text-xs text-gray-400 dark:text-gray-600 mt-1">
+                  {filter !== 'all'
+                    ? 'Cambiá el filtro para ver más'
+                    : showTestChats
+                    ? 'No hay chats de prueba'
+                    : 'Los chats aparecerán aquí'}
+                </p>
               </div>
             ) : (
-              <div className="animate-stagger">
-                {filteredConversations.map((conv) => {
-                  const unread = isUnread(conv);
-                  return (
-                    <div
-                      key={conv.phone}
-                      onClick={() => handleSelectConversation(conv.phone)}
-                      className={`p-4 border-b cursor-pointer transition-all duration-200 hover:bg-primary/5 ${
-                        selectedConversation === conv.phone
-                          ? 'bg-primary/10 border-l-4 border-l-primary'
-                          : ''
-                      } ${unread ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''}`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className={`relative w-11 h-11 rounded-full ${getAvatarColor(conv.phone)} flex items-center justify-center flex-shrink-0 shadow-sm`}>
-                          <span className="text-white text-sm font-bold">{getInitials(getDisplayName(conv))}</span>
-                          {unread && (
-                            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-blue-500 rounded-full border-2 border-background" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className={`truncate ${unread ? 'font-bold' : 'font-semibold'}`}>
-                              {getDisplayName(conv)}
-                            </span>
-                            <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
-                              {formatTime(conv.last_message_time)}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {conv.direction === 'incoming' && (
-                              <span className="px-1.5 py-0.5 text-xs bg-emerald-100 text-emerald-700 rounded font-medium">
-                                Nuevo
-                              </span>
-                            )}
-                            <p className={`text-sm truncate ${unread ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
-                              {conv.direction === 'outgoing' && (
-                                <CheckCheck className="inline h-3.5 w-3.5 mr-1 text-primary" />
-                              )}
-                              {conv.last_message}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2 mt-1.5">
-                            <Phone className="h-3 w-3 text-muted-foreground" />
-                            <span className="text-xs text-muted-foreground">{conv.phone}</span>
-                            <span className="text-xs text-muted-foreground">·</span>
-                            <span className="text-xs text-muted-foreground">{conv.message_count} mensajes</span>
-                          </div>
-                        </div>
-                      </div>
+              filteredConversations.map((conv) => {
+                const unread = isUnread(conv);
+                const isSelected = selectedConversation === conv.phone;
+                return (
+                  <div
+                    key={conv.phone}
+                    onClick={() => handleSelectConversation(conv.phone)}
+                    className={cn(
+                      'flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors duration-150',
+                      isSelected
+                        ? 'bg-primary/5 border-l-2 border-primary'
+                        : 'border-l-2 border-transparent hover:bg-gray-50 dark:hover:bg-gray-900'
+                    )}
+                  >
+                    {/* Avatar */}
+                    <div className={cn(
+                      'relative w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0',
+                      getAvatarColor(conv.phone)
+                    )}>
+                      <span className="text-white text-xs font-semibold">
+                        {getInitials(getDisplayName(conv))}
+                      </span>
+                      {unread && (
+                        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-primary border-2 border-white dark:border-gray-950" />
+                      )}
                     </div>
-                  );
-                })}
-              </div>
+
+                    {/* Text content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-0.5">
+                        <span className={cn(
+                          'text-sm truncate',
+                          unread
+                            ? 'font-semibold text-gray-900 dark:text-gray-50'
+                            : 'font-medium text-gray-900 dark:text-gray-100'
+                        )}>
+                          {getDisplayName(conv)}
+                        </span>
+                        <span className="text-xs text-gray-400 flex-shrink-0">
+                          {formatTime(conv.last_message_time)}
+                        </span>
+                      </div>
+                      <p className={cn(
+                        'text-xs truncate',
+                        unread
+                          ? 'text-gray-700 dark:text-gray-300 font-medium'
+                          : 'text-gray-500 dark:text-gray-500'
+                      )}>
+                        {conv.direction === 'outgoing' && (
+                          <CheckCheck className="inline h-3 w-3 mr-0.5 text-gray-400" />
+                        )}
+                        {conv.last_message}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })
             )}
           </div>
-        </Card>
+        </div>
 
-        {/* Messages view */}
+        {/* ── Right panel ── */}
         {selectedConversation ? (
-          <Card className="flex-1 flex flex-col overflow-hidden">
-            {/* Chat header */}
-            <div className="p-4 border-b bg-gradient-to-r from-primary/5 to-transparent flex items-center gap-3">
+          <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-gray-950">
+
+            {/* Thread header */}
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
               <Button
                 variant="ghost"
                 size="icon"
-                className="md:hidden"
+                className="md:hidden h-8 w-8 text-gray-500"
                 onClick={() => setSelectedConversation(null)}
                 aria-label="Volver a conversaciones"
               >
-                <ArrowLeft className="h-5 w-5" />
+                <ArrowLeft className="h-4 w-4" />
               </Button>
-              <div className={`w-11 h-11 rounded-full ${selectedConversation ? getAvatarColor(selectedConversation) : 'bg-primary'} flex items-center justify-center shadow-lg shadow-primary/20`}>
-                <span className="text-white text-sm font-bold">{selectedConvData ? getInitials(getDisplayName(selectedConvData)) : ''}</span>
+
+              <div className={cn(
+                'w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0',
+                selectedConversation ? getAvatarColor(selectedConversation) : 'bg-primary'
+              )}>
+                <span className="text-white text-xs font-semibold">
+                  {selectedConvData ? getInitials(getDisplayName(selectedConvData)) : ''}
+                </span>
               </div>
+
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-lg truncate">
+                <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-50 truncate">
                   {selectedConvData ? getDisplayName(selectedConvData) : ''}
                 </h3>
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Phone className="h-3 w-3" />
+                <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-0.5">
+                  <Phone className="h-2.5 w-2.5" />
                   {selectedConvData?.phone}
+                  {selectedContactInfo?.order_count !== undefined && selectedContactInfo.order_count > 0 && (
+                    <span className="ml-1">
+                      · {selectedContactInfo.order_count} {selectedContactInfo.order_count === 1 ? 'pedido' : 'pedidos'}
+                    </span>
+                  )}
                 </p>
               </div>
 
-              {/* Quick actions */}
+              {/* Action buttons */}
               <TooltipProvider>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
                         variant="ghost"
-                        size="icon"
-                        className="hover:bg-primary/10"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
                         onClick={() => setShowDiscountDialog(true)}
                       >
                         <Tag className="h-4 w-4" />
@@ -655,8 +697,8 @@ export function InboxView() {
                     <TooltipTrigger asChild>
                       <Button
                         variant="ghost"
-                        size="icon"
-                        className="hover:bg-primary/10"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
                         onClick={() => setShowInfoSheet(true)}
                       >
                         <Info className="h-4 w-4" />
@@ -669,8 +711,8 @@ export function InboxView() {
                     <TooltipTrigger asChild>
                       <Button
                         variant="ghost"
-                        size="icon"
-                        className="hover:bg-primary/10"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
                         onClick={handleMarkAttended}
                       >
                         <CheckCircle className="h-4 w-4" />
@@ -683,12 +725,12 @@ export function InboxView() {
                     <TooltipTrigger asChild>
                       <Button
                         variant="ghost"
-                        size="icon"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
                         onClick={() => fetchMessages(selectedConversation)}
                         disabled={loadingMessages}
-                        className="hover:bg-primary/10"
                       >
-                        <RefreshCw className={`h-4 w-4 ${loadingMessages ? 'animate-spin' : ''}`} />
+                        <RefreshCw className={cn('h-3.5 w-3.5', loadingMessages && 'animate-spin')} />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>Actualizar</TooltipContent>
@@ -697,56 +739,81 @@ export function InboxView() {
               </TooltipProvider>
             </div>
 
-            {/* Messages with date separators */}
+            {/* Messages area */}
             <div
               ref={messagesContainerRef}
-              className="flex-1 overflow-y-auto p-4 space-y-3 bg-gradient-to-b from-muted/20 to-muted/40"
+              className="flex-1 overflow-y-auto px-4 py-4 space-y-1 bg-gray-50/50 dark:bg-gray-900/30"
             >
               {loadingMessages && messages.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
-                  <p className="text-sm text-muted-foreground">Cargando mensajes...</p>
+                // Skeleton for messages
+                <div className="space-y-3 pt-4">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={cn('flex animate-pulse', i % 2 === 0 ? 'justify-start' : 'justify-end')}
+                    >
+                      <div className={cn(
+                        'h-9 rounded-2xl bg-gray-100 dark:bg-gray-800',
+                        i % 2 === 0 ? 'w-48' : 'w-36'
+                      )} />
+                    </div>
+                  ))}
                 </div>
               ) : messages.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <p>No hay mensajes</p>
+                <div className="flex flex-col items-center justify-center h-full py-12 text-center">
+                  <MessageCircle className="h-8 w-8 text-gray-300 dark:text-gray-700 mb-2" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Sin mensajes</p>
                 </div>
               ) : (
                 groupedMessages.map((group) => (
                   <div key={group.label}>
-                    {/* Date separator */}
+                    {/* Day separator */}
                     <div className="flex items-center gap-3 my-4">
-                      <Separator className="flex-1" />
-                      <span className="text-xs text-muted-foreground bg-muted/60 px-3 py-1 rounded-full font-medium whitespace-nowrap">
+                      <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
+                      <span className="text-xs text-gray-400 dark:text-gray-500 font-medium whitespace-nowrap">
                         {group.label}
                       </span>
-                      <Separator className="flex-1" />
+                      <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
                     </div>
 
                     {/* Messages for this day */}
-                    <div className="space-y-3">
+                    <div className="space-y-1.5">
                       {group.messages.map((msg, idx) => (
                         <div
                           key={msg.id || `${group.label}-${idx}`}
-                          className={`flex ${msg.direction === 'outgoing' ? 'justify-end' : 'justify-start'} animate-fade-in`}
+                          className={cn(
+                            'flex',
+                            msg.direction === 'outgoing' ? 'justify-end' : 'justify-start'
+                          )}
                         >
-                          <div
-                            className={`max-w-[80%] rounded-2xl p-3 shadow-sm ${
-                              msg.direction === 'outgoing'
-                                ? 'bg-primary text-primary-foreground rounded-br-md'
-                                : 'bg-background border rounded-bl-md'
-                            }`}
-                          >
-                            <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{msg.message}</p>
-                            <div className={`flex items-center justify-end gap-1.5 mt-1.5 ${
-                              msg.direction === 'outgoing' ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                            }`}>
-                              {msg.message_type !== 'text' && (
-                                <span className="text-xs">({msg.message_type})</span>
+                          <div className="flex flex-col max-w-[72%]">
+                            {/* Bubble */}
+                            <div
+                              className={cn(
+                                'px-4 py-2.5',
+                                msg.direction === 'outgoing'
+                                  ? 'bg-primary text-white rounded-2xl rounded-tr-sm'
+                                  : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl rounded-tl-sm'
                               )}
-                              <span className="text-xs">{formatMessageTime(msg.timestamp)}</span>
+                            >
+                              <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
+                                {msg.message}
+                              </p>
+                            </div>
+
+                            {/* Timestamp below bubble */}
+                            <div className={cn(
+                              'flex items-center gap-1 mt-0.5',
+                              msg.direction === 'outgoing' ? 'justify-end pr-0.5' : 'justify-start pl-0.5'
+                            )}>
+                              {msg.message_type !== 'text' && (
+                                <span className="text-[10px] text-gray-400">({msg.message_type})</span>
+                              )}
+                              <span className="text-[10px] text-gray-400">
+                                {formatMessageTime(msg.timestamp)}
+                              </span>
                               {msg.direction === 'outgoing' && (
-                                <Check className="h-3.5 w-3.5" />
+                                <Check className="h-3 w-3 text-gray-400" />
                               )}
                             </div>
                           </div>
@@ -760,7 +827,7 @@ export function InboxView() {
             </div>
 
             {/* Message input */}
-            <div className="p-3 border-t bg-muted/20">
+            <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
               <div className="flex items-end gap-2">
                 <Textarea
                   ref={textareaRef}
@@ -773,7 +840,12 @@ export function InboxView() {
                       handleSendMessage();
                     }
                   }}
-                  className="min-h-10 max-h-32 resize-none bg-background"
+                  className={cn(
+                    'min-h-10 max-h-32 resize-none text-sm rounded-xl',
+                    'bg-gray-50 dark:bg-gray-900 border-0',
+                    'focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:ring-offset-0',
+                    'placeholder:text-gray-400'
+                  )}
                   rows={1}
                   disabled={sending}
                 />
@@ -781,24 +853,30 @@ export function InboxView() {
                   size="icon"
                   onClick={handleSendMessage}
                   disabled={!messageText.trim() || sending}
-                  className="flex-shrink-0 h-10 w-10"
+                  className="flex-shrink-0 h-10 w-10 rounded-xl bg-primary hover:bg-primary/90 text-white"
                   aria-label="Enviar mensaje"
                 >
-                  {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  {sending
+                    ? <Loader2 className="h-4 w-4 animate-spin" />
+                    : <Send className="h-4 w-4" />
+                  }
                 </Button>
               </div>
             </div>
-          </Card>
+          </div>
         ) : (
-          <Card className="hidden md:flex flex-1 items-center justify-center bg-gradient-to-br from-muted/30 to-muted/10">
-            <div className="text-center text-muted-foreground">
-              <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-                <MessageCircle className="h-10 w-10 opacity-50" />
-              </div>
-              <h3 className="font-semibold text-lg mb-1 text-foreground">Selecciona una conversación</h3>
-              <p className="text-sm">Elige un chat de la lista para ver los mensajes</p>
+          // Empty right pane
+          <div className="hidden md:flex flex-1 items-center justify-center bg-gray-50/50 dark:bg-gray-900/20">
+            <div className="text-center">
+              <MessageCircle className="h-10 w-10 text-gray-300 dark:text-gray-700 mx-auto mb-3" />
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                Seleccioná una conversación
+              </p>
+              <p className="text-xs text-gray-400 dark:text-gray-600 mt-1">
+                Elegí un chat de la lista para ver los mensajes
+              </p>
             </div>
-          </Card>
+          </div>
         )}
       </div>
 
@@ -806,68 +884,88 @@ export function InboxView() {
       <Sheet open={showInfoSheet} onOpenChange={setShowInfoSheet}>
         <SheetContent>
           <SheetHeader>
-            <SheetTitle className="flex items-center gap-2">
-              <div className={`w-7 h-7 rounded-full ${selectedConversation ? getAvatarColor(selectedConversation) : 'bg-primary'} flex items-center justify-center`}>
-                <span className="text-white text-xs font-bold">{getInitials(selectedContactInfo?.name || selectedConvData?.contact_name || 'Cliente')}</span>
+            <SheetTitle className="flex items-center gap-2.5">
+              <div className={cn(
+                'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0',
+                selectedConversation ? getAvatarColor(selectedConversation) : 'bg-primary'
+              )}>
+                <span className="text-white text-xs font-semibold">
+                  {getInitials(selectedContactInfo?.name || selectedConvData?.contact_name || 'Cliente')}
+                </span>
               </div>
-              {selectedContactInfo?.name || selectedConvData?.contact_name || 'Cliente'}
+              <span>{selectedContactInfo?.name || selectedConvData?.contact_name || 'Cliente'}</span>
             </SheetTitle>
-            <SheetDescription>
+            <SheetDescription className="flex items-center gap-1.5 text-sm">
+              <Phone className="h-3 w-3" />
               {selectedConvData?.phone}
             </SheetDescription>
           </SheetHeader>
 
           <div className="mt-6 space-y-6">
             {/* Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-muted/50 rounded-lg p-3 text-center">
-                <Package className="h-5 w-5 mx-auto mb-1 text-primary" />
-                <p className="text-2xl font-bold">{selectedContactInfo?.order_count ?? '—'}</p>
-                <p className="text-xs text-muted-foreground">Pedidos</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl bg-gray-50 dark:bg-gray-900 p-4 text-center">
+                <Package className="h-4 w-4 mx-auto mb-1.5 text-gray-400" />
+                <p className="text-2xl font-semibold text-gray-900 dark:text-gray-50">
+                  {selectedContactInfo?.order_count ?? '—'}
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5">Pedidos</p>
               </div>
-              <div className="bg-muted/50 rounded-lg p-3 text-center">
-                <DollarSign className="h-5 w-5 mx-auto mb-1 text-emerald-500" />
-                <p className="text-2xl font-bold">
+              <div className="rounded-xl bg-gray-50 dark:bg-gray-900 p-4 text-center">
+                <DollarSign className="h-4 w-4 mx-auto mb-1.5 text-emerald-500" />
+                <p className="text-2xl font-semibold text-gray-900 dark:text-gray-50">
                   {selectedContactInfo?.total_spent
                     ? `$${selectedContactInfo.total_spent.toLocaleString('es-AR')}`
                     : '—'}
                 </p>
-                <p className="text-xs text-muted-foreground">Gasto total</p>
+                <p className="text-xs text-gray-500 mt-0.5">Gasto total</p>
               </div>
             </div>
 
             {/* Orders list */}
             {selectedContactInfo?.orders && selectedContactInfo.orders.length > 0 && (
               <div>
-                <h4 className="font-semibold mb-3 flex items-center gap-2">
-                  <ShoppingBag className="h-4 w-4" />
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                  <ShoppingBag className="h-3.5 w-3.5 text-gray-400" />
                   Pedidos recientes
                 </h4>
                 <div className="space-y-2">
                   {selectedContactInfo.orders.map((order) => (
-                    <div key={order.number} className="border rounded-lg p-3">
+                    <div
+                      key={order.number}
+                      className="rounded-xl bg-gray-50 dark:bg-gray-900 px-3 py-2.5"
+                    >
                       <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium">#{order.number}</span>
-                        <Badge variant={
-                          order.payment_status === 'paid' ? 'default' :
-                          order.payment_status === 'pending' ? 'secondary' : 'outline'
-                        }>
+                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                          #{order.number}
+                        </span>
+                        <Badge
+                          variant={
+                            order.payment_status === 'paid' ? 'default' :
+                            order.payment_status === 'pending' ? 'secondary' : 'outline'
+                          }
+                          className="text-[10px] px-1.5 py-0"
+                        >
                           {order.payment_status === 'paid' ? 'Pagado' :
                            order.payment_status === 'pending' ? 'Pendiente' :
                            order.payment_status}
                         </Badge>
                       </div>
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <div className="flex items-center justify-between text-xs text-gray-500">
                         <span>${Number(order.total).toLocaleString('es-AR')} {order.currency}</span>
-                        <span>{order.created_at ? format(parseISO(order.created_at), "d MMM yyyy", { locale: es }) : ''}</span>
+                        <span>
+                          {order.created_at
+                            ? format(parseISO(order.created_at), "d MMM yyyy", { locale: es })
+                            : ''}
+                        </span>
                       </div>
                       {order.shipping_status && (
-                        <div className="mt-1">
-                          <Badge variant="outline" className="text-xs">
-                            Envío: {order.shipping_status === 'shipped' ? 'Enviado' :
-                                    order.shipping_status === 'delivered' ? 'Entregado' :
-                                    order.shipping_status === 'unshipped' ? 'Sin enviar' :
-                                    order.shipping_status}
+                        <div className="mt-1.5">
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                            {order.shipping_status === 'shipped' ? 'Enviado' :
+                             order.shipping_status === 'delivered' ? 'Entregado' :
+                             order.shipping_status === 'unshipped' ? 'Sin enviar' :
+                             order.shipping_status}
                           </Badge>
                         </div>
                       )}
@@ -879,14 +977,14 @@ export function InboxView() {
 
             {loadingContactInfo[selectedConversation || ''] && (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                <Loader2 className="h-5 w-5 animate-spin text-gray-300" />
               </div>
             )}
 
             {selectedContactInfo && selectedContactInfo.orders.length === 0 && (
-              <div className="text-center py-6 text-muted-foreground">
-                <ShoppingBag className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Sin pedidos registrados</p>
+              <div className="text-center py-8">
+                <ShoppingBag className="h-8 w-8 mx-auto mb-2 text-gray-300 dark:text-gray-700" />
+                <p className="text-sm text-gray-500 dark:text-gray-400">Sin pedidos registrados</p>
               </div>
             )}
           </div>
@@ -897,19 +995,21 @@ export function InboxView() {
       <Dialog open={showDiscountDialog} onOpenChange={setShowDiscountDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Tag className="h-5 w-5" />
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <Tag className="h-4 w-4 text-gray-500" />
               Enviar descuento
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-sm">
               Se enviará un mensaje con un código de descuento al cliente.
             </DialogDescription>
           </DialogHeader>
 
           <div className="py-4">
-            <label className="text-sm font-medium mb-2 block">Porcentaje de descuento</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+              Porcentaje de descuento
+            </label>
             <Select value={discountPercent} onValueChange={setDiscountPercent}>
-              <SelectTrigger>
+              <SelectTrigger className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -924,11 +1024,24 @@ export function InboxView() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDiscountDialog(false)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowDiscountDialog(false)}
+              className="text-gray-500"
+            >
               Cancelar
             </Button>
-            <Button onClick={handleSendDiscount} disabled={sending}>
-              {sending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+            <Button
+              size="sm"
+              onClick={handleSendDiscount}
+              disabled={sending}
+              className="bg-primary hover:bg-primary/90 text-white"
+            >
+              {sending
+                ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                : <Send className="h-3.5 w-3.5 mr-1.5" />
+              }
               Enviar {discountPercent}% OFF
             </Button>
           </DialogFooter>
