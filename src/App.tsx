@@ -16,6 +16,7 @@ const SystemStatusView = lazy(() => import('@/views/SystemStatusView').then(m =>
 const InboxView = lazy(() => import('@/views/InboxView').then(m => ({ default: m.InboxView })));
 const SelfImprovementView = lazy(() => import('@/views/SelfImprovementView').then(m => ({ default: m.SelfImprovementView })));
 const FacebookCommentsView = lazy(() => import('@/views/FacebookCommentsView').then(m => ({ default: m.FacebookCommentsView })));
+const SimulationView = lazy(() => import('@/views/SimulationView').then(m => ({ default: m.SimulationView })));
 
 function ViewLoader() {
   return (
@@ -121,6 +122,8 @@ function App() {
         return <SelfImprovementView />;
       case 'facebook':
         return <FacebookCommentsView />;
+      case 'simulation':
+        return <SimulationView />;
       case 'system':
         return <SystemStatusView />;
       default:

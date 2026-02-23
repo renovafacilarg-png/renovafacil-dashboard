@@ -15,13 +15,14 @@ import {
   LogOut,
   Facebook,
   Instagram,
+  FlaskConical,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { API_URL, fetchImprovementStats } from '@/lib/api';
 
 const FRONTEND_VERSION = '2.1.0';
 
-export type ViewType = 'dashboard' | 'orders' | 'tracking' | 'carts' | 'bot' | 'inbox-wa' | 'inbox-messenger' | 'inbox-instagram' | 'improvements' | 'system' | 'facebook';
+export type ViewType = 'dashboard' | 'orders' | 'tracking' | 'carts' | 'bot' | 'inbox-wa' | 'inbox-messenger' | 'inbox-instagram' | 'improvements' | 'system' | 'facebook' | 'simulation';
 
 interface SidebarProps {
   currentView: ViewType;
@@ -48,6 +49,7 @@ const navItems: NavItem[] = [
   { id: 'bot', label: 'Bot WhatsApp', icon: MessageSquare },
   { id: 'facebook', label: 'FB / Instagram', icon: Facebook },
   { id: 'improvements', label: 'Auto-Mejoras', icon: Sparkles },
+  { id: 'simulation', label: 'Simulación', icon: FlaskConical },
   { id: 'system', label: 'Sistema', icon: Server },
 ];
 
