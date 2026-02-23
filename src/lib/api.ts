@@ -570,6 +570,48 @@ export async function triggerMutationEvaluation(): Promise<{ success: boolean; m
 }
 
 // =============================================================================
+// OUTCOMES
+// =============================================================================
+
+export interface OutcomesResponse {
+  date: string;
+  outcomes: {
+    sale?: number;
+    support?: number;
+    abandoned?: number;
+    quick_exit?: number;
+    [key: string]: number | undefined;
+  };
+}
+
+export async function fetchOutcomes(date?: string): Promise<OutcomesResponse> {
+  const url = date
+    ? `${API_URL}/api/improvements/outcomes?date=${date}`
+    : `${API_URL}/api/improvements/outcomes`;
+  const response = await fetch(url, { headers: getHeaders() });
+  return handleResponse<OutcomesResponse>(response);
+}
+
+// =============================================================================
+// IMPACT
+// =============================================================================
+
+export interface ImpactResponse {
+  suggestion_id: string;
+  approval_date: string;
+  before: Record<string, number>;
+  after: Record<string, number>;
+  impact_pct: Record<string, number>;
+}
+
+export async function fetchImpact(suggestionId: string): Promise<ImpactResponse> {
+  const response = await fetch(`${API_URL}/api/improvements/impact/${suggestionId}`, {
+    headers: getHeaders(),
+  });
+  return handleResponse<ImpactResponse>(response);
+}
+
+// =============================================================================
 // HEALTH
 // =============================================================================
 

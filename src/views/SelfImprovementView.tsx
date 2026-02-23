@@ -32,7 +32,15 @@ import {
   Square,
   Loader2,
   RotateCcw,
-  ShieldAlert
+  ShieldAlert,
+  TrendingUp,
+  TrendingDown,
+  ShoppingCart,
+  HelpCircle,
+  UserX,
+  Zap,
+  BarChart2,
+  Calendar,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -44,9 +52,13 @@ import {
   triggerAnalysis,
   deactivateMutation,
   rollbackMutation,
+  fetchOutcomes,
+  fetchImpact,
   type ImprovementStats,
   type Suggestion,
-  type Mutation
+  type Mutation,
+  type OutcomesResponse,
+  type ImpactResponse,
 } from '@/lib/api';
 
 const suggestionTypeConfig = {
@@ -106,9 +118,17 @@ export function SelfImprovementView() {
   const [expandedSuggestion, setExpandedSuggestion] = useState<string | null>(null);
   const [editingSuggestion, setEditingSuggestion] = useState<string | null>(null);
   const [editedContent, setEditedContent] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'pending' | 'active'>('pending');
+  const [activeTab, setActiveTab] = useState<'pending' | 'active' | 'outcomes'>('pending');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkApproving, setBulkApproving] = useState(false);
+  // Outcomes state
+  const [outcomes, setOutcomes] = useState<OutcomesResponse | null>(null);
+  const [outcomesDate, setOutcomesDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [outcomesLoading, setOutcomesLoading] = useState(false);
+  // Impact state
+  const [impactData, setImpactData] = useState<ImpactResponse | null>(null);
+  const [impactTarget, setImpactTarget] = useState<string | null>(null);
+  const [impactLoading, setImpactLoading] = useState(false);
   // Dialog states
   const [deactivateTarget, setDeactivateTarget] = useState<string | null>(null);
   const [rollbackTarget, setRollbackTarget] = useState<string | null>(null);
@@ -132,9 +152,40 @@ export function SelfImprovementView() {
     }
   };
 
+  const loadOutcomes = async (date?: string) => {
+    try {
+      setOutcomesLoading(true);
+      const data = await fetchOutcomes(date);
+      setOutcomes(data);
+    } catch (error) {
+      toast.error(`Error al cargar outcomes: ${error instanceof Error ? error.message : 'Error'}`);
+    } finally {
+      setOutcomesLoading(false);
+    }
+  };
+
+  const loadImpact = async (suggestionId: string) => {
+    try {
+      setImpactLoading(true);
+      setImpactTarget(suggestionId);
+      setImpactData(null);
+      const data = await fetchImpact(suggestionId);
+      setImpactData(data);
+    } catch {
+      toast.error('Sin datos suficientes para medir impacto (se necesitan 7 días antes y después)');
+      setImpactTarget(null);
+    } finally {
+      setImpactLoading(false);
+    }
+  };
+
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'outcomes') loadOutcomes(outcomesDate);
+  }, [activeTab]);
 
   const handleAnalyze = async () => {
     try {
@@ -343,6 +394,56 @@ export function SelfImprovementView() {
         </DialogContent>
       </Dialog>
 
+      {/* Impact Dialog */}
+      <Dialog open={!!impactTarget} onOpenChange={(open) => { if (!open) { setImpactTarget(null); setImpactData(null); } }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart2 className="h-5 w-5 text-violet-500" />
+              Impacto de la mejora
+            </DialogTitle>
+            <DialogDescription>
+              Comparación de métricas 7 días antes vs 7 días después de aprobar la sugerencia.
+            </DialogDescription>
+          </DialogHeader>
+          {impactLoading && (
+            <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Midiendo impacto...
+            </div>
+          )}
+          {!impactLoading && impactData && (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Aprobada el {new Date(impactData.approval_date).toLocaleDateString('es-AR')}
+              </p>
+              <div className="divide-y rounded-lg border overflow-hidden">
+                {Object.entries(impactData.impact_pct).map(([key, pct]) => {
+                  const before = impactData.before[key] ?? 0;
+                  const after = impactData.after[key] ?? 0;
+                  const positive = pct >= 0;
+                  return (
+                    <div key={key} className="flex items-center justify-between px-4 py-3 bg-background">
+                      <span className="text-sm font-medium capitalize">{key.replace(/_/g, ' ')}</span>
+                      <div className="flex items-center gap-4 text-sm">
+                        <span className="text-muted-foreground">{before.toFixed(1)} → {after.toFixed(1)}</span>
+                        <span className={`flex items-center gap-1 font-semibold ${positive ? 'text-green-600' : 'text-red-600'}`}>
+                          {positive ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+                          {positive ? '+' : ''}{pct}%
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setImpactTarget(null); setImpactData(null); }}>Cerrar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -448,6 +549,16 @@ export function SelfImprovementView() {
           }`}
         >
           Mejoras Activas ({mutations.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('outcomes')}
+          className={`px-4 py-2 font-medium border-b-2 transition-colors ${
+            activeTab === 'outcomes'
+              ? 'border-violet-500 text-violet-600'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Outcomes del Día
         </button>
       </div>
 
@@ -789,6 +900,15 @@ export function SelfImprovementView() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={() => loadImpact(mutation.id)}
+                          className="text-violet-600 hover:text-violet-700 hover:bg-violet-50 h-8 px-2"
+                          title="Ver impacto en métricas"
+                        >
+                          <BarChart2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => setDeactivateTarget(mutation.id)}
                           className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8 px-2"
                           title="Desactivar esta mejora"
@@ -801,6 +921,156 @@ export function SelfImprovementView() {
                 </Card>
               );
             })
+          )}
+        </div>
+      )}
+
+      {/* Outcomes Tab */}
+      {activeTab === 'outcomes' && (
+        <div className="space-y-6">
+          {/* Date picker + refresh */}
+          <div className="flex items-center gap-3">
+            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <input
+              type="date"
+              value={outcomesDate}
+              max={new Date().toISOString().split('T')[0]}
+              onChange={(e) => {
+                setOutcomesDate(e.target.value);
+                loadOutcomes(e.target.value);
+              }}
+              className="border rounded-md px-3 py-1.5 text-sm bg-background"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => loadOutcomes(outcomesDate)}
+              disabled={outcomesLoading}
+            >
+              <RefreshCw className={`h-4 w-4 ${outcomesLoading ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
+
+          {outcomesLoading ? (
+            <div className="flex items-center justify-center py-16 gap-2 text-muted-foreground">
+              <Loader2 className="h-6 w-6 animate-spin" />
+              Cargando outcomes...
+            </div>
+          ) : !outcomes || Object.keys(outcomes.outcomes).length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <BarChart2 className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
+                <h3 className="font-medium text-lg mb-2">Sin datos para esta fecha</h3>
+                <p className="text-muted-foreground text-sm">
+                  Los outcomes se calculan durante el análisis nocturno de conversaciones.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              {/* KPI cards */}
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                {[
+                  {
+                    key: 'sale',
+                    label: 'Ventas',
+                    icon: ShoppingCart,
+                    color: 'bg-green-100',
+                    iconColor: 'text-green-600',
+                    description: 'Conversaciones que terminaron en compra',
+                  },
+                  {
+                    key: 'support',
+                    label: 'Soporte',
+                    icon: HelpCircle,
+                    color: 'bg-blue-100',
+                    iconColor: 'text-blue-600',
+                    description: 'Consultas de pedidos o post-venta',
+                  },
+                  {
+                    key: 'abandoned',
+                    label: 'Abandonados',
+                    icon: UserX,
+                    color: 'bg-amber-100',
+                    iconColor: 'text-amber-600',
+                    description: 'Interés pero sin cierre',
+                  },
+                  {
+                    key: 'quick_exit',
+                    label: 'Salida rápida',
+                    icon: Zap,
+                    color: 'bg-slate-100',
+                    iconColor: 'text-slate-600',
+                    description: 'Conversaciones muy cortas sin interacción real',
+                  },
+                ].map(({ key, label, icon: Icon, color, iconColor, description }) => {
+                  const value = outcomes.outcomes[key] ?? 0;
+                  const total = Object.values(outcomes.outcomes).reduce((a, b) => (a ?? 0) + (b ?? 0), 0) ?? 1;
+                  const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+                  return (
+                    <Card key={key}>
+                      <CardContent className="pt-6">
+                        <div className="flex items-start gap-3">
+                          <div className={`w-11 h-11 rounded-full ${color} flex items-center justify-center flex-shrink-0`}>
+                            <Icon className={`h-5 w-5 ${iconColor}`} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-2xl font-bold">{value}</p>
+                            <p className="text-sm font-medium">{label}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{pct}% del total</p>
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{description}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              {/* Barra de distribución */}
+              {(() => {
+                const total = Object.values(outcomes.outcomes).reduce((a, b) => (a ?? 0) + (b ?? 0), 0) ?? 0;
+                if (total === 0) return null;
+                const segments = [
+                  { key: 'sale', color: 'bg-green-500', label: 'Ventas' },
+                  { key: 'support', color: 'bg-blue-400', label: 'Soporte' },
+                  { key: 'abandoned', color: 'bg-amber-400', label: 'Abandonados' },
+                  { key: 'quick_exit', color: 'bg-slate-400', label: 'Salida rápida' },
+                ];
+                return (
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm font-medium">Distribución del día — {total} conversaciones</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex rounded-full overflow-hidden h-4 gap-px">
+                        {segments.map(({ key, color }) => {
+                          const val = outcomes.outcomes[key] ?? 0;
+                          const pct = (val / total) * 100;
+                          if (pct === 0) return null;
+                          return (
+                            <div
+                              key={key}
+                              className={`${color} transition-all`}
+                              style={{ width: `${pct}%` }}
+                              title={`${key}: ${val}`}
+                            />
+                          );
+                        })}
+                      </div>
+                      <div className="flex flex-wrap gap-3 mt-3">
+                        {segments.map(({ key, color, label }) => (
+                          <div key={key} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                            <div className={`w-2.5 h-2.5 rounded-full ${color}`} />
+                            {label}
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })()}
+            </>
           )}
         </div>
       )}
