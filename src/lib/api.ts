@@ -409,6 +409,7 @@ export interface AnalysisResult {
   message?: string;
   date?: string;
   conversations_analyzed?: number;
+  fb_comments_analyzed?: number;
   suggestions?: Suggestion[];
   summary?: {
     total_conversations: number;

@@ -189,10 +189,16 @@ export function SelfImprovementView() {
   const handleAnalyze = async () => {
     try {
       setAnalyzing(true);
-      toast.info('Iniciando análisis de conversaciones...');
+      toast.info('Iniciando análisis multi-canal (WA, Messenger, IG, comentarios FB/IG)...');
       const result = await triggerAnalysis();
       if (result.success) {
-        toast.success(`Análisis completado: ${result.suggestions?.length || 0} sugerencias generadas`);
+        const convs = result.conversations_analyzed ?? 0;
+        const fbComments = result.fb_comments_analyzed ?? 0;
+        const sugs = result.suggestions?.length ?? 0;
+        const sourceLabel = fbComments > 0
+          ? `${convs} conv + ${fbComments} comentarios FB/IG`
+          : `${convs} conversaciones`;
+        toast.success(`Análisis completado: ${sugs} sugerencias (${sourceLabel})`);
         loadData();
       } else {
         toast.error(result.message || 'Error en el análisis');
