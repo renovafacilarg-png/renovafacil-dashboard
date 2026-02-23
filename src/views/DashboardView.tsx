@@ -1,7 +1,6 @@
 import { KPICard } from '@/components/KPICard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 import {
   MessageSquare,
   TrendingUp,
@@ -12,12 +11,9 @@ import {
   Bot,
   RefreshCw,
   ArrowRight,
-  Activity,
-  Server,
+  Brain,
   DollarSign,
-  ShoppingCart,
-  Sparkles,
-  Brain
+  ShoppingCart
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -97,11 +93,10 @@ export function DashboardView({ onViewChange }: DashboardViewProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-gray-900">
             Dashboard
-            <Sparkles className="h-6 w-6 text-primary" />
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-sm text-gray-500 mt-1">
             Métricas en tiempo real de tu negocio
             {lastUpdated && (
               <span className="ml-2 text-xs">
@@ -111,58 +106,43 @@ export function DashboardView({ onViewChange }: DashboardViewProps) {
           </p>
         </div>
         <Button
-          variant="outline"
+          variant="ghost"
+          size="sm"
           onClick={fetchData}
           disabled={loading}
-          className="shadow-sm hover:shadow-md transition-shadow"
+          className="text-gray-500 hover:text-gray-900"
         >
-          <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          Actualizar
+          <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+          <span className="ml-2">Actualizar</span>
         </Button>
       </div>
 
       {/* System Status */}
       {health && (
-        <Card className={`overflow-hidden ${
-          health.redis === 'connected'
-            ? 'border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50'
-            : 'border-red-200 bg-gradient-to-r from-red-50 to-orange-50'
-        }`}>
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${
-                  health.redis === 'connected'
-                    ? 'bg-emerald-500 shadow-emerald-500/30'
-                    : 'bg-red-500 shadow-red-500/30'
-                }`}>
-                  <Server className="h-6 w-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg flex items-center gap-2">
-                    Bot de WhatsApp
-                    <span className={`w-2.5 h-2.5 rounded-full ${
-                      health.redis === 'connected'
-                        ? 'bg-emerald-500 animate-pulse shadow-lg shadow-emerald-500/50'
-                        : 'bg-red-500'
-                    }`} />
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    v{health.version} • Redis: {health.redis === 'connected' ? 'Conectado' : 'Desconectado'}
-                  </p>
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onViewChange('system')}
-                className="hover:bg-white/50"
-              >
-                Ver detalles <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+        <div className="flex items-center justify-between px-4 py-3 bg-white border border-gray-200 rounded-xl">
+          <div className="flex items-center gap-3">
+            <span className={cn(
+              "w-2 h-2 rounded-full",
+              health.redis === 'connected'
+                ? 'bg-emerald-500 animate-pulse'
+                : 'bg-red-500'
+            )} />
+            <div>
+              <span className="text-sm font-medium text-gray-900">Bot de WhatsApp</span>
+              <span className="ml-2 text-xs text-gray-500">
+                v{health.version} · Redis: {health.redis === 'connected' ? 'Conectado' : 'Desconectado'}
+              </span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onViewChange('system')}
+            className="text-xs text-gray-500"
+          >
+            Ver detalles <ArrowRight className="ml-1 h-3 w-3" />
+          </Button>
+        </div>
       )}
 
       {/* Sales & Orders Overview */}
@@ -236,186 +216,159 @@ export function DashboardView({ onViewChange }: DashboardViewProps) {
           </div>
 
           {/* Success Rate */}
-          <Card className="overflow-hidden">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Activity className="h-5 w-5 text-primary" />
-                Tasa de Éxito del Bot
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-8">
-                <div className="relative w-36 h-36">
-                  <svg className="w-full h-full transform -rotate-90">
-                    <circle
-                      cx="72"
-                      cy="72"
-                      r="60"
-                      stroke="currentColor"
-                      strokeWidth="14"
-                      fill="transparent"
-                      className="text-muted"
-                    />
-                    <circle
-                      cx="72"
-                      cy="72"
-                      r="60"
-                      stroke="currentColor"
-                      strokeWidth="14"
-                      fill="transparent"
-                      strokeDasharray={377}
-                      strokeDashoffset={377 * (1 - successRate / 100)}
-                      strokeLinecap="round"
-                      className={`transition-all duration-1000 ${
-                        successRate >= 95 ? 'text-emerald-500' : successRate >= 80 ? 'text-amber-500' : 'text-red-500'
-                      }`}
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-3xl font-bold">{successRate}%</span>
-                    <span className="text-xs text-muted-foreground">éxito</span>
-                  </div>
-                </div>
-                <div className="flex-1 space-y-3">
-                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                    <span className="text-muted-foreground">Mensajes recibidos</span>
-                    <span className="font-semibold text-lg">{metrics.messages_received}</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-                    <span className="text-muted-foreground">Respuestas IA</span>
-                    <span className="font-semibold text-lg">{metrics.ai_responses}</span>
-                  </div>
-                  {processingErrors > 0 && (
-                    <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                      <span className="text-red-600">Errores de respuesta</span>
-                      <span className="font-semibold text-lg text-red-600">{processingErrors}</span>
-                    </div>
-                  )}
-                  {webhookErrors > 0 && (
-                    <div className="text-xs text-muted-foreground pl-3">
-                      {webhookErrors} eventos de webhook con error (no afectan respuestas)
-                    </div>
-                  )}
+          <div className="bg-white border border-gray-200 rounded-xl p-6">
+            <p className="text-base font-semibold text-gray-900 mb-4">Tasa de Éxito del Bot</p>
+            <div className="flex items-center gap-8">
+              <div className="relative w-36 h-36">
+                <svg className="w-full h-full transform -rotate-90">
+                  <circle
+                    cx="72"
+                    cy="72"
+                    r="60"
+                    stroke="currentColor"
+                    strokeWidth="14"
+                    fill="transparent"
+                    className="text-gray-100"
+                  />
+                  <circle
+                    cx="72"
+                    cy="72"
+                    r="60"
+                    stroke="currentColor"
+                    strokeWidth="14"
+                    fill="transparent"
+                    strokeDasharray={377}
+                    strokeDashoffset={377 * (1 - successRate / 100)}
+                    strokeLinecap="round"
+                    className={cn(
+                      "transition-all duration-1000",
+                      successRate >= 95 ? 'text-emerald-500' : successRate >= 80 ? 'text-amber-500' : 'text-red-500'
+                    )}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-3xl font-bold">{successRate}%</span>
+                  <span className="text-xs text-gray-500">éxito</span>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+              <div className="flex-1">
+                <div className="flex justify-between items-center py-2.5 border-b border-gray-100">
+                  <span className="text-sm text-gray-500">Mensajes recibidos</span>
+                  <span className="text-sm font-semibold text-gray-900">{metrics.messages_received}</span>
+                </div>
+                <div className="flex justify-between items-center py-2.5 border-b border-gray-100 last:border-0">
+                  <span className="text-sm text-gray-500">Respuestas IA</span>
+                  <span className="text-sm font-semibold text-gray-900">{metrics.ai_responses}</span>
+                </div>
+                {processingErrors > 0 && (
+                  <div className="flex justify-between items-center py-2.5 border-b border-gray-100 last:border-0">
+                    <span className="text-sm text-red-600">Errores de respuesta</span>
+                    <span className="text-sm font-semibold text-red-600">{processingErrors}</span>
+                  </div>
+                )}
+                {webhookErrors > 0 && (
+                  <div className="text-xs text-gray-500 pt-2.5">
+                    {webhookErrors} eventos de webhook con error (no afectan respuestas)
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </>
       )}
 
       {/* Quick Actions */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card
-          className="cursor-pointer card-hover group overflow-hidden"
+        <div
+          className="flex items-center gap-4 p-5 bg-white border border-gray-200 rounded-xl cursor-pointer hover:border-gray-300 hover:bg-gray-50 transition-colors group"
           onClick={() => onViewChange('orders')}
         >
-          <CardContent className="p-6 relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="flex items-center gap-4 relative">
-              <div className="w-14 h-14 rounded-xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
-                <Package className="h-7 w-7 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg">Buscar Pedido</h3>
-                <p className="text-sm text-muted-foreground">Consulta por número de orden</p>
-              </div>
-              <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-            </div>
-          </CardContent>
-        </Card>
+          <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+            <Package className="h-5 w-5" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-semibold text-gray-900">Buscar Pedido</h3>
+            <p className="text-xs text-gray-500">Consulta por número de orden</p>
+          </div>
+          <ArrowRight className="h-4 w-4 text-gray-300 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+        </div>
 
-        <Card
-          className="cursor-pointer card-hover group overflow-hidden"
+        <div
+          className="flex items-center gap-4 p-5 bg-white border border-gray-200 rounded-xl cursor-pointer hover:border-gray-300 hover:bg-gray-50 transition-colors group"
           onClick={() => onViewChange('tracking')}
         >
-          <CardContent className="p-6 relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="flex items-center gap-4 relative">
-              <div className="w-14 h-14 rounded-xl bg-amber-500 flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-transform">
-                <Truck className="h-7 w-7 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg">Tracking</h3>
-                <p className="text-sm text-muted-foreground">Rastrea envíos de Andreani</p>
-              </div>
-              <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-            </div>
-          </CardContent>
-        </Card>
+          <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+            <Truck className="h-5 w-5" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-semibold text-gray-900">Tracking</h3>
+            <p className="text-xs text-gray-500">Rastrea envíos de Andreani</p>
+          </div>
+          <ArrowRight className="h-4 w-4 text-gray-300 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+        </div>
 
-        <Card
-          className="cursor-pointer card-hover group overflow-hidden"
+        <div
+          className="flex items-center gap-4 p-5 bg-white border border-gray-200 rounded-xl cursor-pointer hover:border-gray-300 hover:bg-gray-50 transition-colors group"
           onClick={() => onViewChange('carts')}
         >
-          <CardContent className="p-6 relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="flex items-center gap-4 relative">
-              <div className="w-14 h-14 rounded-xl bg-red-500 flex items-center justify-center shadow-lg shadow-red-500/30 group-hover:scale-110 transition-transform">
-                <TrendingUp className="h-7 w-7 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg">Carritos</h3>
-                <p className="text-sm text-muted-foreground">Recupera ventas perdidas</p>
-              </div>
-              <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-            </div>
-          </CardContent>
-        </Card>
+          <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+            <TrendingUp className="h-5 w-5" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-semibold text-gray-900">Carritos</h3>
+            <p className="text-xs text-gray-500">Recupera ventas perdidas</p>
+          </div>
+          <ArrowRight className="h-4 w-4 text-gray-300 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+        </div>
       </div>
 
       {/* Auto-Mejora Widget */}
       {improvementStats && (
-        <Card
-          className="cursor-pointer card-hover group overflow-hidden border-violet-200 bg-gradient-to-r from-violet-50/50 to-purple-50/30"
+        <div
+          className="p-5 bg-white border border-gray-200 rounded-xl cursor-pointer hover:border-gray-300 transition-colors group"
           onClick={() => onViewChange('improvements')}
         >
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg flex items-center justify-between">
-              <span className="flex items-center gap-2">
-                <Brain className="h-5 w-5 text-violet-500" />
-                Auto-Mejora del Bot
-              </span>
-              <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-violet-500 group-hover:translate-x-1 transition-all" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-amber-600">{improvementStats.pending_suggestions}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Pendientes</p>
-                {improvementStats.pending_suggestions > 0 && (
-                  <Badge className="mt-1 text-[10px] bg-amber-100 text-amber-700 border-amber-200">
-                    Revisar
-                  </Badge>
-                )}
-              </div>
-              <div className="text-center border-x border-violet-100">
-                <p className="text-2xl font-bold text-green-600">{improvementStats.active_mutations}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Activas</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-violet-600">{improvementStats.approval_rate}%</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Aprobación</p>
-              </div>
+          <div className="flex justify-between items-center mb-4">
+            <span className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+              <Brain className="h-4 w-4 text-gray-500" />
+              Auto-Mejora del Bot
+            </span>
+            <ArrowRight className="h-4 w-4 text-gray-300 group-hover:text-primary transition-colors" />
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center">
+              <p className={cn(
+                "text-xl font-bold",
+                improvementStats.pending_suggestions > 0 ? 'text-amber-600' : 'text-gray-900'
+              )}>
+                {improvementStats.pending_suggestions}
+              </p>
+              <p className="text-xs text-gray-500 mt-0.5">Pendientes</p>
+              {improvementStats.pending_suggestions > 0 && (
+                <span className="mt-1 inline-block bg-amber-50 text-amber-700 text-[10px] rounded-full px-2 py-0.5">
+                  Revisar
+                </span>
+              )}
             </div>
-          </CardContent>
-        </Card>
+            <div className="text-center border-x border-gray-100">
+              <p className="text-xl font-bold text-emerald-600">{improvementStats.active_mutations}</p>
+              <p className="text-xs text-gray-500 mt-0.5">Activas</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xl font-bold text-gray-900">{improvementStats.approval_rate}%</p>
+              <p className="text-xs text-gray-500 mt-0.5">Aprobación</p>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Info */}
-      <Card className="bg-gradient-to-r from-muted/50 to-muted/30 border-dashed">
-        <CardContent className="p-5">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-              <AlertCircle className="h-5 w-5 text-primary" />
-            </div>
-            <div className="text-sm">
-              <p className="font-medium text-foreground mb-1">¿Cómo funciona?</p>
-              <p className="text-muted-foreground">Este dashboard se conecta directamente a tu bot de WhatsApp y muestra datos reales en tiempo real. Las métricas se actualizan automáticamente cada 15 minutos.</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
+        <AlertCircle className="h-4 w-4 text-gray-400 mt-0.5 shrink-0" />
+        <p className="text-sm text-gray-500">
+          ¿Cómo funciona? Este dashboard se conecta directamente a tu bot de WhatsApp y muestra datos reales en tiempo real. Las métricas se actualizan automáticamente cada 15 minutos.
+        </p>
+      </div>
     </div>
   );
 }
