@@ -741,9 +741,17 @@ export function SelfImprovementView() {
 
                       {/* Response/Content */}
                       <div>
-                        <p className="text-xs text-gray-500 font-medium mb-2">
-                          {suggestion.type === 'failed_response' ? 'Regla sugerida:' : 'Respuesta sugerida:'}
+                        <p className="text-xs font-medium mb-2">
+                          {suggestion.type === 'failed_response' || suggestion.type === 'prompt_addition'
+                            ? <span className="text-gray-500">Regla/instrucción para el sistema:</span>
+                            : <span className="text-amber-600">⚠️ Respuesta que se enviará TEXTUALMENTE al cliente:</span>
+                          }
                         </p>
+                        {isEditing && (suggestion.type === 'cached_response' || suggestion.type === 'objection_handler') && (
+                          <div className="mb-2 p-2 bg-amber-50 border border-amber-300 rounded-lg text-xs text-amber-800">
+                            <strong>Atención:</strong> Este texto se enviará <strong>tal cual</strong> al cliente, sin pasar por la IA. No escribas notas internas ni instrucciones — solo texto listo para el cliente.
+                          </div>
+                        )}
                         {isEditing ? (
                           <Textarea
                             value={editedContent}
