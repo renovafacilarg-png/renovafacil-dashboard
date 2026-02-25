@@ -29,6 +29,7 @@ function ViewLoader() {
 function App() {
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [inboxInitialPhone, setInboxInitialPhone] = useState<string | undefined>();
 
   // Verificar token al cargar
   useEffect(() => {
@@ -79,6 +80,12 @@ function App() {
     checkAuth();
   }, []);
 
+  const handleViewChange = (view: ViewType) => {
+    // Si el usuario navega manualmente (no desde carritos), limpiar el teléfono inicial
+    if (view !== currentView) setInboxInitialPhone(undefined);
+    setCurrentView(view);
+  };
+
   const handleLogin = (_token: string) => {
     setIsAuthenticated(true);
   };
@@ -103,17 +110,17 @@ function App() {
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
-        return <DashboardView onViewChange={(view) => setCurrentView(view)} />;
+        return <DashboardView onViewChange={handleViewChange} />;
       case 'orders':
         return <OrdersView />;
       case 'tracking':
         return <TrackingView />;
       case 'carts':
-        return <AbandonedCartsView />;
+        return <AbandonedCartsView onOpenChat={(phone) => { setInboxInitialPhone(phone); setCurrentView('inbox-wa'); }} />;
       case 'bot':
         return <BotMetricsView />;
       case 'inbox-wa':
-        return <InboxView channel="wa" />;
+        return <InboxView channel="wa" initialPhone={inboxInitialPhone} />;
       case 'inbox-messenger':
         return <InboxView channel="messenger" />;
       case 'inbox-instagram':
@@ -127,7 +134,7 @@ function App() {
       case 'system':
         return <SystemStatusView />;
       default:
-        return <DashboardView onViewChange={(view) => setCurrentView(view)} />;
+        return <DashboardView onViewChange={handleViewChange} />;
     }
   };
 
@@ -153,7 +160,7 @@ function App() {
         {/* Sidebar */}
         <Sidebar
           currentView={currentView}
-          onViewChange={setCurrentView}
+          onViewChange={handleViewChange}
           onLogout={handleLogout}
         />
 

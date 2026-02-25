@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   ShoppingCart,
   MessageCircle,
+  MessageSquare,
   Clock,
   CheckCircle,
   Send,
@@ -81,7 +82,7 @@ interface RecoveryStats {
 // Component
 // ---------------------------------------------------------------------------
 
-export function AbandonedCartsView() {
+export function AbandonedCartsView({ onOpenChat }: { onOpenChat?: (phone: string) => void } = {}) {
   const [carts, setCarts] = useState<AbandonedCart[]>([]);
   const [recoveryLogs, setRecoveryLogs] = useState<RecoveryLog[]>([]);
   const [recoveryResponses, setRecoveryResponses] = useState<RecoveryResponse[]>([]);
@@ -426,6 +427,17 @@ export function AbandonedCartsView() {
                             <ExternalLink className="h-4 w-4" />
                           </a>
                         </Button>
+                        {onOpenChat && cart.contact_phone && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                            onClick={() => onOpenChat(cart.contact_phone)}
+                            title="Ver chat del cliente"
+                          >
+                            <MessageSquare className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Button
                           size="sm"
                           onClick={() => setSelectedCart(cart)}

@@ -75,6 +75,7 @@ type ChannelType = 'wa' | 'messenger' | 'instagram';
 
 interface InboxViewProps {
   channel?: ChannelType;
+  initialPhone?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -101,7 +102,7 @@ function markAsRead(phone: string) {
 // Component
 // ---------------------------------------------------------------------------
 
-export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
+export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {}) {
   // Cached conversations from localStorage
   const getCachedConversations = (): Conversation[] => {
     try {
@@ -291,6 +292,14 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
     const interval = setInterval(() => fetchConversations(false), 30000);
     return () => clearInterval(interval);
   }, []);
+
+  // Auto-select conversation when arriving from carritos
+  useEffect(() => {
+    if (!initialPhone || conversations.length === 0) return;
+    const normalized = initialPhone.replace(/\D/g, '');
+    const match = conversations.find(c => c.phone.replace(/\D/g, '').endsWith(normalized) || normalized.endsWith(c.phone.replace(/\D/g, '')));
+    setSelectedConversation(match ? match.phone : initialPhone);
+  }, [initialPhone, conversations]);
 
   useEffect(() => {
     if (selectedConversation) {
