@@ -15,7 +15,10 @@ import {
   Cpu,
   HardDrive,
   Clock,
-  Timer
+  Timer,
+  AlertTriangle,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { API_URL, getHeaders } from '@/lib/api';
@@ -39,21 +42,73 @@ interface SystemHealth {
   schedulers?: Record<string, SchedulerStatus>;
 }
 
+interface ChannelStatus {
+  status: 'ok' | 'stale' | 'no_data' | 'pending_meta_review';
+  last_activity?: string | null;
+  elapsed_human?: string;
+  reason?: string;
+}
+
+interface IntegrationHealth {
+  channels: Record<string, ChannelStatus>;
+}
+
+const CHANNEL_CONFIG: Record<string, { label: string; icon: string }> = {
+  whatsapp: { label: 'WhatsApp', icon: '💬' },
+  messenger: { label: 'Messenger', icon: '📘' },
+  instagram: { label: 'Instagram DM', icon: '📷' },
+};
+
+function ChannelBadge({ status, reason }: { status: string; reason?: string }) {
+  if (status === 'ok') {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
+        <CheckCircle className="h-3 w-3" /> Activo
+      </span>
+    );
+  }
+  if (status === 'stale') {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">
+        <AlertTriangle className="h-3 w-3" /> Sin actividad reciente
+      </span>
+    );
+  }
+  if (status === 'pending_meta_review') {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700" title={reason}>
+        <WifiOff className="h-3 w-3" /> OFFLINE — Pendiente App Review
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+      <Wifi className="h-3 w-3" /> Sin datos
+    </span>
+  );
+}
+
 export function SystemStatusView() {
   const [health, setHealth] = useState<SystemHealth | null>(null);
+  const [integrationHealth, setIntegrationHealth] = useState<IntegrationHealth | null>(null);
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchHealth = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/health`, { headers: getHeaders() });
-      if (response.ok) {
-        const data = await response.json();
-        setHealth(data);
+      const [mainRes, intRes] = await Promise.all([
+        fetch(`${API_URL}/health`, { headers: getHeaders() }),
+        fetch(`${API_URL}/health/integrations`, { headers: getHeaders() }),
+      ]);
+      if (mainRes.ok) {
+        setHealth(await mainRes.json());
         setLastUpdated(new Date());
       } else {
         toast.error('Error al obtener estado del sistema');
+      }
+      if (intRes.ok) {
+        setIntegrationHealth(await intRes.json());
       }
     } catch (error) {
       console.error('Error:', error);
@@ -82,6 +137,7 @@ export function SystemStatusView() {
   };
 
   const isConnected = health?.redis === 'connected';
+  const channels = integrationHealth?.channels || {};
 
   return (
     <div className="space-y-6">
@@ -161,6 +217,42 @@ export function SystemStatusView() {
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Channels */}
+          <div className="bg-white border border-gray-200 rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <MessageSquare className="h-4 w-4 text-gray-400" />
+              <h3 className="text-sm font-semibold text-gray-900">Canales de Atención</h3>
+            </div>
+            <div className="divide-y divide-gray-100">
+              {Object.entries(CHANNEL_CONFIG).map(([key, cfg]) => {
+                const ch = channels[key];
+                return (
+                  <div key={key} className="flex items-center justify-between py-3 last:border-0">
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg">{cfg.icon}</span>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{cfg.label}</p>
+                        {ch?.last_activity && (
+                          <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                            <Clock className="h-3 w-3" />
+                            Último: {ch.last_activity}
+                            {ch.elapsed_human && ` (hace ${ch.elapsed_human})`}
+                          </p>
+                        )}
+                        {ch?.status === 'pending_meta_review' && (
+                          <p className="text-xs text-red-500 mt-0.5">
+                            Verificación de negocio enviada el 01/03/2026 — esperando aprobación Meta
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <ChannelBadge status={ch?.status ?? 'no_data'} reason={ch?.reason} />
+                  </div>
+                );
+              })}
             </div>
           </div>
 
