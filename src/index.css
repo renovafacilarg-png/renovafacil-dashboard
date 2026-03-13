@@ -5,62 +5,63 @@
 @layer base {
   :root {
     --background: 0 0% 99%;
-    --foreground: 222 47% 9%;
+    --foreground: 0 0% 5%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 9%;
+    --card-foreground: 0 0% 5%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 9%;
+    --popover-foreground: 0 0% 5%;
     --primary: 173 80% 36%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 14% 96%;
-    --secondary-foreground: 222 47% 9%;
-    --muted: 220 14% 96%;
-    --muted-foreground: 215 16% 52%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 5%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
     --accent: 173 80% 95%;
     --accent-foreground: 173 80% 30%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
     --ring: 173 80% 36%;
-    --radius: 0.5rem;
-    --sidebar-background: 222 47% 11%;
-    --sidebar-foreground: 210 40% 98%;
+    --radius: 0.375rem;
+    --sidebar-background: 0 0% 10%;
+    --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 173 80% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 47% 18%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 222 47% 20%;
+    --sidebar-accent: 0 0% 16%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 20%;
     --sidebar-ring: 173 80% 50%;
   }
 
   .dark {
-    --background: 222 47% 7%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 98%;
+    --background: 0 0% 4%;
+    --foreground: 0 0% 96%;
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 96%;
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 96%;
     --primary: 173 80% 50%;
-    --primary-foreground: 222 47% 11%;
-    --secondary: 222 47% 15%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 222 47% 15%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 173 80% 20%;
-    --accent-foreground: 173 80% 70%;
+    --primary-foreground: 0 0% 4%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 55%;
+    --accent: 0 0% 12%;
+    --accent-foreground: 0 0% 96%;
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 98%;
-    --border: 222 47% 20%;
-    --input: 222 47% 20%;
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
     --ring: 173 80% 50%;
-    --sidebar-background: 222 47% 5%;
-    --sidebar-foreground: 210 40% 98%;
+    --radius: 0.375rem;
+    --sidebar-background: 0 0% 3%;
+    --sidebar-foreground: 0 0% 90%;
     --sidebar-primary: 173 80% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 47% 12%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 222 47% 15%;
+    --sidebar-primary-foreground: 0 0% 4%;
+    --sidebar-accent: 0 0% 8%;
+    --sidebar-accent-foreground: 0 0% 90%;
+    --sidebar-border: 0 0% 10%;
     --sidebar-ring: 173 80% 50%;
   }
 }
@@ -107,85 +108,7 @@
   outline-offset: 2px;
 }
 
-/* ========================================
-   CARD EFFECTS
-   ======================================== */
-.card-hover {
-  transition: all 0.3s ease;
-}
-
-.card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow:
-    0 20px 40px -12px rgba(0, 0, 0, 0.1),
-    0 4px 6px -4px rgba(0, 0, 0, 0.05);
-}
-
-.card-glow {
-  position: relative;
-}
-
-.card-glow::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(135deg, hsl(var(--primary) / 0.3), transparent, hsl(var(--primary) / 0.1));
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
-/* ========================================
-   GRADIENT BACKGROUNDS
-   ======================================== */
-.gradient-primary {
-  background: linear-gradient(135deg, hsl(173 80% 40%) 0%, hsl(199 89% 48%) 100%);
-}
-
-.gradient-success {
-  background: linear-gradient(135deg, hsl(152 69% 40%) 0%, hsl(158 64% 52%) 100%);
-}
-
-.gradient-warning {
-  background: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(45 93% 47%) 100%);
-}
-
-.gradient-danger {
-  background: linear-gradient(135deg, hsl(0 84% 60%) 0%, hsl(350 89% 60%) 100%);
-}
-
-.gradient-info {
-  background: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(239 84% 67%) 100%);
-}
-
-.gradient-purple {
-  background: linear-gradient(135deg, hsl(271 91% 65%) 0%, hsl(280 87% 55%) 100%);
-}
-
-/* Subtle gradient backgrounds for cards */
-.bg-gradient-emerald {
-  background: linear-gradient(135deg, hsl(152 69% 97%) 0%, hsl(158 64% 94%) 100%);
-}
-
-.bg-gradient-blue {
-  background: linear-gradient(135deg, hsl(210 100% 97%) 0%, hsl(217 91% 94%) 100%);
-}
-
-.bg-gradient-amber {
-  background: linear-gradient(135deg, hsl(48 100% 96%) 0%, hsl(38 92% 92%) 100%);
-}
-
-.bg-gradient-red {
-  background: linear-gradient(135deg, hsl(0 86% 97%) 0%, hsl(0 84% 94%) 100%);
-}
-
-.bg-gradient-violet {
-  background: linear-gradient(135deg, hsl(270 100% 98%) 0%, hsl(271 91% 95%) 100%);
-}
+/* Decorative card effects and gradients removed per Linear aesthetic decision */
 
 /* ========================================
    ANIMATIONS
@@ -286,19 +209,7 @@
   animation: slide-in-right 0.5s ease-out forwards;
 }
 
-.animate-pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
-}
-
-.animate-shimmer {
-  background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.1), transparent);
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
+/* Decorative animations removed per Linear aesthetic decision */
 
 .animate-pulse-soft {
   animation: pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -411,7 +322,7 @@
    SIDEBAR ENHANCEMENTS
    ======================================== */
 .sidebar-gradient {
-  background: linear-gradient(180deg, hsl(222 47% 11%) 0%, hsl(222 47% 8%) 100%);
+  background: linear-gradient(180deg, hsl(0 0% 3%) 0%, hsl(0 0% 2%) 100%);
 }
 
 .sidebar-item-active {
