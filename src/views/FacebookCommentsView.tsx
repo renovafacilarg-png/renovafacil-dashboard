@@ -167,19 +167,19 @@ export function FacebookCommentsView() {
     switch (action) {
       case 'responder':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-500">
             <MessageCircle className="h-3 w-3" /> Respondio{dry}
           </span>
         );
       case 'borrar':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-500">
             <Trash2 className="h-3 w-3" /> Borro{dry}
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">
             <MinusCircle className="h-3 w-3" /> Ignoro
           </span>
         );
@@ -205,8 +205,8 @@ export function FacebookCommentsView() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Comentarios Facebook</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-foreground">Comentarios Facebook</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
             Moderacion automatica de comentarios en la pagina
           </p>
         </div>
@@ -215,7 +215,7 @@ export function FacebookCommentsView() {
           size="sm"
           onClick={() => fetchData()}
           disabled={loading}
-          className="text-gray-500 hover:text-gray-900"
+          className="text-muted-foreground hover:text-foreground"
         >
           <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} />
           Actualizar
@@ -224,39 +224,39 @@ export function FacebookCommentsView() {
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-8">
-        <div className="md:col-span-1 lg:col-span-2 bg-white border border-gray-200 rounded-xl p-5">
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Hoy procesados</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{stats?.today.total ?? '-'}</p>
+        <div className="md:col-span-1 lg:col-span-2 bg-card border border-border rounded-xl p-5">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">Hoy procesados</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{stats?.today.total ?? '-'}</p>
         </div>
-        <div className="md:col-span-1 lg:col-span-2 bg-white border border-gray-200 rounded-xl p-5">
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Hoy respondidos</p>
+        <div className="md:col-span-1 lg:col-span-2 bg-card border border-border rounded-xl p-5">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">Hoy respondidos</p>
           <p className="text-2xl font-bold text-emerald-600 mt-1">{stats?.today.responded ?? '-'}</p>
         </div>
-        <div className="md:col-span-1 lg:col-span-2 bg-white border border-gray-200 rounded-xl p-5">
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Hoy borrados</p>
+        <div className="md:col-span-1 lg:col-span-2 bg-card border border-border rounded-xl p-5">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">Hoy borrados</p>
           <p className="text-2xl font-bold text-red-500 mt-1">{stats?.today.deleted ?? '-'}</p>
         </div>
-        <div className="md:col-span-1 lg:col-span-2 bg-white border border-gray-200 rounded-xl p-5">
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Total almacenados</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{stats?.total ?? '-'}</p>
-          <p className="text-xs text-gray-500 mt-1">
+        <div className="md:col-span-1 lg:col-span-2 bg-card border border-border rounded-xl p-5">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">Total almacenados</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{stats?.total ?? '-'}</p>
+          <p className="text-xs text-muted-foreground mt-1">
             {stats?.responded ?? 0} resp / {stats?.deleted ?? 0} borr / {stats?.ignored ?? 0} ign
           </p>
         </div>
       </div>
 
       {/* Instagram Status */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5">
+      <div className="bg-card border border-border rounded-xl p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Instagram className="h-4 w-4 text-pink-500" />
-            <p className="text-sm font-semibold text-gray-900">Instagram</p>
+            <p className="text-sm font-semibold text-foreground">Instagram</p>
             {igStatus?.ig_linked ? (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500">
                 Conectado
               </span>
             ) : (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-500">
                 Desconectado
               </span>
             )}
@@ -267,7 +267,7 @@ export function FacebookCommentsView() {
               size="sm"
               onClick={triggerIgReprocess}
               disabled={igReprocessing}
-              className="text-gray-500 hover:text-gray-900"
+              className="text-muted-foreground hover:text-foreground"
             >
               {igReprocessing ? (
                 <Loader2 className="mr-2 h-3 w-3 animate-spin" />
@@ -284,20 +284,20 @@ export function FacebookCommentsView() {
             {igStatus.ig_linked ? (
               <div className="divide-y divide-gray-100">
                 <div className="flex items-center justify-between py-3">
-                  <span className="text-xs text-gray-500">Cuenta</span>
-                  <span className="text-sm text-gray-900 font-medium">@{igStatus.ig_username}</span>
+                  <span className="text-xs text-muted-foreground">Cuenta</span>
+                  <span className="text-sm text-foreground font-medium">@{igStatus.ig_username}</span>
                 </div>
                 <div className="flex items-center justify-between py-3">
-                  <span className="text-xs text-gray-500">Posts monitoreados</span>
-                  <span className="text-sm text-gray-900 font-medium">{igStatus.media_count}</span>
+                  <span className="text-xs text-muted-foreground">Posts monitoreados</span>
+                  <span className="text-sm text-foreground font-medium">{igStatus.media_count}</span>
                 </div>
                 <div className="flex items-center justify-between py-3">
-                  <span className="text-xs text-gray-500">Scheduler</span>
-                  <span className="text-sm text-gray-900 font-medium">{igStatus.scheduler_running ? 'Activo' : 'Inactivo'}</span>
+                  <span className="text-xs text-muted-foreground">Scheduler</span>
+                  <span className="text-sm text-foreground font-medium">{igStatus.scheduler_running ? 'Activo' : 'Inactivo'}</span>
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {igStatus.error || 'Instagram no vinculado. Configurar en Meta Business Suite.'}
               </p>
             )}
@@ -351,23 +351,23 @@ export function FacebookCommentsView() {
       {/* Comments List */}
       {loading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-gray-300" />
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground/50" />
         </div>
       ) : entries.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
-          <MessageCircle className="h-10 w-10 mx-auto text-gray-300 mb-3" />
-          <h3 className="text-sm font-medium text-gray-900 mb-1">No hay comentarios procesados</h3>
-          <p className="text-sm text-gray-500">
+        <div className="bg-card border border-border rounded-xl p-12 text-center">
+          <MessageCircle className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
+          <h3 className="text-sm font-medium text-foreground mb-1">No hay comentarios procesados</h3>
+          <p className="text-sm text-muted-foreground">
             El bot procesa comentarios cada 3 minutos
           </p>
         </div>
       ) : (
         <div className="space-y-2">
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             Mostrando {entries.length} de {totalCount}
           </p>
 
-          <div className="bg-white border border-gray-200 rounded-xl divide-y divide-gray-100">
+          <div className="bg-card border border-border rounded-xl divide-y divide-gray-100">
             {entries.map((entry, idx) => (
               <div key={entry.comment_id || idx} className="py-4 px-4">
                 <div className="flex items-start justify-between gap-4">
@@ -379,16 +379,16 @@ export function FacebookCommentsView() {
                       ) : (
                         <Facebook className="h-3 w-3 text-blue-500 shrink-0" />
                       )}
-                      <span className="text-sm font-medium text-gray-900">{entry.author_name}</span>
+                      <span className="text-sm font-medium text-foreground">{entry.author_name}</span>
                       {actionBadge(entry.action, entry.dry_run)}
-                      <span className="flex items-center gap-1 text-xs text-gray-500">
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Clock className="h-3 w-3" />
                         {formatTime(entry.timestamp)}
                       </span>
                     </div>
 
                     {/* Comment text */}
-                    <div className="bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 mb-2">
+                    <div className="bg-muted/50 border border-border/50 rounded-lg px-3 py-2 mb-2">
                       <p className="text-sm text-gray-700 break-words">{entry.comment_text}</p>
                     </div>
 
@@ -411,7 +411,7 @@ export function FacebookCommentsView() {
                       rel="noopener noreferrer"
                       className="shrink-0"
                     >
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400 hover:text-gray-900">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400 hover:text-foreground">
                         <ExternalLink className="h-4 w-4" />
                       </Button>
                     </a>
@@ -429,7 +429,7 @@ export function FacebookCommentsView() {
                 size="sm"
                 onClick={loadMore}
                 disabled={loadingMore}
-                className="text-gray-500 hover:text-gray-900"
+                className="text-muted-foreground hover:text-foreground"
               >
                 {loadingMore ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -443,7 +443,7 @@ export function FacebookCommentsView() {
         </div>
       )}
 
-      <p className="text-center text-xs text-gray-500">
+      <p className="text-center text-xs text-muted-foreground">
         Auto-refresh cada 60 segundos
       </p>
     </div>
