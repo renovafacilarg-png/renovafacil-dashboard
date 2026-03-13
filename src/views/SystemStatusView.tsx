@@ -144,8 +144,8 @@ export function SystemStatusView() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Estado del Sistema</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-2xl font-semibold text-foreground">Estado del Sistema</h1>
+          <p className="text-sm text-muted-foreground">
             Monitoreo de servicios y componentes
             {lastUpdated && (
               <span className="ml-2">
@@ -154,7 +154,7 @@ export function SystemStatusView() {
             )}
           </p>
         </div>
-        <Button variant="ghost" size="sm" onClick={fetchHealth} disabled={loading} className="text-gray-500 hover:text-gray-900">
+        <Button variant="ghost" size="sm" onClick={fetchHealth} disabled={loading}>
           <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
           <span className="ml-2">Actualizar</span>
         </Button>
@@ -163,10 +163,10 @@ export function SystemStatusView() {
       {/* Loading skeleton */}
       {loading && !health && (
         <div className="space-y-3">
-          <div className="bg-gray-100 rounded-xl h-24 animate-pulse" />
+          <div className="bg-muted/30 rounded-xl h-24 animate-pulse" />
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-gray-100 rounded-xl h-32 animate-pulse" />
+              <div key={i} className="bg-muted/30 rounded-xl h-32 animate-pulse" />
             ))}
           </div>
         </div>
@@ -175,21 +175,21 @@ export function SystemStatusView() {
       {health && (
         <>
           {/* Main Status */}
-          <div className="bg-white border border-gray-200 rounded-xl p-6">
+          <div className="bg-card border border-border rounded-xl p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
                   <div className={cn(
                     "w-2 h-2 rounded-full",
-                    isConnected ? "bg-emerald-500" : "bg-red-500"
+                    isConnected ? "bg-emerald-500" : "bg-destructive"
                   )} />
-                  <h2 className="text-base font-semibold text-gray-900">Bot de WhatsApp</h2>
+                  <h2 className="text-base font-semibold text-foreground">Bot de WhatsApp</h2>
                 </div>
                 <span className={cn(
                   "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium",
                   isConnected
-                    ? "bg-emerald-50 text-emerald-700"
-                    : "bg-red-50 text-red-700"
+                    ? "bg-emerald-500/10 text-emerald-500"
+                    : "bg-destructive/10 text-destructive"
                 )}>
                   {isConnected ? (
                     <><CheckCircle className="h-3 w-3" /> Operativo</>
@@ -200,18 +200,18 @@ export function SystemStatusView() {
               </div>
               <div className="flex items-center gap-6 text-sm">
                 <div>
-                  <span className="text-xs text-gray-500">Versión</span>
-                  <p className="text-sm text-gray-900 font-medium">{health.version}</p>
+                  <span className="text-xs text-muted-foreground">Versión</span>
+                  <p className="text-sm text-foreground font-medium">{health.version}</p>
                 </div>
                 <div>
-                  <span className="text-xs text-gray-500">Servicio</span>
-                  <p className="text-sm text-gray-900 font-medium">{health.service}</p>
+                  <span className="text-xs text-muted-foreground">Servicio</span>
+                  <p className="text-sm text-foreground font-medium">{health.service}</p>
                 </div>
                 <div>
-                  <span className="text-xs text-gray-500">Redis</span>
+                  <span className="text-xs text-muted-foreground">Redis</span>
                   <p className={cn(
                     "text-sm font-medium",
-                    isConnected ? "text-emerald-600" : "text-red-600"
+                    isConnected ? "text-emerald-500" : "text-destructive"
                   )}>
                     {isConnected ? 'Conectado' : 'Desconectado'}
                   </p>
@@ -257,17 +257,17 @@ export function SystemStatusView() {
           </div>
 
           {/* Features Grid */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {/* AI */}
-            <div className="bg-white border border-gray-200 rounded-xl p-5">
+            <div className="bg-card border border-border rounded-lg p-4 space-y-2">
               <div className="flex items-center gap-2 mb-3">
-                <Bot className="h-4 w-4 text-gray-400" />
-                <h3 className="text-sm font-semibold text-gray-900">Inteligencia Artificial</h3>
+                <Bot className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-medium text-foreground">Inteligencia Artificial</h3>
               </div>
-              <ul className="divide-y divide-gray-100">
+              <ul className="divide-y divide-border/50">
                 {featureGroups['IA'].map((feature, idx) => (
-                  <li key={idx} className="flex items-center gap-2 py-2 text-sm text-gray-700">
-                    <CheckCircle className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
+                  <li key={idx} className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
+                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
                     {feature.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </li>
                 ))}
@@ -275,15 +275,15 @@ export function SystemStatusView() {
             </div>
 
             {/* Orders */}
-            <div className="bg-white border border-gray-200 rounded-xl p-5">
+            <div className="bg-card border border-border rounded-lg p-4 space-y-2">
               <div className="flex items-center gap-2 mb-3">
-                <Activity className="h-4 w-4 text-gray-400" />
-                <h3 className="text-sm font-semibold text-gray-900">Pedidos</h3>
+                <Activity className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-medium text-foreground">Pedidos</h3>
               </div>
-              <ul className="divide-y divide-gray-100">
+              <ul className="divide-y divide-border/50">
                 {featureGroups['Pedidos'].map((feature, idx) => (
-                  <li key={idx} className="flex items-center gap-2 py-2 text-sm text-gray-700">
-                    <CheckCircle className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
+                  <li key={idx} className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
+                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
                     {feature.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </li>
                 ))}
@@ -291,15 +291,15 @@ export function SystemStatusView() {
             </div>
 
             {/* Tracking */}
-            <div className="bg-white border border-gray-200 rounded-xl p-5">
+            <div className="bg-card border border-border rounded-lg p-4 space-y-2">
               <div className="flex items-center gap-2 mb-3">
-                <Truck className="h-4 w-4 text-gray-400" />
-                <h3 className="text-sm font-semibold text-gray-900">Tracking</h3>
+                <Truck className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-medium text-foreground">Tracking</h3>
               </div>
-              <ul className="divide-y divide-gray-100">
+              <ul className="divide-y divide-border/50">
                 {featureGroups['Tracking'].map((feature, idx) => (
-                  <li key={idx} className="flex items-center gap-2 py-2 text-sm text-gray-700">
-                    <CheckCircle className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
+                  <li key={idx} className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
+                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
                     {feature.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </li>
                 ))}
@@ -307,15 +307,15 @@ export function SystemStatusView() {
             </div>
 
             {/* Infrastructure */}
-            <div className="bg-white border border-gray-200 rounded-xl p-5">
+            <div className="bg-card border border-border rounded-lg p-4 space-y-2">
               <div className="flex items-center gap-2 mb-3">
-                <Database className="h-4 w-4 text-gray-400" />
-                <h3 className="text-sm font-semibold text-gray-900">Infraestructura</h3>
+                <Database className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-medium text-foreground">Infraestructura</h3>
               </div>
-              <ul className="divide-y divide-gray-100">
+              <ul className="divide-y divide-border/50">
                 {featureGroups['Infraestructura'].map((feature, idx) => (
-                  <li key={idx} className="flex items-center gap-2 py-2 text-sm text-gray-700">
-                    <CheckCircle className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
+                  <li key={idx} className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
+                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
                     {feature.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </li>
                 ))}
@@ -323,15 +323,15 @@ export function SystemStatusView() {
             </div>
 
             {/* WhatsApp */}
-            <div className="bg-white border border-gray-200 rounded-xl p-5">
+            <div className="bg-card border border-border rounded-lg p-4 space-y-2">
               <div className="flex items-center gap-2 mb-3">
-                <MessageSquare className="h-4 w-4 text-gray-400" />
-                <h3 className="text-sm font-semibold text-gray-900">WhatsApp</h3>
+                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-medium text-foreground">WhatsApp</h3>
               </div>
-              <ul className="divide-y divide-gray-100">
+              <ul className="divide-y divide-border/50">
                 {featureGroups['WhatsApp'].map((feature, idx) => (
-                  <li key={idx} className="flex items-center gap-2 py-2 text-sm text-gray-700">
-                    <CheckCircle className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
+                  <li key={idx} className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
+                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
                     {feature.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </li>
                 ))}
@@ -339,15 +339,15 @@ export function SystemStatusView() {
             </div>
 
             {/* Marketing */}
-            <div className="bg-white border border-gray-200 rounded-xl p-5">
+            <div className="bg-card border border-border rounded-lg p-4 space-y-2">
               <div className="flex items-center gap-2 mb-3">
-                <Cpu className="h-4 w-4 text-gray-400" />
-                <h3 className="text-sm font-semibold text-gray-900">Marketing</h3>
+                <Cpu className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-medium text-foreground">Marketing</h3>
               </div>
-              <ul className="divide-y divide-gray-100">
+              <ul className="divide-y divide-border/50">
                 {featureGroups['Marketing'].map((feature, idx) => (
-                  <li key={idx} className="flex items-center gap-2 py-2 text-sm text-gray-700">
-                    <CheckCircle className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
+                  <li key={idx} className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
+                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
                     {feature.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </li>
                 ))}
@@ -357,12 +357,12 @@ export function SystemStatusView() {
 
           {/* Schedulers */}
           {health.schedulers && Object.keys(health.schedulers).length > 0 && (
-            <div className="bg-white border border-gray-200 rounded-xl p-5">
+            <div className="bg-card border border-border rounded-xl p-5">
               <div className="flex items-center gap-2 mb-4">
-                <Timer className="h-4 w-4 text-gray-400" />
-                <h3 className="text-sm font-semibold text-gray-900">Procesos Automáticos</h3>
+                <Timer className="h-4 w-4 text-muted-foreground" />
+                <h3 className="text-sm font-semibold text-foreground">Procesos Automáticos</h3>
               </div>
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-border/50">
                 {Object.entries(health.schedulers).map(([name, scheduler]) => {
                   const label = name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
                   const isRunning = scheduler.running;
@@ -371,12 +371,12 @@ export function SystemStatusView() {
                       <div className="flex items-center gap-3">
                         <div className={cn(
                           "w-2 h-2 rounded-full flex-shrink-0",
-                          isRunning ? "bg-emerald-500" : "bg-red-400"
+                          isRunning ? "bg-emerald-500" : "bg-destructive"
                         )} />
                         <div>
-                          <p className="text-sm font-medium text-gray-900">{label}</p>
+                          <p className="text-sm font-medium text-foreground">{label}</p>
                           {scheduler.last_check && (
-                            <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                               <Clock className="h-3 w-3" />
                               {new Date(scheduler.last_check).toLocaleTimeString('es-AR')}
                             </p>
@@ -385,13 +385,13 @@ export function SystemStatusView() {
                       </div>
                       <div className="flex items-center gap-3">
                         {scheduler.stats && (
-                          <span className="text-xs text-gray-500">{scheduler.stats.sent} enviados</span>
+                          <span className="text-xs text-muted-foreground">{scheduler.stats.sent} enviados</span>
                         )}
                         <span className={cn(
                           "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
                           isRunning
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-red-50 text-red-700"
+                            ? "bg-emerald-500/10 text-emerald-500"
+                            : "bg-destructive/10 text-destructive"
                         )}>
                           {isRunning ? 'Activo' : 'Detenido'}
                         </span>
@@ -404,16 +404,16 @@ export function SystemStatusView() {
           )}
 
           {/* All Features */}
-          <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <div className="bg-card border border-border rounded-xl p-5">
             <div className="flex items-center gap-2 mb-4">
-              <HardDrive className="h-4 w-4 text-gray-400" />
-              <h3 className="text-sm font-semibold text-gray-900">Todas las Características</h3>
+              <HardDrive className="h-4 w-4 text-muted-foreground" />
+              <h3 className="text-sm font-semibold text-foreground">Todas las Características</h3>
             </div>
             <div className="flex flex-wrap gap-2">
               {features.map((feature, idx) => (
                 <span
                   key={idx}
-                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700"
+                  className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-muted/50 text-muted-foreground"
                 >
                   {feature.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                 </span>
@@ -422,8 +422,8 @@ export function SystemStatusView() {
           </div>
 
           {/* Links */}
-          <div className="bg-white border border-gray-200 rounded-xl p-5">
-            <h3 className="text-sm font-semibold text-gray-900 mb-4">Enlaces Útiles</h3>
+          <div className="bg-card border border-border rounded-xl p-5">
+            <h3 className="text-sm font-semibold text-foreground mb-4">Enlaces Útiles</h3>
             <div className="grid gap-2 md:grid-cols-2">
               <Button variant="outline" asChild>
                 <a href={`${API_URL}/metrics`} target="_blank" rel="noopener noreferrer">
@@ -446,9 +446,9 @@ export function SystemStatusView() {
 
       {!health && !loading && (
         <div>
-          <XCircle className="h-10 w-10 text-gray-300 mx-auto" />
-          <div className="text-sm text-gray-500 text-center mt-3">
-            <p className="font-medium text-gray-700">No se pudo conectar</p>
+          <XCircle className="h-10 w-10 text-muted-foreground mx-auto" />
+          <div className="text-sm text-muted-foreground text-center mt-3">
+            <p className="font-medium text-foreground">No se pudo conectar</p>
             <p className="mt-1">Verifica que el bot esté corriendo en {API_URL}</p>
           </div>
         </div>
