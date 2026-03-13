@@ -30,3 +30,18 @@ class LocalStorageMock implements Storage {
 }
 
 globalThis.localStorage = new LocalStorageMock();
+
+// Mock window.matchMedia for tests (used by next-themes and responsive hooks)
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => true,
+  }),
+});

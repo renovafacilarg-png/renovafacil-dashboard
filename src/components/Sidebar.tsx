@@ -2,62 +2,56 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  LayoutDashboard,
   Package,
   Truck,
-  ShoppingCart,
   MessageSquare,
   Server,
   ChevronLeft,
   ChevronRight,
   Menu,
-  Sparkles,
   LogOut,
   Facebook,
-  Instagram,
-  FlaskConical,
+  Kanban,
+  Send,
+  Receipt,
+  Settings2,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router';
 import { API_URL, fetchImprovementStats } from '@/lib/api';
 
 const FRONTEND_VERSION = '2.1.0';
 
-export type ViewType = 'dashboard' | 'orders' | 'tracking' | 'carts' | 'bot' | 'inbox-wa' | 'inbox-messenger' | 'inbox-instagram' | 'improvements' | 'system' | 'facebook' | 'simulation';
-
 interface SidebarProps {
-  currentView: ViewType;
-  onViewChange: (view: ViewType) => void;
   onLogout?: () => void;
   className?: string;
 }
 
 interface NavItem {
-  id: ViewType;
+  path: string;
   label: string;
   icon: React.ElementType;
   badge?: number;
 }
 
 const navItems: NavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'inbox-wa', label: 'Inbox WhatsApp', icon: MessageSquare },
-  { id: 'inbox-messenger', label: 'Inbox Messenger', icon: Facebook },
-  { id: 'inbox-instagram', label: 'Inbox Instagram', icon: Instagram },
-  { id: 'orders', label: 'Buscar Pedido', icon: Package },
-  { id: 'tracking', label: 'Tracking', icon: Truck },
-  { id: 'carts', label: 'Carritos', icon: ShoppingCart },
-  { id: 'bot', label: 'Bot WhatsApp', icon: MessageSquare },
-  { id: 'facebook', label: 'FB / Instagram', icon: Facebook },
-  { id: 'improvements', label: 'Auto-Mejoras', icon: Sparkles },
-  { id: 'simulation', label: 'Simulación', icon: FlaskConical },
-  { id: 'system', label: 'Sistema', icon: Server },
+  { path: '/inbox', label: 'Inbox WA', icon: MessageSquare },
+  { path: '/pipeline', label: 'Pipeline', icon: Kanban },
+  { path: '/re-engagement', label: 'Re-engagement', icon: Send },
+  { path: '/orders', label: 'Buscar Pedido', icon: Package },
+  { path: '/tracking', label: 'Envíos', icon: Truck },
+  { path: '/comprobantes', label: 'Comprobantes', icon: Receipt },
+  { path: '/facebook', label: 'FB / Instagram', icon: Facebook },
+  { path: '/system', label: 'Sistema', icon: Server },
+  { path: '/settings', label: 'Ajustes', icon: Settings2 },
 ];
 
-export function Sidebar({ currentView, onViewChange, onLogout, className }: SidebarProps) {
+export function Sidebar({ onLogout, className }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [backendVersion, setBackendVersion] = useState<string | null>(null);
   const [pendingSuggestions, setPendingSuggestions] = useState<number>(0);
+  const location = useLocation();
 
   useEffect(() => {
     fetch(`${API_URL}/health`)
@@ -109,18 +103,17 @@ export function Sidebar({ currentView, onViewChange, onLogout, className }: Side
         <nav className="px-2 space-y-0.5">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = currentView === item.id;
-            const badge = item.id === 'improvements' ? (pendingSuggestions > 0 ? pendingSuggestions : undefined) : item.badge;
+            const isActive = location.pathname === item.path ||
+              (item.path === '/inbox' && location.pathname === '/');
+            const badge = item.path === '/settings' ? (pendingSuggestions > 0 ? pendingSuggestions : undefined) : item.badge;
 
             return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  onViewChange(item.id);
-                  setMobileOpen(false);
-                }}
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setMobileOpen(false)}
                 className={cn(
-                  'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-100',
+                  'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-100',
                   collapsed && 'justify-center px-2',
                   isActive
                     ? 'bg-sidebar-primary/15 text-sidebar-primary'
@@ -131,12 +124,12 @@ export function Sidebar({ currentView, onViewChange, onLogout, className }: Side
                 {!collapsed && (
                   <span className="flex-1 text-left truncate">{item.label}</span>
                 )}
-                {!collapsed && badge && (
+                {!collapsed && badge !== undefined && badge > 0 && (
                   <span className="ml-auto px-1.5 py-0.5 text-[10px] font-semibold rounded-full bg-sidebar-primary/20 text-sidebar-primary">
                     {badge}
                   </span>
                 )}
-              </button>
+              </Link>
             );
           })}
         </nav>

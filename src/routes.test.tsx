@@ -14,7 +14,7 @@ describe('authLoader', () => {
   it('redirects to /login when no token in localStorage', async () => {
     localStorage.clear();
     const request = new Request('http://localhost/inbox');
-    const result = await authLoader({ request, params: {} });
+    const result = await authLoader({ request, params: {}, unstable_pattern: '/inbox', context: undefined });
     expect(result).toBeDefined();
     // redirect() returns a Response object with Location header
     expect(result).toBeInstanceOf(Response);
@@ -29,7 +29,7 @@ describe('authLoader', () => {
       json: () => Promise.resolve({ valid: true }),
     }));
     const request = new Request('http://localhost/inbox');
-    const result = await authLoader({ request, params: {} });
+    const result = await authLoader({ request, params: {}, unstable_pattern: '/inbox', context: undefined });
     expect(result).toBeNull();
     localStorage.clear();
     vi.unstubAllGlobals();
