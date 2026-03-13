@@ -18,7 +18,6 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
 import { Send, Plus, Clock, Users, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { fetchCampaigns, createCampaign, sendCampaign, type Campaign, type ClientStateFilter } from '@/lib/api';
