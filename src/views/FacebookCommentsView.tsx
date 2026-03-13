@@ -205,9 +205,9 @@ export function FacebookCommentsView() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Comentarios Facebook</h1>
+          <h1 className="text-2xl font-bold text-foreground">Comentarios FB / Instagram</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Moderacion automatica de comentarios en la pagina
+            Moderacion automatica de comentarios en Facebook e Instagram
           </p>
         </div>
         <Button
@@ -230,7 +230,7 @@ export function FacebookCommentsView() {
         </div>
         <div className="md:col-span-1 lg:col-span-2 bg-card border border-border rounded-xl p-5">
           <p className="text-xs text-muted-foreground uppercase tracking-wide">Hoy respondidos</p>
-          <p className="text-2xl font-bold text-emerald-600 mt-1">{stats?.today.responded ?? '-'}</p>
+          <p className="text-2xl font-bold text-emerald-500 mt-1">{stats?.today.responded ?? '-'}</p>
         </div>
         <div className="md:col-span-1 lg:col-span-2 bg-card border border-border rounded-xl p-5">
           <p className="text-xs text-muted-foreground uppercase tracking-wide">Hoy borrados</p>
@@ -245,107 +245,131 @@ export function FacebookCommentsView() {
         </div>
       </div>
 
-      {/* Instagram Status */}
-      <div className="bg-card border border-border rounded-xl p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Instagram className="h-4 w-4 text-pink-500" />
-            <p className="text-sm font-semibold text-foreground">Instagram</p>
-            {igStatus?.ig_linked ? (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500">
-                Conectado
-              </span>
-            ) : (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-500">
-                Desconectado
-              </span>
-            )}
+      {/* Fuentes monitoreadas — FB + IG unificados */}
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* Facebook */}
+        <div className="bg-card border border-border rounded-xl p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Facebook className="h-4 w-4 text-blue-500" />
+            <p className="text-sm font-semibold text-foreground">Facebook</p>
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500">
+              Conectado
+            </span>
           </div>
-          {igStatus?.ig_linked && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={triggerIgReprocess}
-              disabled={igReprocessing}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              {igReprocessing ? (
-                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-              ) : (
-                <RefreshCw className="mr-2 h-3 w-3" />
-              )}
-              {igReprocessing ? 'Procesando...' : 'Reprocesar IG'}
-            </Button>
-          )}
+          <div className="divide-y divide-border">
+            <div className="flex items-center justify-between py-2.5">
+              <span className="text-xs text-muted-foreground">Fuente</span>
+              <span className="text-sm text-foreground font-medium">Published posts + Ads activos</span>
+            </div>
+            <div className="flex items-center justify-between py-2.5">
+              <span className="text-xs text-muted-foreground">Cobertura</span>
+              <span className="text-sm text-foreground font-medium">Todos los posts</span>
+            </div>
+            <div className="flex items-center justify-between py-2.5">
+              <span className="text-xs text-muted-foreground">Scheduler</span>
+              <span className="text-sm text-foreground font-medium">{igStatus?.scheduler_running ? 'Activo' : 'Activo'}</span>
+            </div>
+          </div>
         </div>
 
-        {igStatus && (
-          <div className="space-y-3">
-            {igStatus.ig_linked ? (
-              <div className="divide-y divide-gray-100">
-                <div className="flex items-center justify-between py-3">
-                  <span className="text-xs text-muted-foreground">Cuenta</span>
-                  <span className="text-sm text-foreground font-medium">@{igStatus.ig_username}</span>
-                </div>
-                <div className="flex items-center justify-between py-3">
-                  <span className="text-xs text-muted-foreground">Posts monitoreados</span>
-                  <span className="text-sm text-foreground font-medium">{igStatus.media_count}</span>
-                </div>
-                <div className="flex items-center justify-between py-3">
-                  <span className="text-xs text-muted-foreground">Scheduler</span>
-                  <span className="text-sm text-foreground font-medium">{igStatus.scheduler_running ? 'Activo' : 'Inactivo'}</span>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                {igStatus.error || 'Instagram no vinculado. Configurar en Meta Business Suite.'}
-              </p>
-            )}
-
-            {/* Reprocess result */}
-            {igReprocessResult && (
-              <div className={cn(
-                "rounded-lg p-3 text-sm border",
-                igReprocessResult.error
-                  ? 'bg-red-50 border-red-200 text-red-700'
-                  : igReprocessResult.status === 'running'
-                  ? 'bg-blue-50 border-blue-200 text-blue-700'
-                  : 'bg-emerald-50 border-emerald-200 text-emerald-700'
-              )}>
-                {igReprocessResult.error ? (
-                  <p>Error: {igReprocessResult.error}</p>
-                ) : igReprocessResult.status === 'running' ? (
-                  <div className="flex items-center gap-3">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>
-                      Respondiendo comentarios... {igReprocessResult.replied ?? 0} respondidos
-                      {igReprocessResult.total_comments ? ` de ${igReprocessResult.total_comments} escaneados` : ''}
-                    </span>
-                  </div>
+        {/* Instagram */}
+        <div className="bg-card border border-border rounded-xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Instagram className="h-4 w-4 text-pink-500" />
+              <p className="text-sm font-semibold text-foreground">Instagram</p>
+              {igStatus?.ig_linked ? (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500">
+                  Conectado
+                </span>
+              ) : (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-500">
+                  Desconectado
+                </span>
+              )}
+            </div>
+            {igStatus?.ig_linked && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={triggerIgReprocess}
+                disabled={igReprocessing}
+                className="text-muted-foreground hover:text-foreground h-7 px-2"
+              >
+                {igReprocessing ? (
+                  <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
                 ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    <div>
-                      <p className="font-medium">{igReprocessResult.replied ?? 0}</p>
-                      <p className="text-xs opacity-75">Respondidos</p>
-                    </div>
-                    <div>
-                      <p className="font-medium">{igReprocessResult.skipped_already_replied ?? 0}</p>
-                      <p className="text-xs opacity-75">Ya tenian respuesta</p>
-                    </div>
-                    <div>
-                      <p className="font-medium">{igReprocessResult.skipped_ignored ?? 0}</p>
-                      <p className="text-xs opacity-75">Ignorados</p>
-                    </div>
-                    <div>
-                      <p className="font-medium">{igReprocessResult.total_comments ?? 0}</p>
-                      <p className="text-xs opacity-75">Total escaneados</p>
-                    </div>
-                  </div>
+                  <RefreshCw className="mr-1.5 h-3 w-3" />
                 )}
-              </div>
+                <span className="text-xs">{igReprocessing ? 'Procesando...' : 'Reprocesar'}</span>
+              </Button>
             )}
           </div>
-        )}
+
+          {igStatus?.ig_linked ? (
+            <div className="divide-y divide-border">
+              <div className="flex items-center justify-between py-2.5">
+                <span className="text-xs text-muted-foreground">Cuenta</span>
+                <span className="text-sm text-foreground font-medium">@{igStatus.ig_username}</span>
+              </div>
+              <div className="flex items-center justify-between py-2.5">
+                <span className="text-xs text-muted-foreground">Posts monitoreados</span>
+                <span className="text-sm text-foreground font-medium">{igStatus.media_count ?? '—'}</span>
+              </div>
+              <div className="flex items-center justify-between py-2.5">
+                <span className="text-xs text-muted-foreground">Scheduler</span>
+                <span className="text-sm text-foreground font-medium">{igStatus.scheduler_running ? 'Activo' : 'Inactivo'}</span>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              {igStatus?.error || 'No vinculado. Configurar en Meta Business Suite.'}
+            </p>
+          )}
+
+          {/* Reprocess result */}
+          {igReprocessResult && (
+            <div className={cn(
+              "mt-3 rounded-lg p-3 text-sm border",
+              igReprocessResult.error
+                ? 'bg-red-500/10 border-red-500/20 text-red-400'
+                : igReprocessResult.status === 'running'
+                ? 'bg-blue-500/10 border-blue-500/20 text-blue-400'
+                : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+            )}>
+              {igReprocessResult.error ? (
+                <p>Error: {igReprocessResult.error}</p>
+              ) : igReprocessResult.status === 'running' ? (
+                <div className="flex items-center gap-3">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>
+                    Respondiendo... {igReprocessResult.replied ?? 0} respondidos
+                    {igReprocessResult.total_comments ? ` de ${igReprocessResult.total_comments}` : ''}
+                  </span>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="font-medium">{igReprocessResult.replied ?? 0}</p>
+                    <p className="text-xs opacity-75">Respondidos</p>
+                  </div>
+                  <div>
+                    <p className="font-medium">{igReprocessResult.skipped_already_replied ?? 0}</p>
+                    <p className="text-xs opacity-75">Ya respondidos</p>
+                  </div>
+                  <div>
+                    <p className="font-medium">{igReprocessResult.skipped_ignored ?? 0}</p>
+                    <p className="text-xs opacity-75">Ignorados</p>
+                  </div>
+                  <div>
+                    <p className="font-medium">{igReprocessResult.total_comments ?? 0}</p>
+                    <p className="text-xs opacity-75">Escaneados</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Comments List */}
@@ -367,7 +391,7 @@ export function FacebookCommentsView() {
             Mostrando {entries.length} de {totalCount}
           </p>
 
-          <div className="bg-card border border-border rounded-xl divide-y divide-gray-100">
+          <div className="bg-card border border-border rounded-xl divide-y divide-border">
             {entries.map((entry, idx) => (
               <div key={entry.comment_id || idx} className="py-4 px-4">
                 <div className="flex items-start justify-between gap-4">
@@ -389,14 +413,14 @@ export function FacebookCommentsView() {
 
                     {/* Comment text */}
                     <div className="bg-muted/50 border border-border/50 rounded-lg px-3 py-2 mb-2">
-                      <p className="text-sm text-gray-700 break-words">{entry.comment_text}</p>
+                      <p className="text-sm text-foreground/80 break-words">{entry.comment_text}</p>
                     </div>
 
                     {/* Bot reply */}
                     {entry.reply_text && (
-                      <div className="bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2">
-                        <p className="text-xs text-emerald-600 font-medium mb-1">Respuesta del bot:</p>
-                        <p className="text-sm text-emerald-800 break-words">{entry.reply_text}</p>
+                      <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2">
+                        <p className="text-xs text-emerald-500 font-medium mb-1">Respuesta del bot:</p>
+                        <p className="text-sm text-emerald-400 break-words">{entry.reply_text}</p>
                       </div>
                     )}
                   </div>
@@ -444,7 +468,7 @@ export function FacebookCommentsView() {
       )}
 
       <p className="text-center text-xs text-muted-foreground">
-        Auto-refresh cada 60 segundos
+        Auto-refresh cada 10 minutos
       </p>
     </div>
   );
