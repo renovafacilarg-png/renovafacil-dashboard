@@ -43,6 +43,8 @@ interface FBStats {
 
 const PAGE_SIZE = 50;
 
+type SourceFilter = 'all' | 'facebook' | 'instagram';
+
 export function FacebookCommentsView() {
   const [entries, setEntries] = useState<FBCommentEntry[]>([]);
   const [stats, setStats] = useState<FBStats | null>(null);
@@ -53,6 +55,7 @@ export function FacebookCommentsView() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
+  const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
   const loadedCountRef = useRef(PAGE_SIZE);
 
   const fetchData = async (showLoading = true) => {
@@ -385,14 +388,46 @@ export function FacebookCommentsView() {
             El bot procesa comentarios cada 3 minutos
           </p>
         </div>
-      ) : (
+      ) : (() => {
+        const filteredEntries = entries.filter(e =>
+          sourceFilter === 'all' ? true :
+          sourceFilter === 'instagram' ? e.source === 'instagram' :
+          e.source !== 'instagram'
+        );
+        const fbCount = entries.filter(e => e.source !== 'instagram').length;
+        const igCount = entries.filter(e => e.source === 'instagram').length;
+
+        return (
         <div className="space-y-2">
-          <p className="text-xs text-muted-foreground">
-            Mostrando {entries.length} de {totalCount}
-          </p>
+          {/* Source filter tabs */}
+          <div className="flex items-center gap-3">
+            <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-900 rounded-lg">
+              {(['all', 'facebook', 'instagram'] as SourceFilter[]).map((f) => (
+                <button
+                  key={f}
+                  onClick={() => setSourceFilter(f)}
+                  className={cn(
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150',
+                    sourceFilter === f
+                      ? 'bg-card text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {f === 'facebook' && <Facebook className="h-3 w-3 text-blue-500" />}
+                  {f === 'instagram' && <Instagram className="h-3 w-3 text-pink-500" />}
+                  {f === 'all' ? `Todos (${entries.length})` :
+                   f === 'facebook' ? `Facebook (${fbCount})` :
+                   `Instagram (${igCount})`}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Mostrando {filteredEntries.length} de {totalCount}
+            </p>
+          </div>
 
           <div className="bg-card border border-border rounded-xl divide-y divide-border">
-            {entries.map((entry, idx) => (
+            {filteredEntries.map((entry, idx) => (
               <div key={entry.comment_id || idx} className="py-4 px-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -465,7 +500,8 @@ export function FacebookCommentsView() {
             </div>
           )}
         </div>
-      )}
+      );
+      })()}
 
       <p className="text-center text-xs text-muted-foreground">
         Auto-refresh cada 10 minutos

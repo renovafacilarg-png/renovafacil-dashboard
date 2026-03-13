@@ -17,7 +17,7 @@ import {
 import {
   MessageCircle, ArrowLeft, RefreshCw, Loader2, Phone, Search,
   CheckCheck, Check, Send, Tag, ShoppingBag, CheckCircle, Info,
-  Package, DollarSign,
+  Package, DollarSign, Image, Mic, Video, FileText,
 } from 'lucide-react';
 import { formatDistanceToNow, isToday, isYesterday, isSameDay, format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -452,6 +452,53 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
     }
   };
 
+  // ---- Media message renderer ----
+
+  const renderMessageContent = (msg: Message) => {
+    const isOutgoing = msg.direction === 'outgoing';
+    const bubbleText = msg.message || '';
+
+    if (msg.message_type === 'image') {
+      return (
+        <div className="flex items-start gap-2">
+          <Image className={cn('h-4 w-4 mt-0.5 flex-shrink-0', isOutgoing ? 'text-white/70' : 'text-gray-400')} />
+          <p className="text-sm whitespace-pre-wrap break-words leading-relaxed italic">
+            {bubbleText || '[Imagen]'}
+          </p>
+        </div>
+      );
+    }
+    if (msg.message_type === 'audio') {
+      return (
+        <div className="flex items-center gap-2">
+          <Mic className={cn('h-4 w-4 flex-shrink-0', isOutgoing ? 'text-white/70' : 'text-gray-400')} />
+          <p className="text-sm italic">{bubbleText || '[Audio]'}</p>
+        </div>
+      );
+    }
+    if (msg.message_type === 'video') {
+      return (
+        <div className="flex items-center gap-2">
+          <Video className={cn('h-4 w-4 flex-shrink-0', isOutgoing ? 'text-white/70' : 'text-gray-400')} />
+          <p className="text-sm italic">{bubbleText || '[Video]'}</p>
+        </div>
+      );
+    }
+    if (msg.message_type === 'document' || msg.message_type === 'file') {
+      return (
+        <div className="flex items-center gap-2">
+          <FileText className={cn('h-4 w-4 flex-shrink-0', isOutgoing ? 'text-white/70' : 'text-gray-400')} />
+          <p className="text-sm italic">{bubbleText || '[Documento]'}</p>
+        </div>
+      );
+    }
+    return (
+      <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
+        {bubbleText}
+      </p>
+    );
+  };
+
   // ---- Render ----
 
   return (
@@ -820,9 +867,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
                                   : 'bg-muted text-foreground rounded-2xl rounded-tl-sm'
                               )}
                             >
-                              <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
-                                {msg.message}
-                              </p>
+                              {renderMessageContent(msg)}
                             </div>
 
                             {/* Timestamp below bubble */}
@@ -830,9 +875,6 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
                               'flex items-center gap-1 mt-0.5',
                               msg.direction === 'outgoing' ? 'justify-end pr-0.5' : 'justify-start pl-0.5'
                             )}>
-                              {msg.message_type !== 'text' && (
-                                <span className="text-[10px] text-gray-400">({msg.message_type})</span>
-                              )}
                               <span className="text-[10px] text-gray-400">
                                 {formatMessageTime(msg.timestamp)}
                               </span>
