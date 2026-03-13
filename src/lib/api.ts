@@ -620,3 +620,56 @@ export async function fetchHealthStatus(): Promise<Record<string, unknown>> {
   const response = await fetch(`${API_URL}/health`, { headers: getHeaders() });
   return handleResponse<Record<string, unknown>>(response);
 }
+
+// =============================================================================
+// RE-ENGAGEMENT CAMPAIGNS
+// =============================================================================
+
+export type ClientStateFilter = 'nuevo' | 'interesado' | 'link_enviado' | 'pago' | 'entregado' | 'recurrente' | 'all';
+
+export interface Campaign {
+  id: string;
+  name: string;
+  state_filter: ClientStateFilter;
+  message: string;
+  status: 'draft' | 'scheduled' | 'sent' | 'failed';
+  recipient_count?: number;
+  sent_count?: number;
+  scheduled_at?: string;
+  sent_at?: string;
+  created_at: string;
+}
+
+export interface CampaignsResponse {
+  campaigns: Campaign[];
+  count: number;
+}
+
+export async function fetchCampaigns(): Promise<CampaignsResponse> {
+  const response = await fetch(`${API_URL}/api/campaigns`, {
+    headers: getHeaders(),
+  });
+  return handleResponse<CampaignsResponse>(response);
+}
+
+export async function createCampaign(data: {
+  name: string;
+  state_filter: ClientStateFilter;
+  message: string;
+  scheduled_at?: string;
+}): Promise<Campaign> {
+  const response = await fetch(`${API_URL}/api/campaigns`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  });
+  return handleResponse<Campaign>(response);
+}
+
+export async function sendCampaign(campaignId: string): Promise<{ success: boolean; sent_count: number }> {
+  const response = await fetch(`${API_URL}/api/campaigns/${campaignId}/send`, {
+    method: 'POST',
+    headers: getHeaders(),
+  });
+  return handleResponse<{ success: boolean; sent_count: number }>(response);
+}
