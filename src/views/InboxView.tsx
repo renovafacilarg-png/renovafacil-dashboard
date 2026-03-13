@@ -39,6 +39,7 @@ interface Message {
   message: string;
   message_type: string;
   contact_name: string;
+  has_media?: number;
 }
 
 interface Conversation {
@@ -95,6 +96,24 @@ function getLastReadTime(phone: string): number {
 
 function markAsRead(phone: string) {
   localStorage.setItem(getLastReadKey(phone), String(Date.now()));
+}
+
+// ---------------------------------------------------------------------------
+// AuthImage — fetches image with auth headers and renders as blob URL
+// ---------------------------------------------------------------------------
+
+function AuthImage({ src, alt, className }: { src: string; alt: string; className?: string }) {
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  useEffect(() => {
+    let url: string;
+    fetch(src, { headers: getHeaders() })
+      .then(r => r.blob())
+      .then(b => { url = URL.createObjectURL(b); setBlobUrl(url); })
+      .catch(() => {});
+    return () => { if (url) URL.revokeObjectURL(url); };
+  }, [src]);
+  if (!blobUrl) return <div className={cn('bg-muted animate-pulse rounded-lg', className)} style={{ minHeight: 80 }} />;
+  return <img src={blobUrl} alt={alt} className={className} onClick={() => window.open(blobUrl, '_blank')} />;
 }
 
 // ---------------------------------------------------------------------------
@@ -459,12 +478,24 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
     const bubbleText = msg.message || '';
 
     if (msg.message_type === 'image') {
+      if (msg.has_media) {
+        return (
+          <div className="flex flex-col gap-1.5">
+            <AuthImage
+              src={`${API_URL}/api/messages/${encodeURIComponent(msg.id)}/media`}
+              alt={bubbleText || 'Imagen'}
+              className="rounded-lg max-w-[240px] max-h-[320px] object-cover cursor-pointer"
+            />
+            {bubbleText && bubbleText !== '[Imagen recibida]' && (
+              <p className="text-sm">{bubbleText}</p>
+            )}
+          </div>
+        );
+      }
       return (
         <div className="flex items-start gap-2">
           <Image className={cn('h-4 w-4 mt-0.5 flex-shrink-0', isOutgoing ? 'text-white/70' : 'text-gray-400')} />
-          <p className="text-sm whitespace-pre-wrap break-words leading-relaxed italic">
-            {bubbleText || '[Imagen]'}
-          </p>
+          <p className="text-sm italic">{bubbleText || '[Imagen recibida]'}</p>
         </div>
       );
     }
