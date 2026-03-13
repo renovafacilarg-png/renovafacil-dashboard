@@ -75,7 +75,6 @@ type ChannelType = 'wa' | 'messenger' | 'instagram';
 
 interface InboxViewProps {
   channel?: ChannelType;
-  initialPhone?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -102,7 +101,7 @@ function markAsRead(phone: string) {
 // Component
 // ---------------------------------------------------------------------------
 
-export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {}) {
+export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
   // Cached conversations from localStorage
   const getCachedConversations = (): Conversation[] => {
     try {
@@ -293,13 +292,6 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
     return () => clearInterval(interval);
   }, []);
 
-  // Auto-select conversation when arriving from carritos
-  useEffect(() => {
-    if (!initialPhone || conversations.length === 0) return;
-    const normalized = initialPhone.replace(/\D/g, '');
-    const match = conversations.find(c => c.phone.replace(/\D/g, '').endsWith(normalized) || normalized.endsWith(c.phone.replace(/\D/g, '')));
-    setSelectedConversation(match ? match.phone : initialPhone);
-  }, [initialPhone, conversations]);
 
   useEffect(() => {
     if (selectedConversation) {
@@ -467,7 +459,7 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
       {/* ── Header ── */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">
+          <h1 className="text-2xl font-bold text-foreground">
             {showTestChats
               ? 'Chats de Prueba'
               : channel === 'messenger'
@@ -476,7 +468,7 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
               ? 'Inbox Instagram'
               : 'Inbox WhatsApp'}
           </h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+          <p className="text-sm text-muted-foreground mt-0.5">
             {showTestChats
               ? `${testConversations.length} conversaciones de prueba`
               : `${realConversations.length} conversaciones`}
@@ -498,7 +490,7 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
               variant="ghost"
               size="sm"
               onClick={() => setShowTestChats(!showTestChats)}
-              className="text-xs text-gray-500 hover:text-gray-900"
+              className="text-xs text-muted-foreground hover:text-foreground"
             >
               {showTestChats ? 'Ver Reales' : 'Ver Pruebas'}
             </Button>
@@ -508,7 +500,7 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
             size="sm"
             onClick={() => fetchConversations()}
             disabled={loading}
-            className="text-xs text-gray-500 hover:text-gray-900 gap-1.5"
+            className="text-xs text-muted-foreground hover:text-foreground gap-1.5"
           >
             <RefreshCw className={cn('h-3.5 w-3.5', loading && 'animate-spin')} />
             Actualizar
@@ -517,17 +509,17 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
       </div>
 
       {/* ── Main two-pane layout ── */}
-      <div className="flex-1 flex gap-0 min-h-0 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden bg-white dark:bg-gray-950">
+      <div className="flex-1 flex gap-0 min-h-0 rounded-xl border border-border overflow-hidden bg-card">
 
         {/* ── Left panel: conversation list ── */}
         <div
           className={cn(
-            'flex flex-col w-full md:w-80 lg:w-96 border-r border-gray-100 dark:border-gray-800 flex-shrink-0',
+            'flex flex-col w-full md:w-80 lg:w-96 border-r border-border flex-shrink-0',
             selectedConversation ? 'hidden md:flex' : 'flex'
           )}
         >
           {/* Search + filters */}
-          <div className="p-3 space-y-2 border-b border-gray-100 dark:border-gray-800">
+          <div className="p-3 space-y-2 border-b border-border">
             {/* Search */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
@@ -538,9 +530,9 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={cn(
                   'w-full pl-8 pr-3 py-1.5 text-sm rounded-lg',
-                  'bg-gray-50 dark:bg-gray-900 border-0 outline-none',
-                  'focus:bg-white dark:focus:bg-gray-800 focus:ring-1 focus:ring-primary/30',
-                  'placeholder:text-gray-400 text-gray-900 dark:text-gray-100',
+                  'bg-muted border-0 outline-none',
+                  'focus:bg-card focus:ring-1 focus:ring-primary/30',
+                  'placeholder:text-gray-400 text-foreground',
                   'transition-all duration-150'
                 )}
               />
@@ -562,8 +554,8 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
                     className={cn(
                       'flex-1 text-xs px-2 py-1.5 rounded-md cursor-pointer transition-all duration-150 font-medium whitespace-nowrap',
                       filter === f
-                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm'
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                        ? 'bg-card text-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-gray-700 dark:hover:text-gray-300'
                     )}
                   >
                     {labels[f]}
@@ -585,10 +577,10 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
               <div className="p-3 space-y-1">
                 {Array.from({ length: 6 }).map((_, i) => (
                   <div key={i} className="flex items-center gap-3 px-4 py-3 animate-pulse">
-                    <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex-shrink-0" />
+                    <div className="w-10 h-10 rounded-full bg-muted flex-shrink-0" />
                     <div className="flex-1 space-y-2">
-                      <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-2/3" />
-                      <div className="h-2.5 bg-gray-100 dark:bg-gray-800 rounded w-full" />
+                      <div className="h-3 bg-muted rounded w-2/3" />
+                      <div className="h-2.5 bg-muted rounded w-full" />
                     </div>
                   </div>
                 ))}
@@ -597,8 +589,8 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
               // Empty state
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
                 <MessageCircle className="h-10 w-10 text-gray-300 dark:text-gray-700 mb-3" />
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">No hay conversaciones</p>
-                <p className="text-xs text-gray-400 dark:text-gray-600 mt-1">
+                <p className="text-sm font-medium text-muted-foreground">No hay conversaciones</p>
+                <p className="text-xs text-muted-foreground/70 mt-1">
                   {filter !== 'all'
                     ? 'Cambiá el filtro para ver más'
                     : showTestChats
@@ -618,7 +610,7 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
                       'flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors duration-150',
                       isSelected
                         ? 'bg-primary/5 border-l-2 border-primary'
-                        : 'border-l-2 border-transparent hover:bg-gray-50 dark:hover:bg-gray-900'
+                        : 'border-l-2 border-transparent hover:bg-muted/50'
                     )}
                   >
                     {/* Avatar */}
@@ -640,8 +632,8 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
                         <span className={cn(
                           'text-sm truncate',
                           unread
-                            ? 'font-semibold text-gray-900 dark:text-gray-50'
-                            : 'font-medium text-gray-900 dark:text-gray-100'
+                            ? 'font-semibold text-foreground'
+                            : 'font-medium text-foreground'
                         )}>
                           {getDisplayName(conv)}
                         </span>
@@ -670,10 +662,10 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
 
         {/* ── Right panel ── */}
         {selectedConversation ? (
-          <div className="flex-1 flex flex-col min-w-0 bg-white dark:bg-gray-950">
+          <div className="flex-1 flex flex-col min-w-0 bg-card">
 
             {/* Thread header */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-card">
               <Button
                 variant="ghost"
                 size="icon"
@@ -694,10 +686,10 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
               </div>
 
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-sm text-gray-900 dark:text-gray-50 truncate">
+                <h3 className="font-semibold text-sm text-foreground truncate">
                   {selectedConvData ? getDisplayName(selectedConvData) : ''}
                 </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-0.5">
+                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                   <Phone className="h-2.5 w-2.5" />
                   {selectedConvData?.phone}
                   {selectedContactInfo?.order_count !== undefined && selectedContactInfo.order_count > 0 && (
@@ -716,7 +708,7 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
+                        className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
                         onClick={() => setShowDiscountDialog(true)}
                       >
                         <Tag className="h-4 w-4" />
@@ -730,7 +722,7 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
+                        className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
                         onClick={() => setShowInfoSheet(true)}
                       >
                         <Info className="h-4 w-4" />
@@ -744,7 +736,7 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
+                        className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
                         onClick={handleMarkAttended}
                       >
                         <CheckCircle className="h-4 w-4" />
@@ -758,7 +750,7 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
+                        className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
                         onClick={() => fetchMessages(selectedConversation)}
                         disabled={loadingMessages}
                       >
@@ -785,7 +777,7 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
                       className={cn('flex animate-pulse', i % 2 === 0 ? 'justify-start' : 'justify-end')}
                     >
                       <div className={cn(
-                        'h-9 rounded-2xl bg-gray-100 dark:bg-gray-800',
+                        'h-9 rounded-2xl bg-muted',
                         i % 2 === 0 ? 'w-48' : 'w-36'
                       )} />
                     </div>
@@ -794,7 +786,7 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
               ) : messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full py-12 text-center">
                   <MessageCircle className="h-8 w-8 text-gray-300 dark:text-gray-700 mb-2" />
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Sin mensajes</p>
+                  <p className="text-sm text-muted-foreground">Sin mensajes</p>
                 </div>
               ) : (
                 groupedMessages.map((group) => (
@@ -802,7 +794,7 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
                     {/* Day separator */}
                     <div className="flex items-center gap-3 my-4">
                       <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
-                      <span className="text-xs text-gray-400 dark:text-gray-500 font-medium whitespace-nowrap">
+                      <span className="text-xs text-muted-foreground/70 font-medium whitespace-nowrap">
                         {group.label}
                       </span>
                       <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
@@ -825,7 +817,7 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
                                 'px-4 py-2.5',
                                 msg.direction === 'outgoing'
                                   ? 'bg-primary text-white rounded-2xl rounded-tr-sm'
-                                  : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl rounded-tl-sm'
+                                  : 'bg-muted text-foreground rounded-2xl rounded-tl-sm'
                               )}
                             >
                               <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
@@ -859,7 +851,7 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
             </div>
 
             {/* Message input */}
-            <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950">
+            <div className="px-4 py-3 border-t border-border bg-card">
               <div className="flex items-end gap-2">
                 <Textarea
                   ref={textareaRef}
@@ -874,7 +866,7 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
                   }}
                   className={cn(
                     'min-h-10 max-h-32 resize-none text-sm rounded-xl',
-                    'bg-gray-50 dark:bg-gray-900 border-0',
+                    'bg-muted border-0',
                     'focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:ring-offset-0',
                     'placeholder:text-gray-400'
                   )}
@@ -901,10 +893,10 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
           <div className="hidden md:flex flex-1 items-center justify-center bg-gray-50/50 dark:bg-gray-900/20">
             <div className="text-center">
               <MessageCircle className="h-10 w-10 text-gray-300 dark:text-gray-700 mx-auto mb-3" />
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <p className="text-sm font-medium text-muted-foreground">
                 Seleccioná una conversación
               </p>
-              <p className="text-xs text-gray-400 dark:text-gray-600 mt-1">
+              <p className="text-xs text-muted-foreground/70 mt-1">
                 Elegí un chat de la lista para ver los mensajes
               </p>
             </div>
@@ -936,16 +928,16 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
           <div className="mt-6 space-y-6">
             {/* Stats */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl bg-gray-50 dark:bg-gray-900 p-4 text-center">
+              <div className="rounded-xl bg-muted p-4 text-center">
                 <Package className="h-4 w-4 mx-auto mb-1.5 text-gray-400" />
-                <p className="text-2xl font-semibold text-gray-900 dark:text-gray-50">
+                <p className="text-2xl font-semibold text-foreground">
                   {selectedContactInfo?.order_count ?? '—'}
                 </p>
                 <p className="text-xs text-gray-500 mt-0.5">Pedidos</p>
               </div>
-              <div className="rounded-xl bg-gray-50 dark:bg-gray-900 p-4 text-center">
+              <div className="rounded-xl bg-muted p-4 text-center">
                 <DollarSign className="h-4 w-4 mx-auto mb-1.5 text-emerald-500" />
-                <p className="text-2xl font-semibold text-gray-900 dark:text-gray-50">
+                <p className="text-2xl font-semibold text-foreground">
                   {selectedContactInfo?.total_spent
                     ? `$${selectedContactInfo.total_spent.toLocaleString('es-AR')}`
                     : '—'}
@@ -957,7 +949,7 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
             {/* Orders list */}
             {selectedContactInfo?.orders && selectedContactInfo.orders.length > 0 && (
               <div>
-                <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-2">
+                <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
                   <ShoppingBag className="h-3.5 w-3.5 text-gray-400" />
                   Pedidos recientes
                 </h4>
@@ -965,10 +957,10 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
                   {selectedContactInfo.orders.map((order) => (
                     <div
                       key={order.number}
-                      className="rounded-xl bg-gray-50 dark:bg-gray-900 px-3 py-2.5"
+                      className="rounded-xl bg-muted px-3 py-2.5"
                     >
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        <span className="text-sm font-medium text-foreground">
                           #{order.number}
                         </span>
                         <Badge
@@ -1016,7 +1008,7 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
             {selectedContactInfo && selectedContactInfo.orders.length === 0 && (
               <div className="text-center py-8">
                 <ShoppingBag className="h-8 w-8 mx-auto mb-2 text-gray-300 dark:text-gray-700" />
-                <p className="text-sm text-gray-500 dark:text-gray-400">Sin pedidos registrados</p>
+                <p className="text-sm text-muted-foreground">Sin pedidos registrados</p>
               </div>
             )}
           </div>
@@ -1041,7 +1033,7 @@ export function InboxView({ channel = 'wa', initialPhone }: InboxViewProps = {})
               Porcentaje de descuento
             </label>
             <Select value={discountPercent} onValueChange={setDiscountPercent}>
-              <SelectTrigger className="bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-800">
+              <SelectTrigger className="bg-muted border-border">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
