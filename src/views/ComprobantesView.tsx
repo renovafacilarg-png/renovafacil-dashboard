@@ -1,8 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { mockComprobantes } from '@/data/mockData';
 import type { Comprobante } from '@/types';
+import { API_URL, getHeaders } from '@/lib/api';
 import {
   Search,
   Download,
@@ -38,12 +38,37 @@ import {
 import { cn } from '@/lib/utils';
 
 export function ComprobantesView() {
+  const [comprobantes, setComprobantes] = useState<Comprobante[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedComprobante, setSelectedComprobante] = useState<Comprobante | null>(null);
 
+  useEffect(() => {
+    const fetchComprobantes = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/comprobantes`, {
+          headers: getHeaders(),
+        });
+        if (!response.ok) {
+          // API may not exist until Phase 3 — graceful empty state
+          setComprobantes([]);
+          return;
+        }
+        const data = await response.json();
+        setComprobantes(data.comprobantes || []);
+      } catch {
+        setError('No se pueden cargar los comprobantes. Verifica la conexión.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchComprobantes();
+  }, []);
+
   const filteredComprobantes = useMemo(() => {
-    return mockComprobantes.filter(comp => {
+    return comprobantes.filter(comp => {
       const matchesSearch =
         comp.sender_phone.includes(searchQuery) ||
         comp.order_number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -57,20 +82,20 @@ export function ComprobantesView() {
   }, [searchQuery, statusFilter]);
 
   const stats = useMemo(() => {
-    const today = mockComprobantes.filter(c => {
+    const today = comprobantes.filter(c => {
       const compDate = new Date(c.date);
       const today = new Date();
       return compDate.toDateString() === today.toDateString();
     }).length;
 
-    const pending = mockComprobantes.filter(c => c.status === 'pending').length;
-    const verified = mockComprobantes.filter(c => c.status === 'verified').length;
-    const totalMonth = mockComprobantes
+    const pending = comprobantes.filter(c => c.status === 'pending').length;
+    const verified = comprobantes.filter(c => c.status === 'verified').length;
+    const totalMonth = comprobantes
       .filter(c => c.status === 'verified')
       .reduce((sum, c) => sum + (c.amount || 0), 0);
 
     return { today, pending, verified, totalMonth };
-  }, []);
+  }, [comprobantes]);
 
   const handleVerify = (comprobante: Comprobante, verified: boolean) => {
     toast.success(verified ? 'Comprobante verificado' : 'Comprobante rechazado', {
@@ -139,12 +164,12 @@ export function ComprobantesView() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Comprobantes de Pago</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-foreground">Comprobantes de Pago</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
             Gestiona y verifica las transferencias recibidas
           </p>
         </div>
-        <Button variant="ghost" size="sm" className="text-gray-500">
+        <Button variant="ghost" size="sm" className="text-muted-foreground">
           <Download className="mr-2 h-4 w-4" />
           Exportar Reporte
         </Button>
@@ -152,41 +177,41 @@ export function ComprobantesView() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <div className="bg-white border border-gray-200 rounded-xl p-5">
-          <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Hoy</p>
+        <div className="bg-card border border-border rounded-xl p-5">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Hoy</p>
           <div className="flex items-center justify-between">
-            <p className="text-2xl font-bold text-gray-900">{stats.today}</p>
+            <p className="text-2xl font-bold text-foreground">{stats.today}</p>
             <Receipt className="h-5 w-5 text-gray-400" />
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl p-5">
-          <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Pendientes</p>
+        <div className="bg-card border border-border rounded-xl p-5">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Pendientes</p>
           <div className="flex items-center justify-between">
-            <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
+            <p className="text-2xl font-bold text-foreground">{stats.pending}</p>
             <Clock className="h-5 w-5 text-amber-500" />
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl p-5">
-          <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Verificados</p>
+        <div className="bg-card border border-border rounded-xl p-5">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Verificados</p>
           <div className="flex items-center justify-between">
-            <p className="text-2xl font-bold text-gray-900">{stats.verified}</p>
+            <p className="text-2xl font-bold text-foreground">{stats.verified}</p>
             <CheckCircle className="h-5 w-5 text-emerald-500" />
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl p-5">
-          <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Total Mes</p>
+        <div className="bg-card border border-border rounded-xl p-5">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Total Mes</p>
           <div className="flex items-center justify-between">
-            <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalMonth)}</p>
+            <p className="text-2xl font-bold text-foreground">{formatCurrency(stats.totalMonth)}</p>
             <DollarSign className="h-5 w-5 text-blue-500" />
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white border border-gray-200 rounded-xl p-4">
+      <div className="bg-card border border-border rounded-xl p-4">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -194,11 +219,11 @@ export function ComprobantesView() {
               placeholder="Buscar por teléfono, pedido, referencia..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 border-gray-200 focus:ring-primary/30 text-sm"
+              className="pl-10 border-border focus:ring-primary/30 text-sm"
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[180px] border-gray-200 text-sm">
+            <SelectTrigger className="w-[180px] border-border text-sm">
               <Receipt className="mr-2 h-4 w-4 text-gray-400" />
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
@@ -212,45 +237,74 @@ export function ComprobantesView() {
         </div>
       </div>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="bg-card border border-border rounded-xl p-5 animate-pulse">
+              <div className="h-20 bg-muted/50 rounded" />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !loading && (
+        <div className="bg-card border border-border rounded-xl p-12 text-center">
+          <p className="text-destructive text-sm">{error}</p>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && !error && comprobantes.length === 0 && (
+        <div className="bg-card border border-border rounded-xl p-12 text-center">
+          <Receipt className="h-10 w-10 mx-auto mb-3 opacity-40 text-muted-foreground" />
+          <p className="text-muted-foreground">No hay comprobantes disponibles</p>
+          <p className="text-xs mt-1 text-muted-foreground/70">
+            Los comprobantes aparecerán aquí cuando Phase 3 del backend esté activo
+          </p>
+        </div>
+      )}
+
       {/* Comprobantes Table */}
-      {filteredComprobantes.length > 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      {!loading && !error && filteredComprobantes.length > 0 && (
+        <div className="bg-card border border-border rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Fecha</th>
-                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Cliente</th>
-                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Monto</th>
-                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Origen</th>
-                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Referencia</th>
-                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">Estado</th>
-                  <th className="px-5 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wide">Acciones</th>
+                <tr className="border-b border-border/50">
+                  <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Fecha</th>
+                  <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Cliente</th>
+                  <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Monto</th>
+                  <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Origen</th>
+                  <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Referencia</th>
+                  <th className="px-5 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Estado</th>
+                  <th className="px-5 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wide">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filteredComprobantes.map((comprobante) => (
-                  <tr key={comprobante.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-5 py-3.5 text-sm text-gray-600">
+                  <tr key={comprobante.id} className="hover:bg-muted/50 transition-colors">
+                    <td className="px-5 py-3.5 text-sm text-muted-foreground">
                       {formatDate(comprobante.date)}
                     </td>
                     <td className="px-5 py-3.5">
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{comprobante.titular_origen || 'Desconocido'}</div>
-                        <div className="text-xs text-gray-500">{comprobante.sender_phone}</div>
+                        <div className="text-sm font-medium text-foreground">{comprobante.titular_origen || 'Desconocido'}</div>
+                        <div className="text-xs text-muted-foreground">{comprobante.sender_phone}</div>
                       </div>
                     </td>
-                    <td className="px-5 py-3.5 text-sm font-medium text-gray-900">
+                    <td className="px-5 py-3.5 text-sm font-medium text-foreground">
                       {formatCurrency(comprobante.amount)}
                     </td>
-                    <td className="px-5 py-3.5 text-sm text-gray-600">
+                    <td className="px-5 py-3.5 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1.5">
                         <Banknote className="h-3.5 w-3.5 text-gray-400" />
                         {comprobante.origen || '-'}
                       </div>
                     </td>
                     <td className="px-5 py-3.5">
-                      <code className="text-xs font-mono bg-gray-50 px-2 py-1 rounded text-gray-600">
+                      <code className="text-xs font-mono bg-muted/50 px-2 py-1 rounded text-muted-foreground">
                         {comprobante.referencia || '-'}
                       </code>
                     </td>
@@ -262,7 +316,7 @@ export function ComprobantesView() {
                         variant="ghost"
                         size="sm"
                         onClick={() => setSelectedComprobante(comprobante)}
-                        className="text-gray-500 h-8 w-8 p-0"
+                        className="text-muted-foreground h-8 w-8 p-0"
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -273,11 +327,14 @@ export function ComprobantesView() {
             </table>
           </div>
         </div>
-      ) : (
-        <div className="bg-white border border-gray-200 rounded-xl p-12 text-center">
-          <Receipt className="h-12 w-12 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No se encontraron comprobantes</h3>
-          <p className="text-sm text-gray-500">
+      )}
+
+      {/* No Results (filtered but no matches) */}
+      {!loading && !error && comprobantes.length > 0 && filteredComprobantes.length === 0 && (
+        <div className="bg-card border border-border rounded-xl p-12 text-center">
+          <Receipt className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />
+          <h3 className="text-lg font-medium text-foreground mb-2">No se encontraron comprobantes</h3>
+          <p className="text-sm text-muted-foreground">
             Intenta con otros filtros de búsqueda
           </p>
         </div>
@@ -287,7 +344,7 @@ export function ComprobantesView() {
       <Dialog open={!!selectedComprobante} onOpenChange={() => setSelectedComprobante(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-gray-900">
+            <DialogTitle className="flex items-center gap-2 text-foreground">
               <Receipt className="h-5 w-5" />
               Comprobante de Pago
             </DialogTitle>
@@ -310,62 +367,62 @@ export function ComprobantesView() {
               </div>
 
               {/* Image Placeholder */}
-              <div className="bg-gray-50 border border-gray-200 rounded-xl p-8 text-center">
+              <div className="bg-muted/50 border border-border rounded-xl p-8 text-center">
                 <ImageIcon className="h-14 w-14 mx-auto text-gray-300 mb-3" />
-                <p className="text-sm text-gray-500">Imagen del comprobante</p>
+                <p className="text-sm text-muted-foreground">Imagen del comprobante</p>
                 <p className="text-xs text-gray-400 mt-0.5">(Procesado con Gemini Vision)</p>
               </div>
 
               {/* Details */}
               <div className="divide-y divide-gray-100">
                 <div className="flex justify-between py-2.5">
-                  <span className="text-sm text-gray-500 flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
                     <DollarSign className="h-4 w-4" />
                     Monto
                   </span>
-                  <span className="text-sm font-bold text-gray-900">
+                  <span className="text-sm font-bold text-foreground">
                     {formatCurrency(selectedComprobante.amount)}
                   </span>
                 </div>
 
                 <div className="flex justify-between py-2.5">
-                  <span className="text-sm text-gray-500 flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     Fecha
                   </span>
-                  <span className="text-sm text-gray-900">{selectedComprobante.fecha || '-'}</span>
+                  <span className="text-sm text-foreground">{selectedComprobante.fecha || '-'}</span>
                 </div>
 
                 <div className="flex justify-between py-2.5">
-                  <span className="text-sm text-gray-500 flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
                     <Banknote className="h-4 w-4" />
                     Origen
                   </span>
-                  <span className="text-sm text-gray-900">{selectedComprobante.origen || '-'}</span>
+                  <span className="text-sm text-foreground">{selectedComprobante.origen || '-'}</span>
                 </div>
 
                 <div className="flex justify-between py-2.5">
-                  <span className="text-sm text-gray-500 flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
                     <User className="h-4 w-4" />
                     Titular
                   </span>
-                  <span className="text-sm text-gray-900">{selectedComprobante.titular_origen || '-'}</span>
+                  <span className="text-sm text-foreground">{selectedComprobante.titular_origen || '-'}</span>
                 </div>
 
                 <div className="flex justify-between py-2.5">
-                  <span className="text-sm text-gray-500 flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
                     <Receipt className="h-4 w-4" />
                     Referencia
                   </span>
                   <div className="flex items-center gap-2">
-                    <code className="text-xs font-mono bg-gray-50 px-2 py-1 rounded text-gray-600">
+                    <code className="text-xs font-mono bg-muted/50 px-2 py-1 rounded text-muted-foreground">
                       {selectedComprobante.referencia || '-'}
                     </code>
                     {selectedComprobante.referencia && (
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-gray-400 hover:text-gray-600"
+                        className="h-7 w-7 text-gray-400 hover:text-muted-foreground"
                         onClick={() => copyToClipboard(selectedComprobante.referencia!, 'Referencia')}
                       >
                         <Copy className="h-3.5 w-3.5" />
@@ -375,27 +432,27 @@ export function ComprobantesView() {
                 </div>
 
                 <div className="flex justify-between py-2.5">
-                  <span className="text-sm text-gray-500 flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
                     <Phone className="h-4 w-4" />
                     Teléfono
                   </span>
-                  <span className="text-sm text-gray-900">{selectedComprobante.sender_phone}</span>
+                  <span className="text-sm text-foreground">{selectedComprobante.sender_phone}</span>
                 </div>
 
                 {selectedComprobante.order_number && (
                   <div className="flex justify-between py-2.5">
-                    <span className="text-sm text-gray-500 flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground flex items-center gap-2">
                       <Receipt className="h-4 w-4" />
                       Pedido
                     </span>
-                    <span className="text-sm font-medium text-gray-900">#{selectedComprobante.order_number}</span>
+                    <span className="text-sm font-medium text-foreground">#{selectedComprobante.order_number}</span>
                   </div>
                 )}
 
                 {selectedComprobante.concepto && (
                   <div className="flex justify-between py-2.5">
-                    <span className="text-sm text-gray-500">Concepto</span>
-                    <span className="text-sm text-gray-900">{selectedComprobante.concepto}</span>
+                    <span className="text-sm text-muted-foreground">Concepto</span>
+                    <span className="text-sm text-foreground">{selectedComprobante.concepto}</span>
                   </div>
                 )}
               </div>
