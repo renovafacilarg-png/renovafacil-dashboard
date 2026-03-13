@@ -141,7 +141,7 @@ export function Sidebar({ onLogout, className }: SidebarProps) {
           <div className="flex items-center gap-2.5 px-3 py-3 bg-sidebar-accent rounded-lg">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-sidebar-foreground truncate">Bot activo · GPT-4o</p>
+              <p className="text-xs font-medium text-sidebar-foreground truncate">Bot activo · GPT-4o-mini</p>
               <p className="text-[10px] text-sidebar-foreground/40 mt-0.5">Respondiendo mensajes</p>
             </div>
           </div>

@@ -558,12 +558,12 @@ export function SettingsView() {
               </Button>
             </div>
 
-            {/* Groq AI */}
+            {/* OpenAI */}
             <div className="space-y-4 pt-6">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Key className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-sm font-semibold text-foreground">Groq AI</p>
+                  <p className="text-sm font-semibold text-foreground">OpenAI</p>
                 </div>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500">
                   <CheckCircle className="h-3.5 w-3.5" />
@@ -572,22 +572,22 @@ export function SettingsView() {
               </div>
               <p className="text-xs text-muted-foreground -mt-2 mb-3">Configuracion de la inteligencia artificial del bot</p>
               <div className="space-y-1.5">
-                <Label htmlFor="groq-model" className="text-sm font-medium text-foreground">
+                <Label htmlFor="openai-model" className="text-sm font-medium text-foreground">
                   Modelo
                 </Label>
                 <Input
-                  id="groq-model"
-                  value="llama-3.3-70b-versatile"
+                  id="openai-model"
+                  value="gpt-4o-mini"
                   readOnly
                   className="bg-muted/50 border-border"
                 />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="groq-key" className="text-sm font-medium text-foreground">
+                <Label htmlFor="openai-key" className="text-sm font-medium text-foreground">
                   API Key
                 </Label>
                 <Input
-                  id="groq-key"
+                  id="openai-key"
                   type="password"
                   value="••••••••••••••••••••••"
                   readOnly
