@@ -17,7 +17,7 @@ import {
 import {
   MessageCircle, ArrowLeft, RefreshCw, Loader2, Phone, Search,
   CheckCheck, Check, Send, Tag, ShoppingBag, CheckCircle, Info,
-  Package, DollarSign, Image, Mic, Video, FileText,
+  Package, DollarSign, Image, Mic, Video, FileText, PauseCircle, PlayCircle,
 } from 'lucide-react';
 import { formatDistanceToNow, isToday, isYesterday, isSameDay, format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -148,6 +148,9 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
   const [contactInfoCache, setContactInfoCache] = useState<Record<string, ContactInfo>>({});
   const [loadingContactInfo, setLoadingContactInfo] = useState<Record<string, boolean>>({});
 
+  // Human takeover
+  const [botPausedPhones, setBotPausedPhones] = useState<Set<string>>(new Set());
+
   // Panels
   const [showInfoSheet, setShowInfoSheet] = useState(false);
   const [showDiscountDialog, setShowDiscountDialog] = useState(false);
@@ -243,6 +246,15 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
       if (response.ok) {
         setMessageText('');
         toast.success('Mensaje enviado');
+        // Auto-pause bot when operator sends a manual message
+        if (!botPausedPhones.has(selectedConversation)) {
+          fetch(`${API_URL}/api/conversations/${selectedConversation}/pause-bot`, {
+            method: 'POST',
+            headers: getHeaders(),
+          }).then(() => {
+            setBotPausedPhones(prev => new Set(prev).add(selectedConversation));
+          }).catch(() => {});
+        }
         // Refresh messages immediately
         fetchMessages(selectedConversation);
       } else {
@@ -468,6 +480,32 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
       markAsRead(selectedConversation);
       setConversations(prev => [...prev]); // force re-render
       toast.success('Conversación marcada como atendida');
+    }
+  };
+
+  // ---- Toggle bot pause (human takeover) ----
+
+  const handleToggleBotPause = async () => {
+    if (!selectedConversation) return;
+    const isPaused = botPausedPhones.has(selectedConversation);
+    const method = isPaused ? 'DELETE' : 'POST';
+    try {
+      const response = await fetch(`${API_URL}/api/conversations/${selectedConversation}/pause-bot`, {
+        method,
+        headers: getHeaders(),
+      });
+      if (response.ok) {
+        setBotPausedPhones(prev => {
+          const next = new Set(prev);
+          isPaused ? next.delete(selectedConversation) : next.add(selectedConversation);
+          return next;
+        });
+        toast.success(isPaused ? 'Bot reanudado' : 'Bot pausado — tomaste el control (30 min)');
+      } else {
+        toast.error('Error al cambiar estado del bot');
+      }
+    } catch {
+      toast.error('Error de conexión');
     }
   };
 
@@ -781,6 +819,32 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
               {/* Action buttons */}
               <TooltipProvider>
                 <div className="flex items-center gap-0.5">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={cn(
+                          'h-8 w-8 p-0',
+                          botPausedPhones.has(selectedConversation)
+                            ? 'text-amber-500 hover:text-amber-600'
+                            : 'text-muted-foreground hover:text-foreground'
+                        )}
+                        onClick={handleToggleBotPause}
+                      >
+                        {botPausedPhones.has(selectedConversation)
+                          ? <PlayCircle className="h-4 w-4" />
+                          : <PauseCircle className="h-4 w-4" />
+                        }
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      {botPausedPhones.has(selectedConversation)
+                        ? 'Ceder al bot'
+                        : 'Tomar control (pausar bot 30 min)'}
+                    </TooltipContent>
+                  </Tooltip>
+
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
