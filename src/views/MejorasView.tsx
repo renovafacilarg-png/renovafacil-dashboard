@@ -127,12 +127,20 @@ function SuggestionCard({
       {expanded && s.examples && s.examples.length > 0 && (
         <div className="space-y-2">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Ejemplos</p>
-          {s.examples.slice(0, 2).map((ex, i) => (
-            <div key={i} className="bg-muted/30 rounded-lg p-3 space-y-1 text-xs">
-              <p><span className="text-muted-foreground">Usuario:</span> {ex.user}</p>
-              <p><span className="text-muted-foreground">Bot:</span> {ex.bot}</p>
-            </div>
-          ))}
+          {s.examples.slice(0, 2).map((ex, i) => {
+              const r = ex as Record<string, string>;
+              const userText = r.user || r.usuario || r.cliente || r.message || r.input || Object.values(r)[0] || '';
+              const botText  = r.bot  || r.respuesta || r.response || r.output || Object.values(r)[1] || '';
+              return (
+                <div key={i} className="bg-muted/30 rounded-lg p-3 space-y-1 text-xs">
+                  {userText && <p><span className="text-muted-foreground">Usuario:</span> {userText}</p>}
+                  {botText  && <p><span className="text-muted-foreground">Bot:</span> {botText}</p>}
+                  {!userText && !botText && (
+                    <pre className="text-muted-foreground whitespace-pre-wrap">{JSON.stringify(r, null, 2)}</pre>
+                  )}
+                </div>
+              );
+            })}
         </div>
       )}
 
