@@ -128,13 +128,21 @@ function SuggestionCard({
         <div className="space-y-2">
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Ejemplos</p>
           {s.examples.slice(0, 2).map((ex, i) => {
+              // ex puede ser string o un objeto con distintas claves según GPT
+              if (typeof ex === 'string') {
+                return (
+                  <div key={i} className="bg-muted/30 rounded-lg p-3 text-xs text-muted-foreground whitespace-pre-wrap">
+                    {ex}
+                  </div>
+                );
+              }
               const r = ex as Record<string, string>;
-              const userText = r.user || r.usuario || r.cliente || r.message || r.input || Object.values(r)[0] || '';
-              const botText  = r.bot  || r.respuesta || r.response || r.output || Object.values(r)[1] || '';
+              const userText = r.user || r.usuario || r.CLIENTE || r.cliente || r.message || r.input || '';
+              const botText  = r.bot  || r.BOT || r.respuesta || r.response || r.output || '';
               return (
                 <div key={i} className="bg-muted/30 rounded-lg p-3 space-y-1 text-xs">
-                  {userText && <p><span className="text-muted-foreground">Usuario:</span> {userText}</p>}
-                  {botText  && <p><span className="text-muted-foreground">Bot:</span> {botText}</p>}
+                  {userText && <p><span className="text-muted-foreground font-medium">Usuario: </span>{userText}</p>}
+                  {botText  && <p><span className="text-muted-foreground font-medium">Bot: </span>{botText}</p>}
                   {!userText && !botText && (
                     <pre className="text-muted-foreground whitespace-pre-wrap">{JSON.stringify(r, null, 2)}</pre>
                   )}
