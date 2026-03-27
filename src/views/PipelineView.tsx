@@ -218,7 +218,7 @@ export function PipelineView() {
         </h1>
         <p className="text-muted-foreground mt-1 text-sm">
           {clients.length === 0
-            ? 'Activo cuando Phase 3 del backend esté disponible'
+            ? 'Sin clientes en el pipeline aún — aparecerán cuando el bot registre actividad'
             : `${clients.length} clientes en el pipeline`}
         </p>
       </div>

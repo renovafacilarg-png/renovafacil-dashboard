@@ -261,7 +261,7 @@ export function ComprobantesView() {
           <Receipt className="h-10 w-10 mx-auto mb-3 opacity-40 text-muted-foreground" />
           <p className="text-muted-foreground">No hay comprobantes disponibles</p>
           <p className="text-xs mt-1 text-muted-foreground/70">
-            Los comprobantes aparecerán aquí cuando Phase 3 del backend esté activo
+            Los comprobantes aparecerán aquí cuando el bot reciba una transferencia
           </p>
         </div>
       )}
