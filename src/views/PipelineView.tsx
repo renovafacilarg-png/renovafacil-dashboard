@@ -144,7 +144,7 @@ export function PipelineView() {
   useEffect(() => {
     const fetchPipeline = async () => {
       try {
-        const response = await fetch(`${API_URL}/api/pipeline`, { headers: getHeaders() });
+        const response = await fetch(`${API_URL}/api/clients`, { headers: getHeaders() });
         if (!response.ok) {
           // Phase 3 not yet live — graceful empty state
           setClients([]);
@@ -176,7 +176,7 @@ export function PipelineView() {
     setClients(prev => prev.map(c => c.id === clientId ? { ...c, state: newState } : c));
 
     try {
-      const response = await fetch(`${API_URL}/api/pipeline/${clientId}/state`, {
+      const response = await fetch(`${API_URL}/api/clients/${clientId}/state`, {
         method: 'PATCH',
         headers: { ...getHeaders(), 'Content-Type': 'application/json' },
         body: JSON.stringify({ state: newState }),
