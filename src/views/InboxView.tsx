@@ -537,6 +537,23 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
         </div>
       );
     }
+    if (msg.message_type === 'sticker') {
+      if (msg.has_media) {
+        return (
+          <AuthImage
+            src={`${API_URL}/api/messages/${encodeURIComponent(msg.id)}/media`}
+            alt="Sticker"
+            className="rounded-lg max-w-[160px] max-h-[160px] object-contain cursor-pointer"
+          />
+        );
+      }
+      return (
+        <div className="flex items-center gap-2">
+          <Image className={cn('h-4 w-4 flex-shrink-0', isOutgoing ? 'text-white/70' : 'text-gray-400')} />
+          <p className="text-sm italic">[Sticker]</p>
+        </div>
+      );
+    }
     if (msg.message_type === 'audio') {
       return (
         <div className="flex items-center gap-2">
