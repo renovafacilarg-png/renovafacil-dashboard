@@ -15,6 +15,7 @@ const TrackingView = lazy(() => import('@/views/TrackingView').then(m => ({ defa
 const ComprobantesView = lazy(() => import('@/views/ComprobantesView').then(m => ({ default: m.ComprobantesView })));
 const FacebookCommentsView = lazy(() => import('@/views/FacebookCommentsView').then(m => ({ default: m.FacebookCommentsView })));
 const SystemStatusView = lazy(() => import('@/views/SystemStatusView').then(m => ({ default: m.SystemStatusView })));
+const MejorasView = lazy(() => import('@/views/MejorasView').then(m => ({ default: m.MejorasView })));
 const SettingsView = lazy(() => import('@/views/SettingsView').then(m => ({ default: m.SettingsView })));
 
 function ViewLoader() {
@@ -105,6 +106,7 @@ export const router = createBrowserRouter([
       { path: 'inbox', element: <InboxView channel="wa" /> },
       { path: 'pipeline', element: <PipelineView /> },
       { path: 're-engagement', element: <ReEngagementView /> },
+      { path: 'mejoras', element: <MejorasView /> },
       { path: 'orders', element: <OrdersView /> },
       { path: 'tracking', element: <TrackingView /> },
       { path: 'comprobantes', element: <ComprobantesView /> },

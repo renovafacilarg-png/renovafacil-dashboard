@@ -14,6 +14,7 @@ import {
   Kanban,
   Send,
   Receipt,
+  Sparkles,
   Settings2,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
@@ -38,6 +39,7 @@ const navItems: NavItem[] = [
   { path: '/inbox', label: 'Inbox WA', icon: MessageSquare },
   { path: '/pipeline', label: 'Pipeline', icon: Kanban },
   { path: '/re-engagement', label: 'Re-engagement', icon: Send },
+  { path: '/mejoras', label: 'Auto-mejoras', icon: Sparkles },
   { path: '/orders', label: 'Buscar Pedido', icon: Package },
   { path: '/tracking', label: 'Envíos', icon: Truck },
   { path: '/comprobantes', label: 'Comprobantes', icon: Receipt },
@@ -105,7 +107,7 @@ export function Sidebar({ onLogout, className }: SidebarProps) {
             const Icon = item.icon;
             const isActive = location.pathname === item.path ||
               (item.path === '/inbox' && location.pathname === '/');
-            const badge = item.path === '/settings' ? (pendingSuggestions > 0 ? pendingSuggestions : undefined) : item.badge;
+            const badge = item.path === '/mejoras' ? (pendingSuggestions > 0 ? pendingSuggestions : undefined) : item.badge;
 
             return (
               <Link
