@@ -16,6 +16,7 @@ import {
   Receipt,
   Sparkles,
   Settings2,
+  BarChart2,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router';
@@ -44,6 +45,7 @@ const navItems: NavItem[] = [
   { path: '/tracking', label: 'Envíos', icon: Truck },
   { path: '/comprobantes', label: 'Comprobantes', icon: Receipt },
   { path: '/facebook', label: 'FB / Instagram', icon: Facebook },
+  { path: '/meta-ops', label: 'Meta Ops', icon: BarChart2 },
   { path: '/system', label: 'Sistema', icon: Server },
   { path: '/settings', label: 'Ajustes', icon: Settings2 },
 ];

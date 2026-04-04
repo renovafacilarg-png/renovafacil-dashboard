@@ -72,6 +72,7 @@ const FacebookCommentsView = lazyWithReload(() => import('@/views/FacebookCommen
 const SystemStatusView = lazyWithReload(() => import('@/views/SystemStatusView').then(m => ({ default: m.SystemStatusView })));
 const MejorasView = lazyWithReload(() => import('@/views/MejorasView').then(m => ({ default: m.MejorasView })));
 const SettingsView = lazyWithReload(() => import('@/views/SettingsView').then(m => ({ default: m.SettingsView })));
+const MetaOpsView = lazyWithReload(() => import('@/views/MetaOpsView').then(m => ({ default: m.MetaOpsView })));
 
 function ViewLoader() {
   return (
@@ -169,6 +170,7 @@ export const router = createBrowserRouter([
       { path: 'facebook', element: <FacebookCommentsView /> },
       { path: 'system', element: <SystemStatusView /> },
       { path: 'settings', element: <SettingsView /> },
+      { path: 'meta-ops', element: <MetaOpsView /> },
     ],
   },
 ]);
