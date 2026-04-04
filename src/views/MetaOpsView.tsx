@@ -168,7 +168,7 @@ function AdsPanel() {
       <FilterPills
         options={[
           { value: 'ACTIVE', label: 'Activos' },
-          { value: 'ALL', label: 'Todos' },
+          { value: 'ALL', label: 'Activos + Pausados' },
         ]}
         value={statusFilter}
         onChange={setStatusFilter}
@@ -194,7 +194,17 @@ function AdsPanel() {
             <tbody>
               {ads.map(ad => (
                 <tr key={ad.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                  <td className="py-2 pr-4 font-medium text-foreground max-w-[160px] truncate">{ad.name}</td>
+                  <td className="py-2 pr-4 font-medium max-w-[160px] truncate">
+                    <a
+                      href={`https://adsmanager.facebook.com/adsmanager/manage/ads?selected_ad_ids=${ad.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                      title={ad.name}
+                    >
+                      {ad.name}
+                    </a>
+                  </td>
                   <td className="py-2 pr-4">
                     <span className="inline-flex px-2 py-0.5 rounded-full text-[11px] font-semibold bg-primary/10 text-primary">
                       {ad.l1}
