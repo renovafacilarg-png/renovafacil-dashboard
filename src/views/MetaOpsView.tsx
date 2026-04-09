@@ -139,13 +139,12 @@ function AdsPanel() {
   const [ads, setAds] = useState<AdResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<'ACTIVE' | 'ALL'>('ACTIVE');
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/meta/ads/live?status=${statusFilter}`, {
+      const res = await fetch(`${API_URL}/api/meta/ads/live?status=ACTIVE`, {
         headers: getHeaders(),
       });
       const data = await res.json();
@@ -157,22 +156,13 @@ function AdsPanel() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter]);
+  }, []);
 
   useEffect(() => { load(); }, [load]);
 
   return (
     <div className="rounded-xl border border-border bg-card p-5">
-      <SectionHeader icon={Tag} title="Angle Tagger — Ads" count={ads.length} onRefresh={load} loading={loading} />
-
-      <FilterPills
-        options={[
-          { value: 'ACTIVE', label: 'Activos' },
-          { value: 'ALL', label: 'Activos + Pausados' },
-        ]}
-        value={statusFilter}
-        onChange={setStatusFilter}
-      />
+      <SectionHeader icon={Tag} title="Angle Tagger — Ads activos" count={ads.length} onRefresh={load} loading={loading} />
 
       {loading && <LoadingRow />}
       {error && !loading && <ErrorRow msg={error} />}
