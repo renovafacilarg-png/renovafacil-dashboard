@@ -23,6 +23,7 @@ interface Creative {
   ctr_recent: number;
   cpm_recent: number;
   days_active: number;
+  impressions_recent?: number;
 }
 
 interface SaturationReport {
@@ -231,7 +232,7 @@ function SaturationPanel() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/api/meta/saturation/live?date_preset=${preset}`, {
+      const res = await fetch(`${API_URL}/api/meta/saturation/live?date_preset=${preset}&status=ACTIVE`, {
         headers: getHeaders(),
       });
       const data = await res.json();
@@ -292,7 +293,7 @@ function SaturationPanel() {
                   <th className="pb-2 pr-3 text-muted-foreground font-medium">Score</th>
                   <th className="pb-2 pr-3 text-muted-foreground font-medium">Acción</th>
                   <th className="pb-2 pr-3 text-muted-foreground font-medium">Freq</th>
-                  <th className="pb-2 pr-3 text-muted-foreground font-medium">CTR</th>
+                  <th className="pb-2 pr-3 text-muted-foreground font-medium">CTR (imp.)</th>
                   <th className="pb-2 text-muted-foreground font-medium">CPM</th>
                 </tr>
               </thead>
@@ -307,7 +308,16 @@ function SaturationPanel() {
                     </td>
                     <td className="py-2 pr-3"><RecBadge rec={c.recommendation} /></td>
                     <td className="py-2 pr-3 text-muted-foreground">{c.avg_frequency_recent.toFixed(2)}</td>
-                    <td className="py-2 pr-3 text-muted-foreground">{c.ctr_recent.toFixed(2)}%</td>
+                    <td className="py-2 pr-3">
+                      <span className={c.impressions_recent != null && c.impressions_recent < 200 ? 'text-yellow-500' : 'text-muted-foreground'}>
+                        {c.ctr_recent.toFixed(2)}%
+                      </span>
+                      {c.impressions_recent != null && (
+                        <span className="ml-1 text-muted-foreground/60 text-[10px]">
+                          ({c.impressions_recent.toLocaleString()} imp)
+                        </span>
+                      )}
+                    </td>
                     <td className="py-2 text-muted-foreground">${c.cpm_recent.toFixed(2)}</td>
                   </tr>
                 ))}
