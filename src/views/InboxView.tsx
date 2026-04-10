@@ -17,7 +17,7 @@ import {
 import {
   MessageCircle, ArrowLeft, RefreshCw, Loader2, Phone, Search,
   CheckCheck, Check, Send, Tag, ShoppingBag, CheckCircle, Info,
-  Package, DollarSign, Image, Mic, Video, FileText, PauseCircle, PlayCircle,
+  Package, DollarSign, Image, Mic, Video, FileText, PauseCircle, PlayCircle, PlusCircle,
 } from 'lucide-react';
 import { formatDistanceToNow, isToday, isYesterday, isSameDay, format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -156,6 +156,11 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
   const [showDiscountDialog, setShowDiscountDialog] = useState(false);
   const [discountPercent, setDiscountPercent] = useState('10');
 
+  // New conversation dialog
+  const [showNewConvDialog, setShowNewConvDialog] = useState(false);
+  const [newConvPhone, setNewConvPhone] = useState('');
+  const [newConvMessage, setNewConvMessage] = useState('');
+
   // Refs
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -230,6 +235,36 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
       setLoadingContactInfo(prev => ({ ...prev, [phone]: false }));
     }
   }, [contactInfoCache, loadingContactInfo]);
+
+  // ---- New conversation ----
+
+  const handleNewConversation = async () => {
+    const phone = newConvPhone.trim().replace(/\s+/g, '');
+    const message = newConvMessage.trim();
+    if (!phone || !message || sending) return;
+    setSending(true);
+    try {
+      const response = await fetch(`${API_URL}/api/send-manual-message`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ phone, message }),
+      });
+      if (response.ok) {
+        toast.success('Mensaje enviado');
+        setShowNewConvDialog(false);
+        setNewConvPhone('');
+        setNewConvMessage('');
+        fetchConversations(false);
+      } else {
+        const err = await response.json();
+        toast.error(err.error || 'Error enviando mensaje');
+      }
+    } catch {
+      toast.error('Error de conexión');
+    } finally {
+      setSending(false);
+    }
+  };
 
   // ---- Send message ----
 
@@ -628,6 +663,15 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
               {showTestChats ? 'Ver Reales' : 'Ver Pruebas'}
             </Button>
           )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowNewConvDialog(true)}
+            className="text-xs text-muted-foreground hover:text-foreground gap-1.5"
+          >
+            <PlusCircle className="h-3.5 w-3.5" />
+            Nuevo mensaje
+          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -1168,6 +1212,72 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* ---- New Conversation Dialog ---- */}
+      <Dialog open={showNewConvDialog} onOpenChange={setShowNewConvDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <PlusCircle className="h-4 w-4 text-gray-500" />
+              Nuevo mensaje
+            </DialogTitle>
+            <DialogDescription className="text-sm">
+              Enviá un mensaje a cualquier número aunque no haya contactado antes.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4 space-y-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                Número de WhatsApp
+              </label>
+              <input
+                type="text"
+                placeholder="Ej: 5491112345678"
+                value={newConvPhone}
+                onChange={(e) => setNewConvPhone(e.target.value)}
+                className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary/40"
+              />
+              <p className="text-xs text-gray-400 mt-1">Código de país + código de área + número, sin espacios ni +</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                Mensaje
+              </label>
+              <Textarea
+                placeholder="Escribí el mensaje..."
+                value={newConvMessage}
+                onChange={(e) => setNewConvMessage(e.target.value)}
+                className="min-h-24 resize-none text-sm bg-muted border-0 focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:ring-offset-0"
+                rows={4}
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { setShowNewConvDialog(false); setNewConvPhone(''); setNewConvMessage(''); }}
+              className="text-gray-500"
+            >
+              Cancelar
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleNewConversation}
+              disabled={sending || !newConvPhone.trim() || !newConvMessage.trim()}
+              className="bg-primary hover:bg-primary/90 text-white"
+            >
+              {sending
+                ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                : <Send className="h-3.5 w-3.5 mr-1.5" />
+              }
+              Enviar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* ---- Discount Dialog ---- */}
       <Dialog open={showDiscountDialog} onOpenChange={setShowDiscountDialog}>
