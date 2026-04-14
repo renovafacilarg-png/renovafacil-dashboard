@@ -23,9 +23,16 @@ export const getHeaders = (): HeadersInit => {
 
 // Helper para manejar errores de fetch
 async function handleResponse<T>(response: Response): Promise<T> {
+  // 401: sesión expirada → redirect a login SOLO si no estamos ya ahí.
+  // Evita loops y evita pisar el tipeo del user si hay queries en vuelo
+  // mientras intenta loguearse.
   if (response.status === 401) {
-    localStorage.removeItem('auth_token');
-    window.location.href = '/login';
+    const alreadyOnLogin = window.location.pathname.startsWith('/login');
+    if (!alreadyOnLogin) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_expires');
+      window.location.replace('/login');
+    }
     throw new Error('Sesión expirada');
   }
   if (!response.ok) {
