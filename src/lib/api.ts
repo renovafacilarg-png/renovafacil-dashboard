@@ -23,9 +23,14 @@ export const getHeaders = (): HeadersInit => {
 
 // Helper para manejar errores de fetch
 async function handleResponse<T>(response: Response): Promise<T> {
+  if (response.status === 401) {
+    localStorage.removeItem('auth_token');
+    window.location.href = '/login';
+    throw new Error('Sesión expirada');
+  }
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Error desconocido' }));
-    throw new Error(error.error || `HTTP error! status: ${response.status}`);
+    throw new Error(error.error || `HTTP ${response.status}`);
   }
   return response.json();
 }
