@@ -19,8 +19,11 @@ import {
   BarChart2,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from 'react-router';
-import { API_URL, fetchImprovementStats } from '@/lib/api';
+import { API_URL } from '@/lib/api';
+import { IMPROVEMENT_QUERY_KEYS } from '@/views/MejorasView';
+import { fetchImprovementStats } from '@/lib/api';
 
 const FRONTEND_VERSION = '2.1.0';
 
@@ -54,26 +57,23 @@ export function Sidebar({ onLogout, className }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [backendVersion, setBackendVersion] = useState<string | null>(null);
-  const [pendingSuggestions, setPendingSuggestions] = useState<number>(0);
   const location = useLocation();
+
+  // Badge sincronizado con React Query — se actualiza automáticamente
+  // cuando MejorasView aprueba/rechaza sugerencias
+  const { data: improvementStats } = useQuery({
+    queryKey: IMPROVEMENT_QUERY_KEYS.stats,
+    queryFn: fetchImprovementStats,
+    refetchInterval: 300_000, // fallback polling cada 5 min
+    refetchOnWindowFocus: true,
+  });
+  const pendingSuggestions = improvementStats?.pending_suggestions ?? 0;
 
   useEffect(() => {
     fetch(`${API_URL}/health`)
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (data?.version) setBackendVersion(data.version); })
       .catch(() => {});
-
-    fetchImprovementStats()
-      .then(stats => { if (stats?.pending_suggestions) setPendingSuggestions(stats.pending_suggestions); })
-      .catch(() => {});
-
-    const interval = setInterval(() => {
-      fetchImprovementStats()
-        .then(stats => { if (stats?.pending_suggestions !== undefined) setPendingSuggestions(stats.pending_suggestions); })
-        .catch(() => {});
-    }, 300000);
-
-    return () => clearInterval(interval);
   }, []);
 
   const sidebarContent = (
