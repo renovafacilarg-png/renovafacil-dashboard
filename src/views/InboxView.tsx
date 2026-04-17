@@ -567,7 +567,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
       }
       return (
         <div className="flex items-start gap-2">
-          <Image className={cn('h-4 w-4 mt-0.5 flex-shrink-0', isOutgoing ? 'text-white/70' : 'text-gray-400')} />
+          <Image className={cn('h-4 w-4 mt-0.5 flex-shrink-0', isOutgoing ? 'text-white/70' : 'text-muted-foreground')} />
           <p className="text-sm italic">{bubbleText || '[Imagen recibida]'}</p>
         </div>
       );
@@ -584,7 +584,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
       }
       return (
         <div className="flex items-center gap-2">
-          <Image className={cn('h-4 w-4 flex-shrink-0', isOutgoing ? 'text-white/70' : 'text-gray-400')} />
+          <Image className={cn('h-4 w-4 flex-shrink-0', isOutgoing ? 'text-white/70' : 'text-muted-foreground')} />
           <p className="text-sm italic">[Sticker]</p>
         </div>
       );
@@ -592,7 +592,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
     if (msg.message_type === 'audio') {
       return (
         <div className="flex items-center gap-2">
-          <Mic className={cn('h-4 w-4 flex-shrink-0', isOutgoing ? 'text-white/70' : 'text-gray-400')} />
+          <Mic className={cn('h-4 w-4 flex-shrink-0', isOutgoing ? 'text-white/70' : 'text-muted-foreground')} />
           <p className="text-sm italic">{bubbleText || '[Audio]'}</p>
         </div>
       );
@@ -600,7 +600,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
     if (msg.message_type === 'video') {
       return (
         <div className="flex items-center gap-2">
-          <Video className={cn('h-4 w-4 flex-shrink-0', isOutgoing ? 'text-white/70' : 'text-gray-400')} />
+          <Video className={cn('h-4 w-4 flex-shrink-0', isOutgoing ? 'text-white/70' : 'text-muted-foreground')} />
           <p className="text-sm italic">{bubbleText || '[Video]'}</p>
         </div>
       );
@@ -608,7 +608,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
     if (msg.message_type === 'document' || msg.message_type === 'file') {
       return (
         <div className="flex items-center gap-2">
-          <FileText className={cn('h-4 w-4 flex-shrink-0', isOutgoing ? 'text-white/70' : 'text-gray-400')} />
+          <FileText className={cn('h-4 w-4 flex-shrink-0', isOutgoing ? 'text-white/70' : 'text-muted-foreground')} />
           <p className="text-sm italic">{bubbleText || '[Documento]'}</p>
         </div>
       );
@@ -641,12 +641,12 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
               ? `${testConversations.length} conversaciones de prueba`
               : `${realConversations.length} conversaciones`}
             {!showTestChats && channel === 'wa' && testConversations.length > 0 && (
-              <span className="ml-1.5 text-xs text-gray-400">
+              <span className="ml-1.5 text-xs text-muted-foreground">
                 ({testConversations.length} de prueba ocultas)
               </span>
             )}
             {lastUpdated && (
-              <span className="ml-1.5 text-xs text-gray-400">
+              <span className="ml-1.5 text-xs text-muted-foreground">
                 · Actualizado {lastUpdated.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
               </span>
             )}
@@ -699,7 +699,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
           <div className="p-3 space-y-2 border-b border-border">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Buscar..."
@@ -709,14 +709,14 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
                   'w-full pl-8 pr-3 py-1.5 text-sm rounded-lg',
                   'bg-muted border-0 outline-none',
                   'focus:bg-card focus:ring-1 focus:ring-primary/30',
-                  'placeholder:text-gray-400 text-foreground',
+                  'placeholder:text-muted-foreground text-foreground',
                   'transition-all duration-150'
                 )}
               />
             </div>
 
             {/* Filter tabs */}
-            <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-900 rounded-lg">
+            <div className="flex gap-1 p-1 bg-muted rounded-lg">
               {(['all', 'unread', 'incoming', 'outgoing'] as FilterType[]).map((f) => {
                 const labels: Record<FilterType, string> = {
                   all: 'Todos',
@@ -732,7 +732,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
                       'flex-1 text-xs px-2 py-1.5 rounded-md cursor-pointer transition-all duration-150 font-medium whitespace-nowrap',
                       filter === f
                         ? 'bg-card text-foreground shadow-sm'
-                        : 'text-muted-foreground hover:text-gray-700 dark:hover:text-gray-300'
+                        : 'text-muted-foreground hover:text-foreground'
                     )}
                   >
                     {labels[f]}
@@ -765,7 +765,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
             ) : filteredConversations.length === 0 ? (
               // Empty state
               <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                <MessageCircle className="h-10 w-10 text-gray-300 dark:text-gray-700 mb-3" />
+                <MessageCircle className="h-10 w-10 text-muted-foreground/40 mb-3" />
                 <p className="text-sm font-medium text-muted-foreground">No hay conversaciones</p>
                 <p className="text-xs text-muted-foreground/70 mt-1">
                   {filter !== 'all'
@@ -799,7 +799,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
                         {getInitials(getDisplayName(conv))}
                       </span>
                       {unread && (
-                        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-primary border-2 border-white dark:border-gray-950" />
+                        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-primary border-2 border-background" />
                       )}
                     </div>
 
@@ -814,18 +814,18 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
                         )}>
                           {getDisplayName(conv)}
                         </span>
-                        <span className="text-xs text-gray-400 flex-shrink-0">
+                        <span className="text-xs text-muted-foreground flex-shrink-0">
                           {formatTime(conv.last_message_time)}
                         </span>
                       </div>
                       <p className={cn(
                         'text-xs truncate',
                         unread
-                          ? 'text-gray-700 dark:text-gray-300 font-medium'
-                          : 'text-gray-500 dark:text-gray-500'
+                          ? 'text-foreground font-medium'
+                          : 'text-muted-foreground'
                       )}>
                         {conv.direction === 'outgoing' && (
-                          <CheckCheck className="inline h-3 w-3 mr-0.5 text-gray-400" />
+                          <CheckCheck className="inline h-3 w-3 mr-0.5 text-muted-foreground" />
                         )}
                         {conv.last_message}
                       </p>
@@ -846,7 +846,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="md:hidden h-8 w-8 text-gray-500"
+                className="md:hidden h-8 w-8 text-muted-foreground"
                 onClick={() => setSelectedConversation(null)}
                 aria-label="Volver a conversaciones"
               >
@@ -888,7 +888,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
                         className={cn(
                           'h-8 w-8 p-0',
                           botPausedPhones.has(selectedConversation)
-                            ? 'text-amber-500 hover:text-amber-600'
+                            ? 'text-warning hover:text-warning/80'
                             : 'text-muted-foreground hover:text-foreground'
                         )}
                         onClick={handleToggleBotPause}
@@ -969,7 +969,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
             {/* Messages area */}
             <div
               ref={messagesContainerRef}
-              className="flex-1 overflow-y-auto px-4 py-4 space-y-1 bg-gray-50/50 dark:bg-gray-900/30"
+              className="flex-1 overflow-y-auto px-4 py-4 space-y-1 bg-muted/30"
             >
               {loadingMessages && messages.length === 0 ? (
                 // Skeleton for messages
@@ -988,7 +988,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
                 </div>
               ) : messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full py-12 text-center">
-                  <MessageCircle className="h-8 w-8 text-gray-300 dark:text-gray-700 mb-2" />
+                  <MessageCircle className="h-8 w-8 text-muted-foreground/40 mb-2" />
                   <p className="text-sm text-muted-foreground">Sin mensajes</p>
                 </div>
               ) : (
@@ -996,11 +996,11 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
                   <div key={group.label}>
                     {/* Day separator */}
                     <div className="flex items-center gap-3 my-4">
-                      <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
+                      <div className="flex-1 h-px bg-border" />
                       <span className="text-xs text-muted-foreground/70 font-medium whitespace-nowrap">
                         {group.label}
                       </span>
-                      <div className="flex-1 h-px bg-gray-200 dark:bg-gray-800" />
+                      <div className="flex-1 h-px bg-border" />
                     </div>
 
                     {/* Messages for this day */}
@@ -1031,11 +1031,11 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
                               'flex items-center gap-1 mt-0.5',
                               msg.direction === 'outgoing' ? 'justify-end pr-0.5' : 'justify-start pl-0.5'
                             )}>
-                              <span className="text-[10px] text-gray-400">
+                              <span className="text-[10px] text-muted-foreground">
                                 {formatMessageTime(msg.timestamp)}
                               </span>
                               {msg.direction === 'outgoing' && (
-                                <Check className="h-3 w-3 text-gray-400" />
+                                <Check className="h-3 w-3 text-muted-foreground" />
                               )}
                             </div>
                           </div>
@@ -1066,7 +1066,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
                     'min-h-10 max-h-32 resize-none text-sm rounded-xl',
                     'bg-muted border-0',
                     'focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:ring-offset-0',
-                    'placeholder:text-gray-400'
+                    'placeholder:text-muted-foreground'
                   )}
                   rows={1}
                   disabled={sending}
@@ -1088,9 +1088,9 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
           </div>
         ) : (
           // Empty right pane
-          <div className="hidden md:flex flex-1 items-center justify-center bg-gray-50/50 dark:bg-gray-900/20">
+          <div className="hidden md:flex flex-1 items-center justify-center bg-muted/20">
             <div className="text-center">
-              <MessageCircle className="h-10 w-10 text-gray-300 dark:text-gray-700 mx-auto mb-3" />
+              <MessageCircle className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
               <p className="text-sm font-medium text-muted-foreground">
                 Seleccioná una conversación
               </p>
@@ -1127,20 +1127,20 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
             {/* Stats */}
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl bg-muted p-4 text-center">
-                <Package className="h-4 w-4 mx-auto mb-1.5 text-gray-400" />
+                <Package className="h-4 w-4 mx-auto mb-1.5 text-muted-foreground" />
                 <p className="text-2xl font-semibold text-foreground">
                   {selectedContactInfo?.order_count ?? '—'}
                 </p>
-                <p className="text-xs text-gray-500 mt-0.5">Pedidos</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Pedidos</p>
               </div>
               <div className="rounded-xl bg-muted p-4 text-center">
-                <DollarSign className="h-4 w-4 mx-auto mb-1.5 text-emerald-500" />
+                <DollarSign className="h-4 w-4 mx-auto mb-1.5 text-secondary" />
                 <p className="text-2xl font-semibold text-foreground">
                   {selectedContactInfo?.total_spent
                     ? `$${selectedContactInfo.total_spent.toLocaleString('es-AR')}`
                     : '—'}
                 </p>
-                <p className="text-xs text-gray-500 mt-0.5">Gasto total</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Gasto total</p>
               </div>
             </div>
 
@@ -1148,7 +1148,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
             {selectedContactInfo?.orders && selectedContactInfo.orders.length > 0 && (
               <div>
                 <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-                  <ShoppingBag className="h-3.5 w-3.5 text-gray-400" />
+                  <ShoppingBag className="h-3.5 w-3.5 text-muted-foreground" />
                   Pedidos recientes
                 </h4>
                 <div className="space-y-2">
@@ -1173,7 +1173,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
                            order.payment_status}
                         </Badge>
                       </div>
-                      <div className="flex items-center justify-between text-xs text-gray-500">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
                         <span>${Number(order.total).toLocaleString('es-AR')} {order.currency}</span>
                         <span>
                           {order.created_at
@@ -1199,13 +1199,13 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
 
             {loadingContactInfo[selectedConversation || ''] && (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-5 w-5 animate-spin text-gray-300" />
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground/40" />
               </div>
             )}
 
             {selectedContactInfo && selectedContactInfo.orders.length === 0 && (
               <div className="text-center py-8">
-                <ShoppingBag className="h-8 w-8 mx-auto mb-2 text-gray-300 dark:text-gray-700" />
+                <ShoppingBag className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
                 <p className="text-sm text-muted-foreground">Sin pedidos registrados</p>
               </div>
             )}
@@ -1218,7 +1218,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-base">
-              <PlusCircle className="h-4 w-4 text-gray-500" />
+              <PlusCircle className="h-4 w-4 text-muted-foreground" />
               Nuevo mensaje
             </DialogTitle>
             <DialogDescription className="text-sm">
@@ -1228,7 +1228,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
 
           <div className="py-4 space-y-4">
             <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+              <label className="text-sm font-medium text-foreground mb-2 block">
                 Número de WhatsApp
               </label>
               <input
@@ -1238,10 +1238,10 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
                 onChange={(e) => setNewConvPhone(e.target.value)}
                 className="w-full rounded-lg border border-border bg-muted px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary/40"
               />
-              <p className="text-xs text-gray-400 mt-1">Código de país + código de área + número, sin espacios ni +</p>
+              <p className="text-xs text-muted-foreground mt-1">Código de país + código de área + número, sin espacios ni +</p>
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+              <label className="text-sm font-medium text-foreground mb-2 block">
                 Mensaje
               </label>
               <Textarea
@@ -1259,7 +1259,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
               variant="ghost"
               size="sm"
               onClick={() => { setShowNewConvDialog(false); setNewConvPhone(''); setNewConvMessage(''); }}
-              className="text-gray-500"
+              className="text-muted-foreground"
             >
               Cancelar
             </Button>
@@ -1284,7 +1284,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-base">
-              <Tag className="h-4 w-4 text-gray-500" />
+              <Tag className="h-4 w-4 text-muted-foreground" />
               Enviar descuento
             </DialogTitle>
             <DialogDescription className="text-sm">
@@ -1293,7 +1293,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
           </DialogHeader>
 
           <div className="py-4">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+            <label className="text-sm font-medium text-foreground mb-2 block">
               Porcentaje de descuento
             </label>
             <Select value={discountPercent} onValueChange={setDiscountPercent}>
@@ -1316,7 +1316,7 @@ export function InboxView({ channel = 'wa' }: InboxViewProps = {}) {
               variant="ghost"
               size="sm"
               onClick={() => setShowDiscountDialog(false)}
-              className="text-gray-500"
+              className="text-muted-foreground"
             >
               Cancelar
             </Button>

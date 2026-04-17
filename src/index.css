@@ -4,65 +4,96 @@
 
 @layer base {
   :root {
-    --background: 0 0% 99%;
-    --foreground: 0 0% 5%;
+    /* ── Renovafacil brand palette — terracota cálido ── */
+    --background: 30 20% 98%;          /* off-white cream */
+    --foreground: 20 15% 12%;          /* charcoal warm */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 5%;
+    --card-foreground: 20 15% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 5%;
-    --primary: 173 80% 36%;
+    --popover-foreground: 20 15% 12%;
+
+    /* Primary: terracota ≈ #E05A3A */
+    --primary: 14 72% 52%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 5%;
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
-    --accent: 173 80% 95%;
-    --accent-foreground: 173 80% 30%;
-    --destructive: 0 84% 60%;
+
+    /* Secondary: verde salvia ≈ #7D8F6D — también semántico success */
+    --secondary: 95 15% 50%;
+    --secondary-foreground: 0 0% 100%;
+
+    /* Muted: neutrales cálidos */
+    --muted: 30 15% 95%;
+    --muted-foreground: 20 10% 45%;
+
+    /* Accent: terracota muy desaturado para hovers suaves */
+    --accent: 14 60% 95%;
+    --accent-foreground: 14 72% 35%;
+
+    /* Destructive: rojo quemado */
+    --destructive: 8 75% 52%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 173 80% 36%;
-    --radius: 0.375rem;
-    --sidebar-background: 0 0% 10%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 173 80% 50%;
+
+    /* Warning: dorado ámbar cálido */
+    --warning: 35 85% 55%;
+    --warning-foreground: 20 15% 12%;
+
+    /* Borders & inputs */
+    --border: 30 10% 88%;
+    --input: 30 10% 88%;
+    --ring: 14 72% 52%;
+    --radius: 0.5rem;
+
+    /* Sidebar — oscuro cálido */
+    --sidebar-background: 20 15% 10%;
+    --sidebar-foreground: 30 10% 96%;
+    --sidebar-primary: 14 80% 62%;       /* terracota más luminoso para contraste sobre oscuro */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 16%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 20%;
-    --sidebar-ring: 173 80% 50%;
+    --sidebar-accent: 20 12% 16%;
+    --sidebar-accent-foreground: 30 10% 92%;
+    --sidebar-border: 20 10% 20%;
+    --sidebar-ring: 14 80% 62%;
   }
 
   .dark {
-    --background: 0 0% 8%;
-    --foreground: 0 0% 97%;
-    --card: 0 0% 11%;
-    --card-foreground: 0 0% 97%;
-    --popover: 0 0% 11%;
-    --popover-foreground: 0 0% 97%;
-    --primary: 173 80% 50%;
-    --primary-foreground: 0 0% 4%;
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 97%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 68%;
-    --accent: 0 0% 17%;
-    --accent-foreground: 0 0% 97%;
-    --destructive: 0 62% 50%;
+    --background: 20 12% 9%;            /* warm near-black */
+    --foreground: 30 10% 96%;
+    --card: 20 12% 12%;
+    --card-foreground: 30 10% 96%;
+    --popover: 20 12% 12%;
+    --popover-foreground: 30 10% 96%;
+
+    /* Primary dark: terracota levemente más luminoso */
+    --primary: 14 75% 58%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary dark: verde salvia ajustado */
+    --secondary: 95 12% 36%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 20 10% 18%;
+    --muted-foreground: 30 8% 60%;
+
+    --accent: 14 30% 18%;
+    --accent-foreground: 14 60% 75%;
+
+    --destructive: 8 70% 58%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 20%;
-    --input: 0 0% 18%;
-    --ring: 173 80% 50%;
-    --radius: 0.375rem;
-    --sidebar-background: 0 0% 6%;
-    --sidebar-foreground: 0 0% 92%;
-    --sidebar-primary: 173 80% 50%;
-    --sidebar-primary-foreground: 0 0% 4%;
-    --sidebar-accent: 0 0% 12%;
-    --sidebar-accent-foreground: 0 0% 92%;
-    --sidebar-border: 0 0% 16%;
-    --sidebar-ring: 173 80% 50%;
+
+    --warning: 35 80% 52%;
+    --warning-foreground: 20 15% 12%;
+
+    --border: 20 10% 20%;
+    --input: 20 10% 18%;
+    --ring: 14 75% 58%;
+    --radius: 0.5rem;
+
+    --sidebar-background: 20 15% 7%;
+    --sidebar-foreground: 30 10% 92%;
+    --sidebar-primary: 14 80% 62%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 20 12% 12%;
+    --sidebar-accent-foreground: 30 10% 88%;
+    --sidebar-border: 20 10% 16%;
+    --sidebar-ring: 14 80% 62%;
   }
 }
 
@@ -72,11 +103,18 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    /* Geist — modern geometric sans, excellent for dense dashboards */
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.875rem; /* text-sm default for dense admin */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  /* Heading hierarchy */
+  h1 { @apply text-3xl font-bold tracking-tight; }
+  h2 { @apply text-2xl font-semibold tracking-tight; }
+  h3 { @apply text-xl font-semibold; }
+  h4 { @apply text-lg font-medium; }
 }
 
 /* Custom scrollbar */
@@ -90,16 +128,26 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-gray-200 dark:bg-gray-700 rounded-full;
+  background: hsl(var(--muted-foreground) / 0.25);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-300 dark:bg-gray-600;
+  background: hsl(var(--muted-foreground) / 0.45);
 }
 
 /* Smooth transitions */
 * {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Focus styles */
@@ -232,7 +280,9 @@
 
 .status-online::after {
   content: '';
-  @apply absolute -top-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white;
+  @apply absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white;
+  /* secondary = verde salvia, semántico para "activo/online" */
+  background: hsl(var(--secondary));
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
@@ -241,17 +291,17 @@
 }
 
 .status-dot-online {
-  @apply bg-emerald-500;
-  box-shadow: 0 0 8px hsl(152 69% 50% / 0.6);
+  background: hsl(var(--secondary));
+  box-shadow: 0 0 8px hsl(var(--secondary) / 0.6);
 }
 
 .status-dot-offline {
-  @apply bg-gray-400;
+  @apply bg-muted-foreground/40;
 }
 
 .status-dot-warning {
-  @apply bg-amber-500;
-  box-shadow: 0 0 8px hsl(38 92% 50% / 0.6);
+  background: hsl(var(--warning));
+  box-shadow: 0 0 8px hsl(var(--warning) / 0.6);
 }
 
 /* ========================================
@@ -322,7 +372,8 @@
    SIDEBAR ENHANCEMENTS
    ======================================== */
 .sidebar-gradient {
-  background: linear-gradient(180deg, hsl(0 0% 3%) 0%, hsl(0 0% 2%) 100%);
+  /* Warm dark gradient — acuerda con --sidebar-background cálido */
+  background: linear-gradient(180deg, hsl(var(--sidebar-background)) 0%, hsl(20 15% 6%) 100%);
 }
 
 .sidebar-item-active {
@@ -355,7 +406,8 @@ th, td {
    UTILITY CLASSES
    ======================================== */
 .text-gradient {
-  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(199 89% 48%) 100%);
+  /* Terracota → dorado ámbar — coherente con la marca */
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--warning)) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -390,39 +442,3 @@ th, td {
   }
 }
 
-/* ========================================
-   CHAT UI UTILITIES
-   ======================================== */
-@layer utilities {
-  /* Message bubbles */
-  .bubble-incoming {
-    @apply bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-2xl rounded-tl-sm;
-  }
-  .bubble-outgoing {
-    @apply bg-primary text-white rounded-2xl rounded-tr-sm;
-  }
-
-  /* Conversation list item */
-  .conv-item {
-    @apply flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors duration-100;
-  }
-  .conv-item:hover {
-    @apply bg-gray-50 dark:bg-gray-900;
-  }
-  .conv-item.active {
-    @apply bg-primary/5 border-l-2 border-primary;
-  }
-
-  /* Filter pill (tab-style) */
-  .filter-tab {
-    @apply text-xs px-3 py-1.5 rounded-md cursor-pointer transition-all duration-100 text-gray-500;
-  }
-  .filter-tab.active {
-    @apply bg-white shadow-sm text-gray-900 font-medium;
-  }
-
-  /* Skeleton loading */
-  .skeleton {
-    @apply animate-pulse bg-gray-100 dark:bg-gray-800 rounded;
-  }
-}

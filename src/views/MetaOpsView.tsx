@@ -47,10 +47,11 @@ interface Adset {
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 const REC_STYLES: Record<string, string> = {
-  keep: 'bg-emerald-500/15 text-emerald-500',
-  monitor: 'bg-yellow-500/15 text-yellow-600',
-  refresh: 'bg-orange-500/15 text-orange-500',
-  kill: 'bg-red-500/15 text-red-500',
+  // Tokens semánticos donde posible; orange/yellow sin token propio — excepciones documentadas
+  keep: 'bg-secondary/15 text-secondary',
+  monitor: 'bg-warning/15 text-warning',
+  refresh: 'bg-primary/15 text-primary',
+  kill: 'bg-destructive/15 text-destructive',
 };
 
 const REC_LABELS: Record<string, string> = {
@@ -96,7 +97,7 @@ function SectionHeader({ icon: Icon, title, count, onRefresh, loading }: {
 
 function ErrorRow({ msg }: { msg: string }) {
   return (
-    <div className="flex items-center gap-2 text-sm text-red-400 py-4">
+    <div className="flex items-center gap-2 text-sm text-destructive py-4">
       <AlertTriangle className="h-4 w-4 shrink-0" />
       {msg}
     </div>
@@ -252,7 +253,7 @@ function SaturationPanel() {
     s >= 75 ? 'text-red-500' :
     s >= 55 ? 'text-orange-500' :
     s >= 30 ? 'text-yellow-500' :
-    'text-emerald-500';
+    'text-secondary';
 
   return (
     <div className="rounded-xl border border-border bg-card p-5">
@@ -387,7 +388,7 @@ function AdsetsPanel() {
                   <td className="py-2 pr-4 text-muted-foreground">
                     {a.lifetime_budget != null ? `$${a.lifetime_budget.toLocaleString()}` : '—'}
                   </td>
-                  <td className={`py-2 font-medium ${a.effective_status === 'ACTIVE' ? 'text-emerald-500' : 'text-muted-foreground'}`}>
+                  <td className={`py-2 font-medium ${a.effective_status === 'ACTIVE' ? 'text-secondary' : 'text-muted-foreground'}`}>
                     {a.effective_status}
                   </td>
                 </tr>

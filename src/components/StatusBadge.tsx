@@ -13,52 +13,179 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-const statusConfig = {
-  // Order statuses
-  open: { label: 'Abierto', className: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-  closed: { label: 'Cerrado', className: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-  cancelled: { label: 'Cancelado', className: 'bg-red-500/10 text-red-400 border-red-500/20' },
-  pending: { label: 'Pendiente', className: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
+/**
+ * StatusBadge — todos los colores via tokens semánticos CSS o paleta brand.
+ * Cada badge lleva un dot pequeño para ser más glanceable.
+ *
+ * Semántica de colores:
+ *   success  → secondary (verde salvia)
+ *   warning  → warning (dorado ámbar)
+ *   danger   → destructive (rojo quemado)
+ *   info     → primary (terracota) — para estados activos/new
+ *   neutral  → muted — para estados inactivos/preparación
+ *   purple   → color exacto para reembolso/recurrente (excepción documentada)
+ */
 
-  // Shipping statuses
-  unpacked: { label: 'En preparación', className: 'bg-gray-500/10 text-gray-400 border-gray-500/20' },
-  packed: { label: 'Empaquetado', className: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-  shipped: { label: 'Despachado', className: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-  delivered: { label: 'Entregado', className: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-  in_transit: { label: 'En tránsito', className: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-  preparation: { label: 'En preparación', className: 'bg-gray-500/10 text-gray-400 border-gray-500/20' },
-  transit: { label: 'En tránsito', className: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-  branch: { label: 'En sucursal', className: 'bg-violet-500/10 text-violet-400 border-violet-500/20' },
+type StatusDot = 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'purple';
 
-  // Payment statuses
-  paid: { label: 'Pagado', className: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-  refunded: { label: 'Reembolsado', className: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+interface StatusConfig {
+  label: string;
+  dot: StatusDot;
+  /** Clases Tailwind para el badge completo */
+  className: string;
+}
 
-  // Comprobante statuses
-  verified: { label: 'Verificado', className: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-  rejected: { label: 'Rechazado', className: 'bg-red-500/10 text-red-400 border-red-500/20' },
+const statusConfig: Record<string, StatusConfig> = {
+  // ── Order statuses ──
+  open: {
+    label: 'Abierto',
+    dot: 'info',
+    className: 'bg-primary/10 text-primary border-primary/20',
+  },
+  closed: {
+    label: 'Cerrado',
+    dot: 'success',
+    className: 'bg-secondary/10 text-secondary border-secondary/20',
+  },
+  cancelled: {
+    label: 'Cancelado',
+    dot: 'danger',
+    className: 'bg-destructive/10 text-destructive border-destructive/20',
+  },
+  pending: {
+    label: 'Pendiente',
+    dot: 'warning',
+    className: 'bg-warning/10 text-warning border-warning/20',
+  },
 
-  // Pipeline client states
-  nuevo: { label: 'Nuevo', className: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-  interesado: { label: 'Interesado', className: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-  link_enviado: { label: 'Link enviado', className: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
-  pago: { label: 'Pagó', className: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-  entregado: { label: 'Entregado', className: 'bg-teal-500/10 text-teal-400 border-teal-500/20' },
-  recurrente: { label: 'Recurrente', className: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+  // ── Shipping statuses ──
+  unpacked: {
+    label: 'En preparación',
+    dot: 'neutral',
+    className: 'bg-muted text-muted-foreground border-border',
+  },
+  packed: {
+    label: 'Empaquetado',
+    dot: 'info',
+    className: 'bg-primary/10 text-primary border-primary/20',
+  },
+  shipped: {
+    label: 'Despachado',
+    dot: 'info',
+    className: 'bg-primary/10 text-primary border-primary/20',
+  },
+  delivered: {
+    label: 'Entregado',
+    dot: 'success',
+    className: 'bg-secondary/10 text-secondary border-secondary/20',
+  },
+  in_transit: {
+    label: 'En tránsito',
+    dot: 'warning',
+    className: 'bg-warning/10 text-warning border-warning/20',
+  },
+  preparation: {
+    label: 'En preparación',
+    dot: 'neutral',
+    className: 'bg-muted text-muted-foreground border-border',
+  },
+  transit: {
+    label: 'En tránsito',
+    dot: 'warning',
+    className: 'bg-warning/10 text-warning border-warning/20',
+  },
+  branch: {
+    label: 'En sucursal',
+    dot: 'purple',
+    // purple: excepción documentada — no hay token semántico para "en sucursal"
+    className: 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20',
+  },
+
+  // ── Payment statuses ──
+  paid: {
+    label: 'Pagado',
+    dot: 'success',
+    className: 'bg-secondary/10 text-secondary border-secondary/20',
+  },
+  refunded: {
+    label: 'Reembolsado',
+    dot: 'purple',
+    className: 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20',
+  },
+
+  // ── Comprobante statuses ──
+  verified: {
+    label: 'Verificado',
+    dot: 'success',
+    className: 'bg-secondary/10 text-secondary border-secondary/20',
+  },
+  rejected: {
+    label: 'Rechazado',
+    dot: 'danger',
+    className: 'bg-destructive/10 text-destructive border-destructive/20',
+  },
+
+  // ── Pipeline client states ──
+  nuevo: {
+    label: 'Nuevo',
+    dot: 'info',
+    className: 'bg-primary/10 text-primary border-primary/20',
+  },
+  interesado: {
+    label: 'Interesado',
+    dot: 'warning',
+    className: 'bg-warning/10 text-warning border-warning/20',
+  },
+  link_enviado: {
+    label: 'Link enviado',
+    dot: 'warning',
+    className: 'bg-warning/15 text-warning border-warning/25',
+  },
+  pago: {
+    label: 'Pagó',
+    dot: 'success',
+    className: 'bg-secondary/10 text-secondary border-secondary/20',
+  },
+  entregado: {
+    label: 'Entregado',
+    dot: 'success',
+    className: 'bg-secondary/15 text-secondary border-secondary/25',
+  },
+  recurrente: {
+    label: 'Recurrente',
+    dot: 'purple',
+    className: 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20',
+  },
+};
+
+/** Dot color map → inline style via currentColor heritage */
+const dotClass: Record<StatusDot, string> = {
+  success: 'bg-secondary',
+  warning: 'bg-warning',
+  danger: 'bg-destructive',
+  info: 'bg-primary',
+  neutral: 'bg-muted-foreground/50',
+  purple: 'bg-purple-500',
 };
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
-  const config = statusConfig[status] || { label: status, className: 'bg-gray-500/10 text-gray-400 border-gray-500/20' };
+  const config = statusConfig[status] ?? {
+    label: status,
+    dot: 'neutral' as StatusDot,
+    className: 'bg-muted text-muted-foreground border-border',
+  };
 
   return (
     <Badge
       variant="secondary"
       className={cn(
-        'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium border',
+        'inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium border',
         config.className,
         className
       )}
     >
+      {/* Dot indicador — más glanceable que solo texto */}
+      <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', dotClass[config.dot])} />
       {config.label}
     </Badge>
   );

@@ -8,10 +8,10 @@ import {
   Package,
   Copy,
   MessageSquare,
-  AlertCircle,
   Truck,
   ExternalLink
 } from 'lucide-react';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import { toast } from 'sonner';
 import { API_URL, getHeaders } from '@/lib/api';
 
@@ -165,23 +165,23 @@ export function OrdersView() {
         </div>
       )}
 
-      {/* Info */}
+      {/* Empty state — instrucciones cuando aún no se buscó nada */}
       {!order && !loading && (
-        <div>
-          <div className="flex items-start gap-3">
-            <AlertCircle className="h-10 w-10 text-muted-foreground/50 mx-auto" />
-            <div className="text-sm text-muted-foreground">
-              <p className="font-medium text-foreground mb-1">¿Cómo buscar?</p>
-              <p>Ingresa el número de pedido sin el #. Por ejemplo: 12345</p>
-              <p className="mt-2">El sistema consultará directamente en TiendaNube y mostrará:</p>
-              <ul className="list-disc list-inside mt-1 space-y-1">
-                <li>Estado del pedido</li>
-                <li>Información del cliente</li>
-                <li>Tracking de Andreani (si está disponible)</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        <Empty className="border border-dashed border-border bg-card/50">
+          <EmptyMedia variant="icon">
+            <Package />
+          </EmptyMedia>
+          <EmptyHeader>
+            <EmptyTitle>Buscar un pedido</EmptyTitle>
+            <EmptyDescription>
+              Ingresá el número de pedido sin el #. Por ejemplo: <code className="bg-muted px-1.5 py-0.5 rounded text-foreground text-xs">12345</code>
+              <br />
+              <span className="text-xs mt-2 block">
+                El sistema consultará en TiendaNube y mostrará estado, datos del cliente y tracking Andreani.
+              </span>
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       )}
     </div>
   );

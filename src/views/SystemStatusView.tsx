@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import {
   Server,
@@ -62,27 +63,27 @@ const CHANNEL_CONFIG: Record<string, { label: string; icon: string }> = {
 function ChannelBadge({ status, reason }: { status: string; reason?: string }) {
   if (status === 'ok') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-secondary/10 text-secondary">
         <CheckCircle className="h-3 w-3" /> Activo
       </span>
     );
   }
   if (status === 'stale') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-warning/10 text-warning">
         <AlertTriangle className="h-3 w-3" /> Sin actividad reciente
       </span>
     );
   }
   if (status === 'pending_meta_review') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700" title={reason}>
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-destructive/10 text-destructive" title={reason}>
         <WifiOff className="h-3 w-3" /> OFFLINE — Pendiente App Review
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">
       <Wifi className="h-3 w-3" /> Sin datos
     </span>
   );
@@ -160,13 +161,20 @@ export function SystemStatusView() {
         </Button>
       </div>
 
-      {/* Loading skeleton */}
+      {/* Loading skeleton — usa el componente Skeleton para consistencia */}
       {loading && !health && (
-        <div className="space-y-3">
-          <div className="bg-muted/30 rounded-xl h-24 animate-pulse" />
+        <div className="space-y-4">
+          <Skeleton className="h-24 w-full rounded-xl" />
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-muted/30 rounded-xl h-32 animate-pulse" />
+              <div key={i} className="bg-card border border-border rounded-xl p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-5 w-5 rounded-md" />
+                </div>
+                <Skeleton className="h-6 w-16" />
+                <Skeleton className="h-3 w-32" />
+              </div>
             ))}
           </div>
         </div>
@@ -181,14 +189,14 @@ export function SystemStatusView() {
                 <div className="flex items-center gap-2">
                   <div className={cn(
                     "w-2 h-2 rounded-full",
-                    isConnected ? "bg-emerald-500" : "bg-destructive"
+                    isConnected ? "bg-secondary" : "bg-destructive"
                   )} />
                   <h2 className="text-base font-semibold text-foreground">Bot de WhatsApp</h2>
                 </div>
                 <span className={cn(
                   "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium",
                   isConnected
-                    ? "bg-emerald-500/10 text-emerald-500"
+                    ? "bg-secondary/10 text-secondary"
                     : "bg-destructive/10 text-destructive"
                 )}>
                   {isConnected ? (
@@ -211,7 +219,7 @@ export function SystemStatusView() {
                   <span className="text-xs text-muted-foreground">Redis</span>
                   <p className={cn(
                     "text-sm font-medium",
-                    isConnected ? "text-emerald-500" : "text-destructive"
+                    isConnected ? "text-secondary" : "text-destructive"
                   )}>
                     {isConnected ? 'Conectado' : 'Desconectado'}
                   </p>
@@ -221,12 +229,12 @@ export function SystemStatusView() {
           </div>
 
           {/* Channels */}
-          <div className="bg-white border border-gray-200 rounded-xl p-5">
+          <div className="bg-card border border-border rounded-xl p-5">
             <div className="flex items-center gap-2 mb-4">
-              <MessageSquare className="h-4 w-4 text-gray-400" />
-              <h3 className="text-sm font-semibold text-gray-900">Canales de Atención</h3>
+              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+              <h3 className="text-sm font-semibold text-foreground">Canales de Atención</h3>
             </div>
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-border">
               {Object.entries(CHANNEL_CONFIG).map(([key, cfg]) => {
                 const ch = channels[key];
                 return (
@@ -234,16 +242,16 @@ export function SystemStatusView() {
                     <div className="flex items-center gap-3">
                       <span className="text-lg">{cfg.icon}</span>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{cfg.label}</p>
+                        <p className="text-sm font-medium text-foreground">{cfg.label}</p>
                         {ch?.last_activity && (
-                          <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                             <Clock className="h-3 w-3" />
                             Último: {ch.last_activity}
                             {ch.elapsed_human && ` (hace ${ch.elapsed_human})`}
                           </p>
                         )}
                         {ch?.status === 'pending_meta_review' && (
-                          <p className="text-xs text-red-500 mt-0.5">
+                          <p className="text-xs text-destructive mt-0.5">
                             Verificación de negocio enviada el 01/03/2026 — esperando aprobación Meta
                           </p>
                         )}
@@ -267,7 +275,7 @@ export function SystemStatusView() {
               <ul className="divide-y divide-border/50">
                 {featureGroups['IA'].map((feature, idx) => (
                   <li key={idx} className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
-                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+                    <span className="inline-block w-2 h-2 rounded-full bg-secondary flex-shrink-0" />
                     {feature.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </li>
                 ))}
@@ -283,7 +291,7 @@ export function SystemStatusView() {
               <ul className="divide-y divide-border/50">
                 {featureGroups['Pedidos'].map((feature, idx) => (
                   <li key={idx} className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
-                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+                    <span className="inline-block w-2 h-2 rounded-full bg-secondary flex-shrink-0" />
                     {feature.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </li>
                 ))}
@@ -299,7 +307,7 @@ export function SystemStatusView() {
               <ul className="divide-y divide-border/50">
                 {featureGroups['Tracking'].map((feature, idx) => (
                   <li key={idx} className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
-                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+                    <span className="inline-block w-2 h-2 rounded-full bg-secondary flex-shrink-0" />
                     {feature.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </li>
                 ))}
@@ -315,7 +323,7 @@ export function SystemStatusView() {
               <ul className="divide-y divide-border/50">
                 {featureGroups['Infraestructura'].map((feature, idx) => (
                   <li key={idx} className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
-                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+                    <span className="inline-block w-2 h-2 rounded-full bg-secondary flex-shrink-0" />
                     {feature.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </li>
                 ))}
@@ -331,7 +339,7 @@ export function SystemStatusView() {
               <ul className="divide-y divide-border/50">
                 {featureGroups['WhatsApp'].map((feature, idx) => (
                   <li key={idx} className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
-                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+                    <span className="inline-block w-2 h-2 rounded-full bg-secondary flex-shrink-0" />
                     {feature.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </li>
                 ))}
@@ -347,7 +355,7 @@ export function SystemStatusView() {
               <ul className="divide-y divide-border/50">
                 {featureGroups['Marketing'].map((feature, idx) => (
                   <li key={idx} className="flex items-center gap-2 py-2 text-sm text-muted-foreground">
-                    <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+                    <span className="inline-block w-2 h-2 rounded-full bg-secondary flex-shrink-0" />
                     {feature.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </li>
                 ))}
@@ -371,7 +379,7 @@ export function SystemStatusView() {
                       <div className="flex items-center gap-3">
                         <div className={cn(
                           "w-2 h-2 rounded-full flex-shrink-0",
-                          isRunning ? "bg-emerald-500" : "bg-destructive"
+                          isRunning ? "bg-secondary" : "bg-destructive"
                         )} />
                         <div>
                           <p className="text-sm font-medium text-foreground">{label}</p>
@@ -390,7 +398,7 @@ export function SystemStatusView() {
                         <span className={cn(
                           "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
                           isRunning
-                            ? "bg-emerald-500/10 text-emerald-500"
+                            ? "bg-secondary/10 text-secondary"
                             : "bg-destructive/10 text-destructive"
                         )}>
                           {isRunning ? 'Activo' : 'Detenido'}

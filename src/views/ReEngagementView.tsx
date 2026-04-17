@@ -20,6 +20,8 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Send, Plus, Clock, Users, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import { fetchCampaigns, createCampaign, sendCampaign, type Campaign, type ClientStateFilter } from '@/lib/api';
 import { toast } from 'sonner';
 import { format, parseISO } from 'date-fns';
@@ -37,8 +39,8 @@ const STATE_OPTIONS: { value: ClientStateFilter; label: string }[] = [
 
 const STATUS_CONFIG: Record<Campaign['status'], { label: string; icon: typeof Send; className: string }> = {
   draft: { label: 'Borrador', icon: Clock, className: 'bg-muted text-muted-foreground' },
-  scheduled: { label: 'Programada', icon: Clock, className: 'bg-amber-500/10 text-amber-400' },
-  sent: { label: 'Enviada', icon: CheckCircle, className: 'bg-emerald-500/10 text-emerald-400' },
+  scheduled: { label: 'Programada', icon: Clock, className: 'bg-warning/10 text-warning' },
+  sent: { label: 'Enviada', icon: CheckCircle, className: 'bg-secondary/10 text-secondary' },
   failed: { label: 'Fallida', icon: AlertCircle, className: 'bg-destructive/10 text-destructive' },
 };
 
@@ -179,17 +181,33 @@ export function ReEngagementView() {
       {/* Campaign list */}
       {loading ? (
         <div className="space-y-3">
-          {[1, 2, 3].map(i => <div key={i} className="skeleton h-28 rounded-lg" />)}
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-card border border-border rounded-lg p-4 space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-40" />
+                  <Skeleton className="h-3 w-64" />
+                </div>
+                <Skeleton className="h-5 w-20 rounded-md" />
+              </div>
+              <Skeleton className="h-3 w-32" />
+            </div>
+          ))}
         </div>
       ) : campaigns.length === 0 ? (
-        <div className="text-center py-16">
-          <Send className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
-          <p className="text-muted-foreground">No hay campañas todavía</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Phase 3 del backend requerida para envíos reales.
-            Podés crear campañas en borrador ahora.
-          </p>
-        </div>
+        <Empty className="border border-dashed border-border bg-card/50">
+          <EmptyMedia variant="icon">
+            <Send />
+          </EmptyMedia>
+          <EmptyHeader>
+            <EmptyTitle>Sin campañas todavía</EmptyTitle>
+            <EmptyDescription>
+              Creá tu primera campaña para enviar mensajes segmentados a tus clientes.
+              <br />
+              <span className="text-xs block mt-1 opacity-70">Phase 3 del backend requerida para envíos reales.</span>
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       ) : (
         <div className="space-y-3">
           {campaigns.map(campaign => (

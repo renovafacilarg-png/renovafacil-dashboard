@@ -170,13 +170,13 @@ export function FacebookCommentsView() {
     switch (action) {
       case 'responder':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-500">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
             <MessageCircle className="h-3 w-3" /> Respondio{dry}
           </span>
         );
       case 'borrar':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-500">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-destructive/10 text-destructive">
             <Trash2 className="h-3 w-3" /> Borro{dry}
           </span>
         );
@@ -233,11 +233,11 @@ export function FacebookCommentsView() {
         </div>
         <div className="md:col-span-1 lg:col-span-2 bg-card border border-border rounded-xl p-5">
           <p className="text-xs text-muted-foreground uppercase tracking-wide">Hoy respondidos</p>
-          <p className="text-2xl font-bold text-emerald-500 mt-1">{stats?.today.responded ?? '-'}</p>
+          <p className="text-2xl font-bold text-secondary mt-1">{stats?.today.responded ?? '-'}</p>
         </div>
         <div className="md:col-span-1 lg:col-span-2 bg-card border border-border rounded-xl p-5">
           <p className="text-xs text-muted-foreground uppercase tracking-wide">Hoy borrados</p>
-          <p className="text-2xl font-bold text-red-500 mt-1">{stats?.today.deleted ?? '-'}</p>
+          <p className="text-2xl font-bold text-destructive mt-1">{stats?.today.deleted ?? '-'}</p>
         </div>
         <div className="md:col-span-1 lg:col-span-2 bg-card border border-border rounded-xl p-5">
           <p className="text-xs text-muted-foreground uppercase tracking-wide">Total almacenados</p>
@@ -255,7 +255,7 @@ export function FacebookCommentsView() {
           <div className="flex items-center gap-2 mb-4">
             <Facebook className="h-4 w-4 text-blue-500" />
             <p className="text-sm font-semibold text-foreground">Facebook</p>
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-secondary/10 text-secondary">
               Conectado
             </span>
           </div>
@@ -282,11 +282,11 @@ export function FacebookCommentsView() {
               <Instagram className="h-4 w-4 text-pink-500" />
               <p className="text-sm font-semibold text-foreground">Instagram</p>
               {igStatus?.ig_linked ? (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-secondary/10 text-secondary">
                   Conectado
                 </span>
               ) : (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-500">
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-destructive/10 text-destructive">
                   Desconectado
                 </span>
               )}
@@ -335,10 +335,10 @@ export function FacebookCommentsView() {
             <div className={cn(
               "mt-3 rounded-lg p-3 text-sm border",
               igReprocessResult.error
-                ? 'bg-red-500/10 border-red-500/20 text-red-400'
+                ? 'bg-destructive/10 border-destructive/20 text-destructive'
                 : igReprocessResult.status === 'running'
-                ? 'bg-blue-500/10 border-blue-500/20 text-blue-400'
-                : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                ? 'bg-primary/10 border-primary/20 text-primary'
+                : 'bg-secondary/10 border-secondary/20 text-secondary'
             )}>
               {igReprocessResult.error ? (
                 <p>Error: {igReprocessResult.error}</p>
@@ -401,7 +401,7 @@ export function FacebookCommentsView() {
         <div className="space-y-2">
           {/* Source filter tabs */}
           <div className="flex items-center gap-3">
-            <div className="flex gap-1 p-1 bg-gray-100 dark:bg-gray-900 rounded-lg">
+            <div className="flex gap-1 p-1 bg-muted rounded-lg">
               {(['all', 'facebook', 'instagram'] as SourceFilter[]).map((f) => (
                 <button
                   key={f}
@@ -453,9 +453,9 @@ export function FacebookCommentsView() {
 
                     {/* Bot reply */}
                     {entry.reply_text && (
-                      <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2">
-                        <p className="text-xs text-emerald-500 font-medium mb-1">Respuesta del bot:</p>
-                        <p className="text-sm text-emerald-400 break-words">{entry.reply_text}</p>
+                      <div className="bg-secondary/10 border border-secondary/20 rounded-lg px-3 py-2">
+                        <p className="text-xs text-secondary font-medium mb-1">Respuesta del bot:</p>
+                        <p className="text-sm text-secondary break-words">{entry.reply_text}</p>
                       </div>
                     )}
                   </div>
@@ -470,7 +470,7 @@ export function FacebookCommentsView() {
                       rel="noopener noreferrer"
                       className="shrink-0"
                     >
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400 hover:text-foreground">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground">
                         <ExternalLink className="h-4 w-4" />
                       </Button>
                     </a>

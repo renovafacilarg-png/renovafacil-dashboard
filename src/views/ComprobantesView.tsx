@@ -126,21 +126,21 @@ export function ComprobantesView() {
     switch (status) {
       case 'verified':
         return (
-          <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+          <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-secondary/10 text-secondary">
             <CheckCircle className="h-3 w-3" />
             Verificado
           </span>
         );
       case 'rejected':
         return (
-          <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-red-50 text-red-700">
+          <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-destructive/10 text-destructive">
             <XCircle className="h-3 w-3" />
             Rechazado
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
+          <span className="inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-warning/10 text-warning">
             <Clock className="h-3 w-3" />
             Pendiente
           </span>
@@ -151,11 +151,11 @@ export function ComprobantesView() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'verified':
-        return <CheckCircle className="h-5 w-5 text-emerald-500" />;
+        return <CheckCircle className="h-5 w-5 text-secondary" />;
       case 'rejected':
-        return <XCircle className="h-5 w-5 text-red-500" />;
+        return <XCircle className="h-5 w-5 text-destructive" />;
       default:
-        return <Clock className="h-5 w-5 text-amber-500" />;
+        return <Clock className="h-5 w-5 text-warning" />;
     }
   };
 
@@ -181,7 +181,7 @@ export function ComprobantesView() {
           <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Hoy</p>
           <div className="flex items-center justify-between">
             <p className="text-2xl font-bold text-foreground">{stats.today}</p>
-            <Receipt className="h-5 w-5 text-gray-400" />
+            <Receipt className="h-5 w-5 text-muted-foreground" />
           </div>
         </div>
 
@@ -189,7 +189,7 @@ export function ComprobantesView() {
           <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Pendientes</p>
           <div className="flex items-center justify-between">
             <p className="text-2xl font-bold text-foreground">{stats.pending}</p>
-            <Clock className="h-5 w-5 text-amber-500" />
+            <Clock className="h-5 w-5 text-warning" />
           </div>
         </div>
 
@@ -197,7 +197,7 @@ export function ComprobantesView() {
           <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Verificados</p>
           <div className="flex items-center justify-between">
             <p className="text-2xl font-bold text-foreground">{stats.verified}</p>
-            <CheckCircle className="h-5 w-5 text-emerald-500" />
+            <CheckCircle className="h-5 w-5 text-secondary" />
           </div>
         </div>
 
@@ -205,7 +205,7 @@ export function ComprobantesView() {
           <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Total Mes</p>
           <div className="flex items-center justify-between">
             <p className="text-2xl font-bold text-foreground">{formatCurrency(stats.totalMonth)}</p>
-            <DollarSign className="h-5 w-5 text-blue-500" />
+            <DollarSign className="h-5 w-5 text-primary" />
           </div>
         </div>
       </div>
@@ -214,7 +214,7 @@ export function ComprobantesView() {
       <div className="bg-card border border-border rounded-xl p-4">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar por teléfono, pedido, referencia..."
               value={searchQuery}
@@ -224,7 +224,7 @@ export function ComprobantesView() {
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[180px] border-border text-sm">
-              <Receipt className="mr-2 h-4 w-4 text-gray-400" />
+              <Receipt className="mr-2 h-4 w-4 text-muted-foreground" />
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>
@@ -299,7 +299,7 @@ export function ComprobantesView() {
                     </td>
                     <td className="px-5 py-3.5 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1.5">
-                        <Banknote className="h-3.5 w-3.5 text-gray-400" />
+                        <Banknote className="h-3.5 w-3.5 text-muted-foreground" />
                         {comprobante.origen || '-'}
                       </div>
                     </td>
@@ -356,9 +356,9 @@ export function ComprobantesView() {
               <div className="flex justify-center">
                 <div className={cn(
                   'inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium',
-                  selectedComprobante.status === 'verified' && 'bg-emerald-50 text-emerald-700',
-                  selectedComprobante.status === 'rejected' && 'bg-red-50 text-red-700',
-                  selectedComprobante.status === 'pending' && 'bg-amber-50 text-amber-700'
+                  selectedComprobante.status === 'verified' && 'bg-secondary/10 text-secondary',
+                  selectedComprobante.status === 'rejected' && 'bg-destructive/10 text-destructive',
+                  selectedComprobante.status === 'pending' && 'bg-warning/10 text-warning'
                 )}>
                   {getStatusIcon(selectedComprobante.status)}
                   {selectedComprobante.status === 'verified' ? 'Verificado' :
@@ -368,13 +368,13 @@ export function ComprobantesView() {
 
               {/* Image Placeholder */}
               <div className="bg-muted/50 border border-border rounded-xl p-8 text-center">
-                <ImageIcon className="h-14 w-14 mx-auto text-gray-300 mb-3" />
+                <ImageIcon className="h-14 w-14 mx-auto text-muted-foreground/40 mb-3" />
                 <p className="text-sm text-muted-foreground">Imagen del comprobante</p>
-                <p className="text-xs text-gray-400 mt-0.5">(Procesado con Gemini Vision)</p>
+                <p className="text-xs text-muted-foreground mt-0.5">(Procesado con Gemini Vision)</p>
               </div>
 
               {/* Details */}
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-border">
                 <div className="flex justify-between py-2.5">
                   <span className="text-sm text-muted-foreground flex items-center gap-2">
                     <DollarSign className="h-4 w-4" />
@@ -422,7 +422,7 @@ export function ComprobantesView() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-7 w-7 text-gray-400 hover:text-muted-foreground"
+                        className="h-7 w-7 text-muted-foreground hover:text-muted-foreground"
                         onClick={() => copyToClipboard(selectedComprobante.referencia!, 'Referencia')}
                       >
                         <Copy className="h-3.5 w-3.5" />
@@ -463,7 +463,7 @@ export function ComprobantesView() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="flex-1 text-red-500 hover:bg-red-50"
+                    className="flex-1 text-destructive hover:bg-destructive/10"
                     onClick={() => handleVerify(selectedComprobante, false)}
                   >
                     <XCircle className="mr-2 h-4 w-4" />
