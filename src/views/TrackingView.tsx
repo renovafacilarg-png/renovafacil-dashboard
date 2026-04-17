@@ -16,6 +16,7 @@ import {
   AlertCircle,
   Package
 } from 'lucide-react';
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia } from '@/components/ui/empty';
 import { toast } from 'sonner';
 import { API_URL, getHeaders } from '@/lib/api';
 
@@ -75,28 +76,28 @@ export function TrackingView() {
     const estadoLower = estado.toLowerCase();
     if (estadoLower.includes('entregado')) {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-secondary/10 text-secondary border border-secondary/20">
           <CheckCircle className="h-3 w-3" />
           {estado}
         </span>
       );
     } else if (estadoLower.includes('transito') || estadoLower.includes('camino')) {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-warning/10 text-warning border border-warning/20">
           <Truck className="h-3 w-3" />
           {estado}
         </span>
       );
     } else if (estadoLower.includes('sucursal')) {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-gray-700">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-foreground">
           <MapPin className="h-3 w-3" />
           {estado}
         </span>
       );
     } else {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-gray-700">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-foreground">
           <Package className="h-3 w-3" />
           {estado}
         </span>
@@ -244,19 +245,23 @@ export function TrackingView() {
         </div>
       )}
 
-      {/* Info */}
+      {/* Empty state — instrucciones cuando aún no se buscó nada */}
       {!tracking && !loading && (
-        <div>
-          <AlertCircle className="h-10 w-10 text-muted-foreground/50 mx-auto" />
-          <div className="text-sm text-muted-foreground text-center mt-3">
-            <p className="font-medium text-foreground mb-1">¿Cómo rastrear?</p>
-            <p>Ingresa el número de tracking de Andreani (generalmente 15 dígitos)</p>
-            <p className="mt-2">
-              Ejemplo:{' '}
-              <code className="bg-muted px-2 py-0.5 rounded text-foreground">360002399767740</code>
-            </p>
-          </div>
-        </div>
+        <Empty className="border border-dashed border-border bg-card/50">
+          <EmptyMedia variant="icon">
+            <Truck />
+          </EmptyMedia>
+          <EmptyHeader>
+            <EmptyTitle>Rastrear un envío</EmptyTitle>
+            <EmptyDescription>
+              Ingresá el número de tracking de Andreani (generalmente 15 dígitos).
+              <br />
+              <span className="text-xs mt-2 block">
+                Ejemplo: <code className="bg-muted px-1.5 py-0.5 rounded text-foreground">360002399767740</code>
+              </span>
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       )}
     </div>
   );

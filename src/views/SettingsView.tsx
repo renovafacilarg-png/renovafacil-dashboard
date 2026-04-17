@@ -273,7 +273,7 @@ export function SettingsView() {
                       defaultValue={feat}
                       className="bg-muted/50 border-border focus:ring-primary/30"
                     />
-                    <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600 hover:bg-red-500/10 shrink-0 px-3">
+                    <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0 px-3">
                       <span>×</span>
                     </Button>
                   </div>
@@ -410,7 +410,7 @@ export function SettingsView() {
                   <Store className="h-4 w-4 text-muted-foreground" />
                   <p className="text-sm font-semibold text-foreground">TiendaNube</p>
                 </div>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-secondary/10 text-secondary">
                   <CheckCircle className="h-3.5 w-3.5" />
                   Conectado
                 </span>
@@ -460,7 +460,7 @@ export function SettingsView() {
                   <MessageSquare className="h-4 w-4 text-muted-foreground" />
                   <p className="text-sm font-semibold text-foreground">WhatsApp Business API</p>
                 </div>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-secondary/10 text-secondary">
                   <CheckCircle className="h-3.5 w-3.5" />
                   Conectado
                 </span>
@@ -522,7 +522,7 @@ export function SettingsView() {
                   <ExternalLink className="h-4 w-4 text-muted-foreground" />
                   <p className="text-sm font-semibold text-foreground">Packsy Google Sheets</p>
                 </div>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-secondary/10 text-secondary">
                   <CheckCircle className="h-3.5 w-3.5" />
                   Conectado
                 </span>
@@ -542,7 +542,7 @@ export function SettingsView() {
               <div className="space-y-1.5">
                 <p className="text-sm font-medium text-foreground">Estado de sincronizacion</p>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span className="w-2 h-2 rounded-full bg-secondary" />
                   Ultima sincronizacion: hace 5 minutos
                 </div>
               </div>
@@ -565,7 +565,7 @@ export function SettingsView() {
                   <Key className="h-4 w-4 text-muted-foreground" />
                   <p className="text-sm font-semibold text-foreground">OpenAI</p>
                 </div>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-500">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-secondary/10 text-secondary">
                   <CheckCircle className="h-3.5 w-3.5" />
                   Activo
                 </span>

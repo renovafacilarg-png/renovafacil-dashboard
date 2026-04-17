@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Logo } from '@/components/Logo';
 import {
   Package,
   Truck,
@@ -81,13 +82,14 @@ export function Sidebar({ onLogout, className }: SidebarProps) {
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
         <div className={cn('flex items-center gap-3', collapsed && 'justify-center')}>
-          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center shrink-0">
-            <span className="text-white font-bold text-sm">RF</span>
+          {/* Logo SVG monogram */}
+          <div className="w-9 h-9 shrink-0 flex items-center justify-center">
+            <Logo size={36} className="text-sidebar-primary" />
           </div>
           {!collapsed && (
             <div>
               <p className="text-sm font-semibold text-sidebar-foreground leading-tight">Renovafacil</p>
-              <p className="text-[11px] text-sidebar-foreground/50 leading-tight">Admin Panel</p>
+              <p className="text-[11px] text-sidebar-foreground/50 leading-tight">Admin</p>
             </div>
           )}
         </div>
@@ -120,7 +122,7 @@ export function Sidebar({ onLogout, className }: SidebarProps) {
                   'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-100',
                   collapsed && 'justify-center px-2',
                   isActive
-                    ? 'bg-sidebar-primary/15 text-sidebar-primary'
+                    ? 'sidebar-item-active text-sidebar-primary font-semibold'
                     : 'text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent'
                 )}
               >
@@ -143,7 +145,8 @@ export function Sidebar({ onLogout, className }: SidebarProps) {
       {!collapsed && (
         <div className="px-3 pb-3">
           <div className="flex items-center gap-2.5 px-3 py-3 bg-sidebar-accent rounded-lg">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                        {/* secondary = verde salvia, semántico para "online/activo" */}
+            <div className="w-1.5 h-1.5 rounded-full bg-secondary shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium text-sidebar-foreground truncate">Bot activo · GPT-4o-mini</p>
               <p className="text-[10px] text-sidebar-foreground/40 mt-0.5">Respondiendo mensajes</p>
@@ -157,7 +160,7 @@ export function Sidebar({ onLogout, className }: SidebarProps) {
         <div className="px-4 pb-2 flex items-center justify-center gap-1.5 text-[10px] text-sidebar-foreground/30">
           <span>dash v{FRONTEND_VERSION}</span>
           <span>·</span>
-          <span className={backendVersion ? 'text-emerald-500/60' : 'text-red-400/60'}>
+          <span className={backendVersion ? 'text-secondary/80' : 'text-destructive/60'}>
             bot {backendVersion ? `v${backendVersion}` : 'offline'}
           </span>
         </div>
@@ -169,7 +172,7 @@ export function Sidebar({ onLogout, className }: SidebarProps) {
           <button
             onClick={onLogout}
             className={cn(
-              'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-sidebar-foreground/50 hover:text-red-400 hover:bg-sidebar-accent transition-colors duration-100',
+              'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-sidebar-foreground/50 hover:text-destructive hover:bg-sidebar-accent transition-colors duration-100',
               collapsed && 'justify-center px-2'
             )}
             aria-label="Cerrar sesión"

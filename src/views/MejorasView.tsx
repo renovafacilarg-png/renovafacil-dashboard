@@ -6,6 +6,7 @@ import {
   TrendingUp, LayoutGrid, List,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import {
   AlertDialog,
@@ -62,8 +63,8 @@ const TYPE_LABELS: Record<string, string> = {
 };
 
 const PRIORITY_CLASS: Record<string, string> = {
-  high: 'bg-red-500/10 text-red-400 border-red-500/20',
-  medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  high: 'bg-destructive/10 text-destructive border-destructive/20',
+  medium: 'bg-warning/10 text-warning border-warning/20',
   low: 'bg-muted text-muted-foreground border-border',
 };
 
@@ -218,7 +219,7 @@ function SuggestionCard({ s, selected, onToggleSelect, isFocused, listMode }: Su
           {/* Reject dialog */}
           <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" variant="ghost" className="h-7 px-2 text-red-400 hover:bg-red-500/10 hover:text-red-400" disabled={isLoading}>
+              <Button size="sm" variant="ghost" className="h-7 px-2 text-destructive hover:bg-destructive/10 hover:text-destructive" disabled={isLoading}>
                 <XCircle className="h-3.5 w-3.5" />
               </Button>
             </DialogTrigger>
@@ -258,8 +259,8 @@ function SuggestionCard({ s, selected, onToggleSelect, isFocused, listMode }: Su
                 <div className="space-y-2">
                   <p>Esta sugerencia tiene los siguientes flags activos:</p>
                   <ul className="list-disc list-inside space-y-1 text-sm">
-                    {s.has_conflict && <li className="text-red-400">Conflicto detectado</li>}
-                    {s.requires_code_change && <li className="text-amber-400">Requiere cambio de código</li>}
+                    {s.has_conflict && <li className="text-destructive">Conflicto detectado</li>}
+                    {s.requires_code_change && <li className="text-warning">Requiere cambio de código</li>}
                   </ul>
                   <p>¿Querés aprobarla de todas formas?</p>
                 </div>
@@ -307,7 +308,7 @@ function SuggestionCard({ s, selected, onToggleSelect, isFocused, listMode }: Su
             </span>
           )}
           {s.has_conflict && (
-            <span className="text-xs font-medium px-2 py-0.5 rounded-full border bg-red-500/15 text-red-400 border-red-500/30 flex items-center gap-1">
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full border bg-destructive/15 text-destructive border-destructive/30 flex items-center gap-1">
               <AlertTriangle className="h-3 w-3" />
               Conflicto
             </span>
@@ -374,7 +375,7 @@ function SuggestionCard({ s, selected, onToggleSelect, isFocused, listMode }: Su
           {/* A9 */}
           {isEdited && (
             <>
-              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-warning/10 text-warning border border-warning/20">
                 Editado
               </span>
               <button
@@ -421,7 +422,7 @@ function SuggestionCard({ s, selected, onToggleSelect, isFocused, listMode }: Su
         <div className="space-y-1">
           {s.reason && <p className="text-xs text-muted-foreground italic">{s.reason}</p>}
           {s.conflict_reason && (
-            <p className="text-xs text-red-400/80 italic">Conflicto: {s.conflict_reason}</p>
+            <p className="text-xs text-destructive/80 italic">Conflicto: {s.conflict_reason}</p>
           )}
         </div>
       )}
@@ -450,7 +451,7 @@ function SuggestionCard({ s, selected, onToggleSelect, isFocused, listMode }: Su
             <Button
               size="sm"
               variant="ghost"
-              className="flex-none text-red-400 hover:bg-red-500/10 hover:text-red-400"
+              className="flex-none text-destructive hover:bg-destructive/10 hover:text-destructive"
               disabled={isLoading}
             >
               <XCircle className="mr-1.5 h-3.5 w-3.5" />
@@ -509,8 +510,8 @@ function SuggestionCard({ s, selected, onToggleSelect, isFocused, listMode }: Su
               <div className="space-y-2">
                 <p>Esta sugerencia tiene los siguientes flags activos:</p>
                 <ul className="list-disc list-inside space-y-1 text-sm">
-                  {s.has_conflict && <li className="text-red-400">Conflicto detectado</li>}
-                  {s.requires_code_change && <li className="text-amber-400">Requiere cambio de código</li>}
+                  {s.has_conflict && <li className="text-destructive">Conflicto detectado</li>}
+                  {s.requires_code_change && <li className="text-warning">Requiere cambio de código</li>}
                 </ul>
                 <p>¿Querés aprobarla de todas formas?</p>
               </div>
@@ -558,7 +559,7 @@ function MutationCard({ m }: { m: Mutation }) {
           <span className="text-xs font-medium text-foreground/70 bg-muted px-2 py-0.5 rounded-full border border-border">
             {TYPE_LABELS[m.type] || m.type}
           </span>
-          <span className="text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+          <span className="text-xs text-secondary bg-secondary/10 border border-secondary/20 px-2 py-0.5 rounded-full">
             {m.uses} usos
           </span>
         </div>
@@ -568,7 +569,7 @@ function MutationCard({ m }: { m: Mutation }) {
             <Button
               size="sm"
               variant="ghost"
-              className="h-7 px-2 text-muted-foreground hover:text-red-400 hover:bg-red-500/10"
+              className="h-7 px-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
               disabled={deactivateMut.isPending}
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -876,8 +877,20 @@ export function MejorasView() {
         </Button>
       </div>
 
-      {/* Stats — A4: Pendientes + Activas clickables */}
-      {stats && (
+      {/* Stats — skeleton while loading, then real data */}
+      {statsQuery.isLoading ? (
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="bg-card border border-border rounded-xl p-5">
+              <Skeleton className="h-3 w-24 mb-3" />
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-8 w-12" />
+                <Skeleton className="h-5 w-5 rounded-md" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : stats ? (
         <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
           {/* Pendientes — clickable */}
           <button
@@ -900,7 +913,7 @@ export function MejorasView() {
             <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Activas</p>
             <div className="flex items-center justify-between">
               <p className="text-2xl font-bold text-foreground">{stats.active_mutations}</p>
-              <Zap className="h-5 w-5 text-emerald-400" />
+              <Zap className="h-5 w-5 text-secondary" />
             </div>
           </button>
           {/* Aprobadas */}
@@ -908,7 +921,7 @@ export function MejorasView() {
             <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">Aprobadas</p>
             <div className="flex items-center justify-between">
               <p className="text-2xl font-bold text-foreground">{stats.approved_total}</p>
-              <CheckCircle className="h-5 w-5 text-blue-400" />
+              <CheckCircle className="h-5 w-5 text-primary" />
             </div>
           </div>
           {/* A6 — Tasa aprobación con TrendingUp */}
@@ -920,7 +933,7 @@ export function MejorasView() {
             </div>
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* Tabs + B2 view mode toggle */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -1043,7 +1056,7 @@ export function MejorasView() {
       ) : tab === 'pendientes' ? (
         suggestions.length === 0 ? (
           <div className="bg-card border border-border rounded-xl p-16 text-center">
-            <CheckCircle className="h-10 w-10 mx-auto mb-3 text-emerald-400 opacity-60" />
+            <CheckCircle className="h-10 w-10 mx-auto mb-3 text-secondary opacity-60" />
             <p className="text-foreground font-medium">
               {rawSuggestions.length > 0 ? 'Sin resultados para los filtros aplicados' : 'Todo revisado'}
             </p>
@@ -1119,7 +1132,7 @@ export function MejorasView() {
           <Button
             size="sm"
             variant="ghost"
-            className="text-red-400 hover:bg-red-500/10 hover:text-red-400"
+            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
             onClick={handleBulkReject}
             disabled={bulkProcessing}
           >
@@ -1161,8 +1174,8 @@ export function MejorasView() {
                     <>
                       <div>{flaggedCount} de las {pendingBulkIds.length} seleccionadas tienen flags activos (conflictos o requieren código).</div>
                       <ul className="list-disc list-inside space-y-1 text-sm">
-                        {conflictCount > 0 && <li className="text-red-400">{conflictCount} con conflicto detectado</li>}
-                        {codeCount > 0 && <li className="text-amber-400">{codeCount} que requieren cambio de código</li>}
+                        {conflictCount > 0 && <li className="text-destructive">{conflictCount} con conflicto detectado</li>}
+                        {codeCount > 0 && <li className="text-warning">{codeCount} que requieren cambio de código</li>}
                       </ul>
                       <div>¿Querés aprobar todas igual?</div>
                     </>

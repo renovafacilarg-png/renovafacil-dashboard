@@ -89,7 +89,7 @@ function ClientCard({ client }: { client: PipelineClient }) {
           {timeLabel}
         </span>
         {client.is_abandoned_cart && (
-          <span className="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded px-1.5 py-0.5">
+          <span className="text-xs bg-warning/10 text-warning border border-warning/20 rounded px-1.5 py-0.5">
             Carrito
           </span>
         )}
